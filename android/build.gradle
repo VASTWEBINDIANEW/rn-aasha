@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+        ndkVersion = "27.2.12479018"
+        kotlinVersion = "1.9.25"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.5.2")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
+
+allprojects {
+    repositories {
+        // ✅ FIX: /libs added at the end — this is where app.notifee:core POM actually lives
+        maven {
+            url "$rootDir/../node_modules/@notifee/react-native/android/libs"
+            content { includeGroup "app.notifee" }
+        }
+
+        maven { url "$rootDir/../node_modules/react-native/android" }
+        maven { url "$rootDir/../node_modules/jsc-android/dist" }
+
+        // Standard Repos
+        google()
+        mavenCentral()
+
+        // Local AARs (pspwDmt, pw_ekyc)
+        flatDir {
+            dirs "$rootDir/app/libs"
+        }
+
+        // CredoPay Private Repo
+        maven {
+            url "https://mymavenrepo.com/repo/FrQdp1FhEvW3jjbX8Md4/"
+            credentials {
+                username = project.findProperty("MAVEN_USERNAME") ?: ""
+                password = project.findProperty("MAVEN_PASSWORD") ?: ""
+            }
+            content { includeGroup "in.credopay.payment.sdk" }
+        }
+
+        maven { url 'https://www.jitpack.io' }
+    }
+}

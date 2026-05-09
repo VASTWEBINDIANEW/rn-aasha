@@ -1,0 +1,295 @@
+package com.swmansion.rnscreens
+
+import android.content.Context
+import android.graphics.Canvas
+import android.os.Build
+import android.view.View
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.uimanager.UIManagerHelper
+import com.swmansion.rnscreens.Screen.StackAnimation
+import com.swmansion.rnscreens.events.StackFinishTransitioningEvent
+import java.util.Collections
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+
+class ScreenStack(context: Context?) : ScreenContainer(context) {
+    private val stack = ArrayList<ScreenStackFragmentWrapper>()
+    private val dismissedWrappers: MutableSet<ScreenStackFragmentWrapper> = HashSet()
+    private val drawingOpPool: MutableList<DrawingOp> = ArrayList()
+    private var drawingOps: MutableList<DrawingOp> = ArrayList()
+    private var topScreenWrapper: ScreenStackFragmentWrapper? = null
+    private var removalTransitionStarted = false
+    private var isDetachingCurrentScreen = false
+    private var reverseLastTwoChildren = false
+    private var previousChildrenCount = 0
+    var goingForward = false
+
+    fun dismiss(screenFragment: ScreenStackFragmentWrapper) {
+        dismissedWrappers.add(screenFragment)
+        performUpdatesNow()
+    }
+
+    override val topScreen: Screen?
+        get() = topScreenWrapper?.screen
+
+    val fragments: ArrayList<ScreenStackFragmentWrapper>
+        get() = stack
+
+    val rootScreen: Screen
+        get() {
+            for (i in 0 until screenCount) {
+                val screenWrapper = getScreenFragmentWrapperAt(i)
+                if (!dismissedWrappers.contains(screenWrapper)) {
+                    return screenWrapper.screen
+                }
+            }
+            throw IllegalStateException("Stack has no root screen set")
+        }
+
+    override fun adapt(screen: Screen) = ScreenStackFragment(screen)
+
+    override fun startViewTransition(view: View) {
+        super.startViewTransition(view)
+        removalTransitionStarted = true
+    }
+
+    override fun endViewTransition(view: View) {
+        super.endViewTransition(view)
+        if (removalTransitionStarted) {
+            removalTransitionStarted = false
+            dispatchOnFinishTransitioning()
+        }
+    }
+
+    fun onViewAppearTransitionEnd() {
+        if (!removalTransitionStarted) {
+            dispatchOnFinishTransitioning()
+        }
+    }
+
+    private fun dispatchOnFinishTransitioning() {
+        val surfaceId = UIManagerHelper.getSurfaceId(this)
+        UIManagerHelper
+            .getEventDispatcherForReactTag((context as ReactContext), id)
+            ?.dispatchEvent(StackFinishTransitioningEvent(surfaceId, id))
+    }
+
+    override fun removeScreenAt(index: Int) {
+        dismissedWrappers.remove(getScreenFragmentWrapperAt(index))
+        super.removeScreenAt(index)
+    }
+
+    override fun removeAllScreens() {
+        dismissedWrappers.clear()
+        super.removeAllScreens()
+    }
+
+    override fun hasScreen(screenFragmentWrapper: ScreenFragmentWrapper?): Boolean =
+        super.hasScreen(screenFragmentWrapper) && !dismissedWrappers.contains(screenFragmentWrapper)
+
+    override fun onUpdate() {
+        var newTop: ScreenFragmentWrapper? = null 
+        var visibleBottom: ScreenFragmentWrapper? = null 
+        isDetachingCurrentScreen = false 
+        for (i in screenWrappers.indices.reversed()) {
+            val screen = getScreenFragmentWrapperAt(i)
+            if (!dismissedWrappers.contains(screen)) {
+                if (newTop == null) {
+                    newTop = screen
+                } else {
+                    visibleBottom = screen
+                }
+                if (!isTransparent(screen)) {
+                    break
+                }
+            }
+        }
+        var shouldUseOpenAnimation = true
+        var stackAnimation: StackAnimation? = null
+        if (!stack.contains(newTop)) {
+            if (topScreenWrapper != null && newTop != null) {
+                val containsTopScreen = topScreenWrapper?.let { screenWrappers.contains(it) } == true
+                val isPushReplace = newTop.screen.replaceAnimation === Screen.ReplaceAnimation.PUSH
+                shouldUseOpenAnimation = containsTopScreen || isPushReplace
+                stackAnimation = if (shouldUseOpenAnimation) newTop.screen.stackAnimation else topScreenWrapper?.screen?.stackAnimation
+            } else if (topScreenWrapper == null && newTop != null) {
+                stackAnimation = StackAnimation.NONE
+                goingForward = true
+            }
+        } else if (topScreenWrapper != null && topScreenWrapper != newTop) {
+            shouldUseOpenAnimation = false
+            stackAnimation = topScreenWrapper?.screen?.stackAnimation
+        }
+
+        createTransaction().let {
+            if (stackAnimation != null) {
+                if (shouldUseOpenAnimation) {
+                    when (stackAnimation) {
+                        StackAnimation.DEFAULT -> it.setCustomAnimations(R.anim.rns_default_enter_in, R.anim.rns_default_enter_out)
+                        StackAnimation.NONE -> it.setCustomAnimations(R.anim.rns_no_animation_20, R.anim.rns_no_animation_20)
+                        StackAnimation.FADE -> it.setCustomAnimations(R.anim.rns_fade_in, R.anim.rns_fade_out)
+                        StackAnimation.SLIDE_FROM_RIGHT -> it.setCustomAnimations(R.anim.rns_slide_in_from_right, R.anim.rns_slide_out_to_left)
+                        StackAnimation.SLIDE_FROM_LEFT -> it.setCustomAnimations(R.anim.rns_slide_in_from_left, R.anim.rns_slide_out_to_right)
+                        StackAnimation.SLIDE_FROM_BOTTOM -> it.setCustomAnimations(
+                            R.anim.rns_slide_in_from_bottom, R.anim.rns_no_animation_medium
+                        )
+                        StackAnimation.FADE_FROM_BOTTOM -> it.setCustomAnimations(R.anim.rns_fade_from_bottom, R.anim.rns_no_animation_350)
+                        StackAnimation.IOS -> it.setCustomAnimations(R.anim.rns_slide_in_from_right_ios, R.anim.rns_slide_out_to_left_ios)
+                    }
+                } else {
+                    when (stackAnimation) {
+                        StackAnimation.DEFAULT -> it.setCustomAnimations(R.anim.rns_default_exit_in, R.anim.rns_default_exit_out)
+                        StackAnimation.NONE -> it.setCustomAnimations(R.anim.rns_no_animation_20, R.anim.rns_no_animation_20)
+                        StackAnimation.FADE -> it.setCustomAnimations(R.anim.rns_fade_in, R.anim.rns_fade_out)
+                        StackAnimation.SLIDE_FROM_RIGHT -> it.setCustomAnimations(R.anim.rns_slide_in_from_left, R.anim.rns_slide_out_to_right)
+                        StackAnimation.SLIDE_FROM_LEFT -> it.setCustomAnimations(R.anim.rns_slide_in_from_right, R.anim.rns_slide_out_to_left)
+                        StackAnimation.SLIDE_FROM_BOTTOM -> it.setCustomAnimations(
+                            R.anim.rns_no_animation_medium, R.anim.rns_slide_out_to_bottom
+                        )
+                        StackAnimation.FADE_FROM_BOTTOM -> it.setCustomAnimations(R.anim.rns_no_animation_250, R.anim.rns_fade_to_bottom)
+                        StackAnimation.IOS -> it.setCustomAnimations(R.anim.rns_slide_in_from_left_ios, R.anim.rns_slide_out_to_right_ios)
+                    }
+                }
+            }
+
+            goingForward = shouldUseOpenAnimation
+
+            if (shouldUseOpenAnimation &&
+                newTop != null && needsDrawReordering(newTop) &&
+                visibleBottom == null
+            ) {
+                isDetachingCurrentScreen = true
+            }
+
+            for (fragmentWrapper in stack) {
+                if (!screenWrappers.contains(fragmentWrapper) || dismissedWrappers.contains(fragmentWrapper)) {
+                    it.remove(fragmentWrapper.fragment)
+                }
+            }
+            for (fragmentWrapper in screenWrappers) {
+                if (fragmentWrapper === visibleBottom) {
+                    break
+                }
+                if (fragmentWrapper !== newTop && !dismissedWrappers.contains(fragmentWrapper)) {
+                    it.remove(fragmentWrapper.fragment)
+                }
+            }
+
+            if (visibleBottom != null && !visibleBottom.fragment.isAdded) {
+                val top = newTop
+                var beneathVisibleBottom = true
+                for (fragmentWrapper in screenWrappers) {
+                    if (beneathVisibleBottom) {
+                        beneathVisibleBottom = if (fragmentWrapper === visibleBottom) {
+                            false
+                        } else continue
+                    }
+                    it.add(id, fragmentWrapper.fragment).runOnCommit { top?.screen?.bringToFront() }
+                }
+            } else if (newTop != null && !newTop.fragment.isAdded) {
+                it.add(id, newTop.fragment)
+            }
+            topScreenWrapper = newTop as? ScreenStackFragmentWrapper
+            stack.clear()
+            stack.addAll(screenWrappers.map { it as ScreenStackFragmentWrapper })
+
+            turnOffA11yUnderTransparentScreen(visibleBottom)
+
+            it.commitNowAllowingStateLoss()
+        }
+    }
+
+    private fun turnOffA11yUnderTransparentScreen(visibleBottom: ScreenFragmentWrapper?) {
+        if (screenWrappers.size > 1 && visibleBottom != null) {
+            topScreenWrapper?.let {
+                if (isTransparent(it)) {
+                    val screenFragmentsBeneathTop = screenWrappers.slice(0 until screenWrappers.size - 1).asReversed()
+                    for (fragmentWrapper in screenFragmentsBeneathTop) {
+                        fragmentWrapper.screen.changeAccessibilityMode(IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
+                        if (fragmentWrapper == visibleBottom) {
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        topScreen?.changeAccessibilityMode(IMPORTANT_FOR_ACCESSIBILITY_AUTO)
+    }
+
+    override fun notifyContainerUpdate() {
+        stack.forEach { it.onContainerUpdate() }
+    }
+
+    override fun removeView(view: View) {
+        if (isDetachingCurrentScreen) {
+            isDetachingCurrentScreen = false
+            reverseLastTwoChildren = true
+        }
+        super.removeView(view)
+    }
+
+    private fun drawAndRelease() {
+        val drawingOpsCopy = drawingOps
+        drawingOps = ArrayList()
+        for (op in drawingOpsCopy) {
+            op.draw()
+            drawingOpPool.add(op)
+        }
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        if (drawingOps.size < previousChildrenCount) {
+            reverseLastTwoChildren = false
+        }
+        previousChildrenCount = drawingOps.size
+        if (reverseLastTwoChildren && drawingOps.size >= 2) {
+            Collections.swap(drawingOps, drawingOps.size - 1, drawingOps.size - 2)
+        }
+        drawAndRelease()
+    }
+
+    override fun drawChild(canvas: Canvas, child: View, drawingTime: Long): Boolean {
+        drawingOps.add(
+            obtainDrawingOp().apply {
+                this.canvas = canvas
+                this.child = child
+                this.drawingTime = drawingTime
+            }
+        )
+        return true
+    }
+
+    private fun performDraw(op: DrawingOp) {
+        super.drawChild(op.canvas!!, op.child, op.drawingTime)
+    }
+
+    // --- FIX START ---
+    private fun obtainDrawingOp(): DrawingOp =
+        if (drawingOpPool.isEmpty()) DrawingOp() else drawingOpPool.removeAt(drawingOpPool.size - 1)
+    // --- FIX END ---
+
+    private inner class DrawingOp {
+        var canvas: Canvas? = null
+        var child: View? = null
+        var drawingTime: Long = 0
+
+        fun draw() {
+            performDraw(this)
+            canvas = null
+            child = null
+            drawingTime = 0
+        }
+    }
+
+    companion object {
+        private fun isTransparent(fragmentWrapper: ScreenFragmentWrapper): Boolean =
+            fragmentWrapper.screen.stackPresentation === Screen.StackPresentation.TRANSPARENT_MODAL
+
+        private fun needsDrawReordering(fragmentWrapper: ScreenFragmentWrapper): Boolean =
+            Build.VERSION.SDK_INT >= 33 ||
+                fragmentWrapper.screen.stackAnimation === StackAnimation.SLIDE_FROM_BOTTOM ||
+                fragmentWrapper.screen.stackAnimation === StackAnimation.FADE_FROM_BOTTOM ||
+                fragmentWrapper.screen.stackAnimation === StackAnimation.IOS
+    }
+}

@@ -1,0 +1,169 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.google.gms.google-services"
+
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+react {
+    hermesEnabled = true
+}
+
+android {
+    namespace "com.ssvcms"
+    compileSdk 35
+    ndkVersion "27.2.12479018"
+
+    defaultConfig {
+        applicationId "com.ssvcms"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "0.0.1"
+        multiDexEnabled true
+
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+                cppFlags "-Wl,-z,max-page-size=16384"
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    signingConfigs {
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MY_KEYSTORE_PASSWORD
+                keyAlias MY_KEY_ALIAS
+                keyPassword MY_KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    // ✅ android block ke ANDAR hai ab
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+            pickFirsts += [
+                '**/libc++_shared.so',
+                '**/libfbjni.so',
+                '**/libjsi.so',
+                '**/libreanimated.so',
+                '**/libworklets.so'
+            ]
+        }
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += 'META-INF/*.kotlin_module'
+        }
+    }
+
+} // ✅ android block end
+
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.lifecycle:lifecycle-viewmodel:2.8.7'
+        force 'androidx.lifecycle:lifecycle-runtime:2.8.7'
+    }
+    exclude group: 'com.google.android.gms', module: 'play-services-safetynet'
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+    implementation "androidx.multidex:multidex:2.0.1"
+    implementation("androidx.activity:activity-ktx:1.9.0")
+
+implementation project(':react-native-ml-kit_face-detection')  // ← yeh add karo
+implementation 'com.google.mlkit:face-detection:16.1.5'
+    // CredoPay & Local AARs
+    implementation files('libs/pspwDmt.aar')
+    implementation files('libs/pw_ekyc.aar')
+    implementation('in.credopay.payment.sdk:vm30-payment-sdk:3.0.20') {
+        exclude group: 'com.squareup.retrofit2', module: 'retrofit'
+    }
+
+    // Notifee
+    implementation project(':notifee_react-native')
+
+    // PayU
+    implementation('in.payu:payu-checkout-pro:1.8.2') {
+        exclude group: 'org.json', module: 'json'
+    }
+
+    implementation project(':react-native-ota-hot-update')
+    implementation project(':lottie-react-native')
+    implementation project(':react-native-fast-image')
+
+    // ALL AUTOLINKED LIBRARIES
+    implementation project(':payu-core-pg-react')
+    // implementation project(':formik')
+
+    implementation project(':payu-custom-browser-react')
+    implementation project(':payu-upi-react')
+    implementation project(':react-native-aes-crypto')
+    implementation project(':react-native-async-storage_async-storage')
+    implementation project(':react-native-blob-util')
+    implementation project(':react-native-bootsplash')
+    implementation project(':react-native-community_netinfo')
+    implementation project(':react-native-compressor')
+    implementation project(':react-native-device-info')
+    implementation project(':react-native-device-number')
+    implementation project(':react-native-file-viewer')
+    implementation project(':react-native-firebase_app')
+    implementation project(':react-native-firebase_firestore')
+    implementation project(':react-native-firebase_messaging')
+    implementation project(':react-native-fs')
+    implementation project(':react-native-gesture-handler')
+    implementation project(':react-native-get-location')
+    implementation project(':react-native-get-random-values')
+    implementation project(':react-native-hash')
+    implementation project(':react-native-html-to-pdf')
+    implementation project(':react-native-image-picker')
+    implementation project(':react-native-instantpay-mpos')
+    implementation project(':react-native-linear-gradient')
+    implementation project(':react-native-localize')
+    implementation project(':react-native-masked-view_masked-view')
+    implementation project(':react-native-otp-verify')
+    implementation project(':react-native-pager-view')
+    implementation project(':react-native-permissions')
+    implementation project(':react-native-print')
+    implementation project(':react-native-push-notification')
+    implementation project(':react-native-randombytes')
+    implementation project(':react-native-rdservice-fingerprintscanner')
+    implementation project(':react-native-reanimated')
+    implementation project(':react-native-safe-area-context')
+    implementation project(':react-native-screens')
+    implementation project(':react-native-share')
+    implementation project(':react-native-sim-cards-manager')
+    implementation project(':react-native-sound-player')
+    implementation project(':react-native-svg')
+    implementation project(':react-native-vector-icons')
+    implementation project(':react-native-video')
+    implementation project(':react-native-view-shot')
+    implementation project(':react-native-vision-camera')
+    implementation project(':react-native-webview')
+    implementation project(':rn-scratch-card')
+    implementation project(':shopify_flash-list')
+}

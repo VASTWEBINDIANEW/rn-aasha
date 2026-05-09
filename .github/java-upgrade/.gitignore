@@ -1,0 +1,13 @@
+# Large binary files
+android/app/libs/*.aar
+android/app/libs/*.jar
+
+# Node modules
+node_modules/
+
+# Android build
+android/build/
+android/app/build/
+
+# iOS
+ios/build/
