@@ -78,3 +78,7 @@ yarn-debug.log*
 # Mac/Linux temp
 *.swp
 *.swo
+# OTA Bundle files
+android-bundle/
+ota-bundle/
+bundle.zip
