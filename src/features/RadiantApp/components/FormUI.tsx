@@ -261,52 +261,6 @@ interface AppInputProps {
   editable?: boolean;
 }
 
-// export const AppInput: React.FC<AppInputProps> = ({
-//   label, value, onChangeText, onBlur, error, touched,
-//   placeholder, keyboardType, maxLength, autoCapitalize,
-//   multiline, numberOfLines, editable = true,
-// }) => {
-//   const [focused, setFocused] = useState(false);
-//   const hasError = !!(touched && error);
-//   const isValid = !!(touched && !error && value.length > 0);
-
-//   const borderColor = hasError ? colors.error
-//     : focused ? colors.primary
-//       : isValid ? colors.seaGreen
-//         : colors.border;
-
-//   return (
-//     <View style={ai.wrap}>
-//       <Text style={ai.label}>{label}</Text>
-//       <View style={[ai.box, { borderColor }, multiline && ai.boxMulti]}>
-//         <TextInput
-//           style={[ai.input, multiline && ai.inputMulti]}
-//           value={value}
-//           onChangeText={onChangeText}
-//           onFocus={() => setFocused(true)}
-//           onBlur={() => { setFocused(false); onBlur?.(); }}
-//           placeholder={placeholder ?? label}
-//           placeholderTextColor={colors.grey}
-//           keyboardType={keyboardType ?? 'default'}
-//           maxLength={maxLength}
-//           autoCapitalize={autoCapitalize ?? 'sentences'}
-//           multiline={multiline}
-//           numberOfLines={numberOfLines}
-//           editable={editable}
-//         />
-//         {isValid && (
-//           <MaterialCommunityIcons name="check-circle" size={16} color={colors.seaGreen} />
-//         )}
-//       </View>
-//       {hasError && (
-//         <View style={ai.errorRow}>
-//           <MaterialCommunityIcons name="alert-circle" size={12} color={colors.error} />
-//           <Text style={ai.errorText}>{error}</Text>
-//         </View>
-//       )}
-//     </View>
-//   );
-// };
 
 
 
@@ -556,7 +510,6 @@ const bt = StyleSheet.create({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// NavRow — Back / Next buttons
 // ─────────────────────────────────────────────────────────────────────────────
 export const NavRow = ({
   onNext,

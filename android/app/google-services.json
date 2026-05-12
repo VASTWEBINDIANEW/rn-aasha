@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "626198584815",
-    "project_id": "maxuspay-b39d1",
-    "storage_bucket": "maxuspay-b39d1.firebasestorage.app"
+    "project_number": "1098473629755",
+    "project_id": "ssvcms-8bbbb",
+    "storage_bucket": "ssvcms-8bbbb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:626198584815:android:63474475e43252a0596a1a",
+        "mobilesdk_app_id": "1:1098473629755:android:9a37fcdf5360eaa45bd41e",
         "android_client_info": {
           "package_name": "com.ssvcms"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAt6JVlq4TVTzKlDOdv2x7xQducFySKZS4"
+          "current_key": "AIzaSyDfX5f8qcLjz042pjlXFbCN0UbWHB-hKak"
         }
       ],
       "services": {

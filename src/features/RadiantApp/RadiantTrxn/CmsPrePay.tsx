@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, Modal, } from 'react-native';
 import FlotingInput from '../../drawer/securityPages/FlotingInput';
 import AlertSvg from '../../drawer/svgimgcomponents/AlertSvg';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
@@ -28,7 +28,8 @@ const CmsPrePay = ({ route }) => {
     console.log(item, '099090');
     console.log(radiantList, rceIdStatus, rceId, cmsAddMFrom, '-=radiantList');
 
-
+    const [isFullPickupAllowed, setIsFullPickupAllowed] = useState(true);
+    const [showZeroAlert, setShowZeroAlert] = useState(false);
     const [rceID, setRceID] = useState('');
     const [shopId, setShopID] = useState('')
     const [amount, setAmount] = useState('');
@@ -55,7 +56,20 @@ const CmsPrePay = ({ route }) => {
     }, []);
 
     const { post, get } = useAxiosHook();
-
+    useEffect(() => {
+        const fetchRceId = async () => {
+            try {
+                const res = await post({ url: APP_URLS.RCEID });
+                const addinfo = res?.Content?.ADDINFO;
+                const allowed = addinfo?.isallowfullpickup === 'Allow';
+                setIsFullPickupAllowed(allowed);
+                if (!allowed) setShowZeroAlert(true); // ✅ popup dikhao
+            } catch (e) {
+                console.log('❌ RCEID error:', e);
+            }
+        };
+        fetchRceId();
+    }, []);
     useEffect(() => {
         if (radiantList?.ShopId) {
             setShopID(radiantList.ShopId);
@@ -79,13 +93,13 @@ const CmsPrePay = ({ route }) => {
     useEffect(() => {
         const amt = Number(amount);
         const rAmt = Number(Ramount);
-  if (paymentType === 'Partial Pickup' && amt === 0) {
-        ToastAndroid.show(
-            'Zero amount is not allowed for Partial Pickup.',
-            ToastAndroid.LONG
-        );
-        return;
-    }
+        if (paymentType === 'Partial Pickup' && amt === 0) {
+            ToastAndroid.show(
+                'Zero amount is not allowed for Partial Pickup.',
+                ToastAndroid.LONG
+            );
+            return;
+        }
         const isValid =
             amount !== "" &&
             Ramount !== "" &&
@@ -102,7 +116,7 @@ const CmsPrePay = ({ route }) => {
             setRAmount('')
             fatchData();
         }
-       
+
     }, [amount, Ramount, adminiStatus?.allowzero]);
 
 
@@ -120,7 +134,7 @@ const CmsPrePay = ({ route }) => {
             setAmountneed(response.amountneeded);
             setAdminiStatus(response);  // store full response
             if (response?.apiremainstatus && response?.sts && response?.allowzero) {
-                navigation.navigate('CmsCoustomerInfo', { item, setAmount, setRAmount });
+                navigation.navigate('CmsCoustomerInfo', {item, setAmount, setRAmount });
 
             }
 
@@ -160,7 +174,7 @@ const CmsPrePay = ({ route }) => {
             return;
         }
         dispatch(setCmsAddMFrom('CmsPrePay'))
-        navigation.navigate("AddMoneyOptions", { amount: amountneed, paymentMode: 'UPI', from: 'PrePay' });
+        navigation.navigate("AddMoneyOptions", { amount:amountneed, paymentMode: 'UPI', from: 'PrePay' });
 
     };
     useEffect(() => {
@@ -177,7 +191,7 @@ const CmsPrePay = ({ route }) => {
         };
 
 
-        
+
         getData();
     }, []);
     const openPhoneApp = () => {
@@ -199,6 +213,53 @@ const CmsPrePay = ({ route }) => {
         <View style={styles.main}>
 
             <AppBarSecond title={'Pickup Amount'} />
+            {/* ── Zero Only Alert Modal ── */}
+            <Modal visible={showZeroAlert}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowZeroAlert(false)}
+            >
+                <View style={za.overlay}>
+                    <View style={za.card}>
+                        {/* ── Icon ── */}
+                        <View style={za.iconCircle}>
+                            <Text style={za.iconText}>⚠️</Text>
+                        </View>
+
+                        {/* ── Title ── */}
+                        <Text style={za.title}>Zero Amount Only</Text>
+
+                        {/* ── Message ── */}
+                        <Text style={za.message}>
+                            Full pickup is not allowed for this store.{'\n'}
+                            You can only enter <Text style={za.bold}>₹0</Text> as the pickup amount.
+                        </Text>
+
+                        {/* ── Button ── */}
+                        <TouchableOpacity
+                            style={[za.btn, { backgroundColor: colorConfig.secondaryColor }]}
+                            onPress={() => {
+                                setAmount('0');
+                                setRAmount('0');
+                                setShowZeroAlert(false);
+                            }}
+                            activeOpacity={0.85}
+                        >
+                            <Text style={za.btnText}>Enter ₹0 & Continue</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={za.cancelBtn}
+                            onPress={() => {
+                                setShowZeroAlert(false);
+                                navigation.goBack();
+                            }}
+                        >
+                            <Text style={za.cancelText}>Go Back</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
             <AllBalance />
             <ScrollView>
 
@@ -522,4 +583,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff'
 
     },
+});
+const za = StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+    card: { backgroundColor: '#fff', borderRadius: wScale(16), padding: wScale(24), width: '85%', alignItems: 'center' },
+    iconCircle: { width: wScale(64), height: wScale(64), borderRadius: wScale(32), backgroundColor: '#FEF3C7', alignItems: 'center', justifyContent: 'center', marginBottom: hScale(12) },
+    iconText: { fontSize: wScale(30) },
+    title: { fontSize: wScale(20), fontWeight: '700', color: '#111', marginBottom: hScale(8), textAlign: 'center' },
+    message: { fontSize: wScale(14), color: '#6B7280', textAlign: 'center', lineHeight: hScale(22), marginBottom: hScale(20) },
+    bold: { fontWeight: '700', color: '#111' },
+    btn: { width: '100%', paddingVertical: hScale(14), borderRadius: wScale(10), alignItems: 'center', marginBottom: hScale(10) },
+    btnText: { color: '#fff', fontSize: wScale(15), fontWeight: '600' },
+    cancelBtn: { paddingVertical: hScale(8) },
+    cancelText: { fontSize: wScale(14), color: '#EF4444', fontWeight: '500' },
 });

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -20,17 +20,19 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import { AppState } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
 import { APP_URLS } from './src/utils/network/urls';
+import OtaUpdateModal from './src/components/OtaUpdateModal';
 
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-
+// ── State add karo AppContent ke andar ──
+const [otaProgress, setOtaProgress] = useState(0);
+const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'success'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
 const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
-  const VERSION_URL =
-    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
-
+const VERSION_URL =
+  `https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
 
   const checkOta = async () => {
@@ -58,48 +60,43 @@ const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
 
   // ✅ START UPDATE
   const startUpdate = async (data: any) => {
-    toast.show(`Downloading v${data.version}...`, {
-      type: 'info',
-      placement: 'top',
-    });
+  setOtaStatus('downloading'); // ✅ modal dikhao
+  setOtaProgress(0);
 
-    try {
-      await OtUpdate.downloadBundleUri(
-        ReactNativeBlobUtil,
-        data.bundle_url,
-        Number(data.version),
-        {
-          restartAfterInstall: true,
-          restartDelay: 1000,
+  try {
+    await OtUpdate.downloadBundleUri(
+      ReactNativeBlobUtil,
+      data.bundle_url,
+      Number(data.version),
+      {
+        restartAfterInstall: true,
+        restartDelay: 1500,
 
-          updateSuccess() {
-            console.log('✅ OTA Updated:', data.version);
+        updateSuccess() {
+          setOtaStatus('success'); // ✅ success UI
+          console.log('✅ OTA Updated:', data.version);
+        },
 
-            toast.show(`Updated to v${data.version}`, {
-              type: 'success',
-            });
-          },
+        updateFail(error) {
+          setOtaStatus('idle'); // ✅ modal band karo
+          console.log('❌ OTA Failed:', error);
+          toast.show('Update Failed', { type: 'danger' });
+        },
 
-          updateFail(error) {
-            console.log('❌ OTA Failed:', error);
-
-            toast.show('Update Failed', {
-              type: 'danger',
-            });
-          },
-
-          progress(received, total) {
-            if (total > 0) {
-              const percent = Math.floor((received / total) * 100);
-              console.log(`Download: ${percent}%`);
-            }
-          },
-        }
-      );
-    } catch (error) {
-      console.log('OTA execution error:', error);
-    }
-  };
+        progress(received, total) {
+          if (total > 0) {
+            const percent = Math.floor((received / total) * 100);
+            setOtaProgress(percent); // ✅ progress update
+            console.log(`Download: ${percent}%`);
+          }
+        },
+      }
+    );
+  } catch (error) {
+    setOtaStatus('idle');
+    console.log('OTA execution error:', error);
+  }
+};
 
   // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
@@ -124,6 +121,8 @@ const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   }, []);
 
   return (
+  <>
+    <OtaUpdateModal status={otaStatus} progress={otaProgress} />
     <NavigationContainer
       key={language}
       ref={navigationRef}
@@ -131,7 +130,8 @@ const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
     >
       <AppContainer />
     </NavigationContainer>
-  );
+  </>
+);
 };
 
 function App() {

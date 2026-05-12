@@ -4,7 +4,10 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.google.gms.google-services"
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
-
+project.ext.react = [
+    bundleAssetName: "index.android.bundle",
+    entryFile: "index.js",
+]
 react {
     hermesEnabled = true
 }
@@ -38,16 +41,14 @@ android {
         viewBinding true
     }
 
-    signingConfigs {
-        release {
-            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                storePassword MY_KEYSTORE_PASSWORD
-                keyAlias MY_KEY_ALIAS
-                keyPassword MY_KEY_PASSWORD
-            }
-        }
+   signingConfigs {
+    release {
+        storeFile file('ssvcms-release.keystore')
+        storePassword 'ssvcms.in@123'
+        keyAlias 'ssvcms'
+        keyPassword 'ssvcms.in@123'
     }
+}
 
     buildTypes {
         debug {

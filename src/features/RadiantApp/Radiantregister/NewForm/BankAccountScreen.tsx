@@ -41,7 +41,7 @@ const BankAccountSchema = Yup.object({
     .matches(/^\d{9,18}$/, 'Enter valid account number (9–18 digits)')
     .required('Account number required'),
   ifscCode: Yup.string()
-    .matches(/^[A-Z]{4}0[A-Z0-9]{6}$/i, 'Enter valid IFSC code (e.g. SBIN0001234)')
+    // .matches(/^[A-Z]{4}0[A-Z0-9]{6}$/i, 'Enter valid IFSC code (e.g. SBIN0001234)')
     .required('IFSC code required'),
   accountType: Yup.string().required('Account type required'),
   branchName: Yup.string().required('Branch name required'),
@@ -327,6 +327,7 @@ const BankAccountScreen = ({ onNext }: { onNext: () => void }) => {
             placeholder="e.g. SBIN0001234"
             autoCapitalize="characters"
             {...f('ifscCode')}
+            maxLength={11}
           />
           <AppInput
             label="Branch Name"

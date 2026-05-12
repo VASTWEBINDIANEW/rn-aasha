@@ -559,7 +559,7 @@ if (!aadhaarBack.base64 && !aadhaarBack.uri) { toast('Aadhaar back copy required
           OtherCopy: otherDoc.base64 || '',
           Passportsizephoto: passportPhoto.base64,
         };
- console.log('📤 InsertForm5 URL    :', APP_URLS.InsertForm6Update);
+ console.log('📤 InsertForm6 URL    :', APP_URLS.InsertForm6Update);
         console.log('📦 InsertForm5 REQUEST:', JSON.stringify(payload, null, 2));
 
         const res = await post({ url: APP_URLS.InsertForm6Update, data: payload });

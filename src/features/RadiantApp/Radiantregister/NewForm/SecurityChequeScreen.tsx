@@ -20,13 +20,13 @@ import RNFS from 'react-native-fs';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
 import { AppInput, SectionCard, NavRow, getStepColor } from '../../components/FormUI';
-import { colors }         from '../../../../utils/styles/theme';
-import useAxiosHook       from '../../../../utils/network/AxiosClient';
-import { APP_URLS }       from '../../../../utils/network/urls';
-import { toast }          from './AadhaarPanVerification/types';
+import { colors } from '../../../../utils/styles/theme';
+import useAxiosHook from '../../../../utils/network/AxiosClient';
+import { APP_URLS } from '../../../../utils/network/urls';
+import { toast } from './AadhaarPanVerification/types';
 import { hScale, wScale } from '../../../../utils/styles/dimensions';
-import BankListModal      from '../../../../components/BankListModal';
-import ShowLoader         from '../../../../components/ShowLoder';
+import BankListModal from '../../../../components/BankListModal';
+import ShowLoader from '../../../../components/ShowLoder';
 import ImagePreviewModal from '../ImagePreviewModal';
 
 const STEP = 11;
@@ -46,7 +46,7 @@ const toBase64Anywhere = async (uri: string): Promise<string> => {
     const localPath = `${RNFS.CachesDirectoryPath}/${Date.now()}.jpg`;
     await RNFS.downloadFile({ fromUrl: uri, toFile: localPath }).promise;
     const b64 = await RNFS.readFile(localPath, 'base64');
-    await RNFS.unlink(localPath).catch(() => {});
+    await RNFS.unlink(localPath).catch(() => { });
     return b64;
   }
   // content://
@@ -67,8 +67,8 @@ const toBase64Anywhere = async (uri: string): Promise<string> => {
 
 
 const SecurityChequeSchema = Yup.object({
-  chequeNumber:     Yup.string().required('Cheque number required'),
-  bankDisplayName:  Yup.string().required('Bank name required'),
+  chequeNumber: Yup.string().required('Cheque number required'),
+  bankDisplayName: Yup.string().required('Bank name required'),
   chequeHolderName: Yup.string().required('Cheque holder name required'),
 });
 
@@ -80,14 +80,14 @@ const urlToBase64 = async (url: string): Promise<string> => {
   const destPath = `${RNFS.CachesDirectoryPath}/${Date.now()}.jpg`;
   await RNFS.downloadFile({ fromUrl: url, toFile: destPath }).promise;
   const b64 = await RNFS.readFile(destPath, 'base64');
-  await RNFS.unlink(destPath).catch(() => {});
+  await RNFS.unlink(destPath).catch(() => { });
   return b64;
 };
 
 const getBase64 = (doc: DocFile): Promise<string> => {
-  if (!doc.uri)                        return Promise.resolve('');
-  if (doc.base64)                      return Promise.resolve(doc.base64);
-  if (doc.uri.startsWith('http'))      return urlToBase64(doc.uri);
+  if (!doc.uri) return Promise.resolve('');
+  if (doc.base64) return Promise.resolve(doc.base64);
+  if (doc.uri.startsWith('http')) return urlToBase64(doc.uri);
   return localToBase64(doc.uri);
 };
 
@@ -99,8 +99,8 @@ const CameraModal = ({
   onClose: () => void;
   onCapture: (uri: string) => void;
 }) => {
-  const device    = useCameraDevice('back');
-  const camera    = useRef<Camera>(null);
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
   const [capturing, setCapturing] = useState(false);
 
   const takePhoto = async () => {
@@ -156,9 +156,9 @@ const CameraModal = ({
 };
 
 const cam = StyleSheet.create({
-  controls:     { position: 'absolute', bottom: hScale(40), left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: wScale(40) },
-  sideBtn:      { width: wScale(44), height: wScale(44), alignItems: 'center', justifyContent: 'center' },
-  captureBtn:   { width: wScale(72), height: wScale(72), borderRadius: wScale(36), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: 'rgba(255,255,255,0.5)' },
+  controls: { position: 'absolute', bottom: hScale(40), left: 0, right: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: wScale(40) },
+  sideBtn: { width: wScale(44), height: wScale(44), alignItems: 'center', justifyContent: 'center' },
+  captureBtn: { width: wScale(72), height: wScale(72), borderRadius: wScale(36), backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: 'rgba(255,255,255,0.5)' },
   captureInner: { width: wScale(56), height: wScale(56), borderRadius: wScale(28), backgroundColor: '#fff' },
 });
 
@@ -205,28 +205,28 @@ const SourcePickerModal = ({
 );
 
 const sp = StyleSheet.create({
-  overlay:     { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  sheet:       { backgroundColor: '#fff', borderTopLeftRadius: wScale(20), borderTopRightRadius: wScale(20), padding: wScale(20), paddingBottom: hScale(32) },
-  title:       { fontSize: wScale(16), fontWeight: '700', color: '#1F2937', marginBottom: hScale(16), textAlign: 'center' },
-  option:      { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: wScale(12), padding: wScale(14), marginBottom: hScale(10) },
-  iconWrap:    { width: wScale(44), height: wScale(44), borderRadius: wScale(10), justifyContent: 'center', alignItems: 'center', marginRight: wScale(12) },
-  optionText:  { flex: 1 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: '#fff', borderTopLeftRadius: wScale(20), borderTopRightRadius: wScale(20), padding: wScale(20), paddingBottom: hScale(32) },
+  title: { fontSize: wScale(16), fontWeight: '700', color: '#1F2937', marginBottom: hScale(16), textAlign: 'center' },
+  option: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: wScale(12), padding: wScale(14), marginBottom: hScale(10) },
+  iconWrap: { width: wScale(44), height: wScale(44), borderRadius: wScale(10), justifyContent: 'center', alignItems: 'center', marginRight: wScale(12) },
+  optionText: { flex: 1 },
   optionTitle: { fontSize: wScale(14), fontWeight: '600', color: '#1F2937' },
-  optionSub:   { fontSize: wScale(12), color: '#6B7280', marginTop: hScale(2) },
-  cancelBtn:   { marginTop: hScale(4), paddingVertical: hScale(14), alignItems: 'center' },
-  cancelText:  { fontSize: wScale(14), color: '#EF4444', fontWeight: '600' },
+  optionSub: { fontSize: wScale(12), color: '#6B7280', marginTop: hScale(2) },
+  cancelBtn: { marginTop: hScale(4), paddingVertical: hScale(14), alignItems: 'center' },
+  cancelText: { fontSize: wScale(14), color: '#EF4444', fontWeight: '600' },
 });
 
 
 
 const ip = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
-  img:       { flex: 1 },
-  actions:   { flexDirection: 'row', padding: wScale(16), backgroundColor: '#000' },
+  img: { flex: 1 },
+  actions: { flexDirection: 'row', padding: wScale(16), backgroundColor: '#000' },
   retakeBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#374151', borderRadius: wScale(10), paddingVertical: hScale(14), marginRight: wScale(6) },
-  retakeText:{ color: '#fff', fontWeight: '600', fontSize: wScale(14), marginLeft: wScale(6) },
-  doneBtn:   { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#16A34A', borderRadius: wScale(10), paddingVertical: hScale(14), marginLeft: wScale(6) },
-  doneText:  { color: '#fff', fontWeight: '600', fontSize: wScale(14), marginLeft: wScale(6) },
+  retakeText: { color: '#fff', fontWeight: '600', fontSize: wScale(14), marginLeft: wScale(6) },
+  doneBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#16A34A', borderRadius: wScale(10), paddingVertical: hScale(14), marginLeft: wScale(6) },
+  doneText: { color: '#fff', fontWeight: '600', fontSize: wScale(14), marginLeft: wScale(6) },
 });
 
 // ─── Cheque Upload ────────────────────────────────────────
@@ -236,11 +236,11 @@ const ChequeUpload = ({
   doc: DocFile; color: string;
   onPick: (d: DocFile) => void; onRemove: () => void;
 }) => {
-  const [loading,      setLoading]      = useState(false);
-  const [showPicker,   setShowPicker]   = useState(false);
-  const [previewUri,   setPreviewUri]   = useState('');
-  
-  const [showPreview,  setShowPreview]  = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [previewUri, setPreviewUri] = useState('');
+
+  const [showPreview, setShowPreview] = useState(false);
   const [pendingAsset, setPendingAsset] = useState<{ uri: string; name: string } | null>(null);
   const [cameraVisible, setCameraVisible] = useState(false);
 
@@ -277,27 +277,27 @@ const ChequeUpload = ({
     });
   };
 
-const confirmImage = async () => {
-  if (!pendingAsset) {
-    console.log('❌ pendingAsset null hai');  // ← yeh check karo
-    return;
-  }
-  console.log('✅ confirmImage uri:', pendingAsset.uri);
-  setLoading(true);
-  try {
-    const base64 = await toBase64Anywhere(pendingAsset.uri);
-    console.log('✅ base64 length:', base64?.length);
-    onPick({ base64, uri: pendingAsset.uri, name: pendingAsset.name });
-    console.log('✅ onPick called');
-    setShowPreview(false);
-  } catch (e) {
-    console.log('❌ confirmImage error:', e);
-    toast('Could not read image');
-  } finally {
-    setLoading(false);
-    setPendingAsset(null);
-  }
-};
+  const confirmImage = async () => {
+    if (!pendingAsset) {
+      console.log('❌ pendingAsset null hai');  // ← yeh check karo
+      return;
+    }
+    console.log('✅ confirmImage uri:', pendingAsset.uri);
+    setLoading(true);
+    try {
+      const base64 = await toBase64Anywhere(pendingAsset.uri);
+      console.log('✅ base64 length:', base64?.length);
+      onPick({ base64, uri: pendingAsset.uri, name: pendingAsset.name });
+      console.log('✅ onPick called');
+      setShowPreview(false);
+    } catch (e) {
+      console.log('❌ confirmImage error:', e);
+      toast('Could not read image');
+    } finally {
+      setLoading(false);
+      setPendingAsset(null);
+    }
+  };
 
 
   const retake = () => {
@@ -324,15 +324,15 @@ const confirmImage = async () => {
       </View>
 
       {/* Thumbnail ya Upload */}
-{doc.uri || doc.base64 ? (
-  <TouchableOpacity
-    style={cu.preview}
-    onPress={() => { 
-      setPreviewUri(doc.uri); 
-      setShowPreview(true); 
-    }}
-    activeOpacity={0.9}
-  >
+      {doc.uri || doc.base64 ? (
+        <TouchableOpacity
+          style={cu.preview}
+          onPress={() => {
+            setPreviewUri(doc.uri);
+            setShowPreview(true);
+          }}
+          activeOpacity={0.9}
+        >
           <Image source={{ uri: doc.uri }} style={cu.thumb} resizeMode="cover" />
           <View style={cu.previewInfo}>
             <Text style={cu.fileName} numberOfLines={1}>{doc.name}</Text>
@@ -352,9 +352,9 @@ const confirmImage = async () => {
           {loading
             ? <ActivityIndicator size="small" color={color} />
             : <>
-                <MaterialCommunityIcons name="upload-outline" size={wScale(20)} color={color} />
-                <Text style={[cu.pickText, { color }]}>Tap to upload cheque</Text>
-              </>
+              <MaterialCommunityIcons name="upload-outline" size={wScale(20)} color={color} />
+              <Text style={[cu.pickText, { color }]}>Tap to upload cheque</Text>
+            </>
           }
         </TouchableOpacity>
       )}
@@ -368,41 +368,41 @@ const confirmImage = async () => {
         onClose={() => setShowPicker(false)}
       />
 
-      
-<ImagePreviewModal
-  visible={showPreview}
-  imageUri={previewUri || doc.uri}
-  reUploadBtn={true}
-  saveClose={() => setShowPreview(false)}
-  onClose={() => {
-    if (pendingAsset) {
-      confirmImage();  
-    } else {
-      setShowPreview(false);
-    }
-  }}
-  reUpload={() => {
-    setShowPreview(false);
-    setShowPicker(true);
-  }}
-/>
+
+      <ImagePreviewModal
+        visible={showPreview}
+        imageUri={previewUri || doc.uri}
+        reUploadBtn={true}
+        saveClose={() => setShowPreview(false)}
+        onClose={() => {
+          if (pendingAsset) {
+            confirmImage();
+          } else {
+            setShowPreview(false);
+          }
+        }}
+        reUpload={() => {
+          setShowPreview(false);
+          setShowPicker(true);
+        }}
+      />
     </View>
   );
 };
 
 const cu = StyleSheet.create({
-  wrapper:     { marginBottom: hScale(14) },
-  labelRow:    { flexDirection: 'row', alignItems: 'center', marginBottom: hScale(6) },
-  label:       { fontSize: wScale(13), color: '#374151', fontWeight: '500', flex: 1, marginLeft: wScale(6) },
-  req:         { fontSize: wScale(13), color: '#EF4444', fontWeight: '700' },
-  pickBtn:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderStyle: 'dashed', borderRadius: wScale(10), paddingVertical: hScale(14), backgroundColor: '#F9FAFB' },
-  pickText:    { fontSize: wScale(13), fontWeight: '600', marginLeft: wScale(8) },
-  preview:     { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0FDF4', borderRadius: wScale(10), padding: wScale(10), borderWidth: 1, borderColor: '#BBF7D0' },
-  thumb:       { width: wScale(48), height: wScale(48), borderRadius: wScale(8), backgroundColor: '#E5E7EB' },
+  wrapper: { marginBottom: hScale(14) },
+  labelRow: { flexDirection: 'row', alignItems: 'center', marginBottom: hScale(6) },
+  label: { fontSize: wScale(13), color: '#374151', fontWeight: '500', flex: 1, marginLeft: wScale(6) },
+  req: { fontSize: wScale(13), color: '#EF4444', fontWeight: '700' },
+  pickBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderStyle: 'dashed', borderRadius: wScale(10), paddingVertical: hScale(14), backgroundColor: '#F9FAFB' },
+  pickText: { fontSize: wScale(13), fontWeight: '600', marginLeft: wScale(8) },
+  preview: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0FDF4', borderRadius: wScale(10), padding: wScale(10), borderWidth: 1, borderColor: '#BBF7D0' },
+  thumb: { width: wScale(48), height: wScale(48), borderRadius: wScale(8), backgroundColor: '#E5E7EB' },
   previewInfo: { flex: 1, marginLeft: wScale(10) },
-  fileName:    { fontSize: wScale(12), color: '#374151', fontWeight: '500' },
-  uploaded:    { fontSize: wScale(11), color: '#16A34A', marginTop: hScale(2) },
-  removeBtn:   { padding: wScale(4) },
+  fileName: { fontSize: wScale(12), color: '#374151', fontWeight: '500' },
+  uploaded: { fontSize: wScale(11), color: '#16A34A', marginTop: hScale(2) },
+  removeBtn: { padding: wScale(4) },
 });
 
 // ─── Bullet ───────────────────────────────────────────────
@@ -414,31 +414,31 @@ const Bullet = ({ text, color }: { text: string; color: string }) => (
 );
 
 const bl = StyleSheet.create({
-  row:  { flexDirection: 'row', alignItems: 'flex-start', marginBottom: hScale(10) },
-  dot:  { width: wScale(6), height: wScale(6), borderRadius: wScale(3), marginTop: hScale(7), marginRight: wScale(10), flexShrink: 0 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: hScale(10) },
+  dot: { width: wScale(6), height: wScale(6), borderRadius: wScale(3), marginTop: hScale(7), marginRight: wScale(10), flexShrink: 0 },
   text: { flex: 1, fontSize: wScale(13), color: '#475569', lineHeight: hScale(20) },
 });
 
 // ─── Main Screen ──────────────────────────────────────────
 const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) => {
-  const { post }  = useAxiosHook();
+  const { post } = useAxiosHook();
   const stepColor = getStepColor(STEP);
 
-  const [loading,       setLoading]       = useState(true);
-  const [chequeDoc,     setChequeDoc]     = useState(emptyDoc());
+  const [loading, setLoading] = useState(true);
+  const [chequeDoc, setChequeDoc] = useState(emptyDoc());
   const [applicantName, setApplicantName] = useState('');
-  const [bankList,      setBankList]      = useState<any[]>([]);
-  const [selectedBank,  setSelectedBank]  = useState<any>(null);
-  const [isBankOpen,    setIsBankOpen]    = useState(false);
+  const [bankList, setBankList] = useState<any[]>([]);
+  const [selectedBank, setSelectedBank] = useState<any>(null);
+  const [isBankOpen, setIsBankOpen] = useState(false);
 
   const formik = useFormik({
     initialValues: {
-      chequeNumber:     '',
-      bankDisplayName:  '',
+      chequeNumber: '',
+      bankDisplayName: '',
       chequeHolderName: '',
     },
     validationSchema: SecurityChequeSchema,
-    validateOnBlur:   true,
+    validateOnBlur: true,
     validateOnChange: false,
 
     onSubmit: async (values) => {
@@ -446,13 +446,15 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
         toast('Please upload security cheque copy');
         return;
       }
+        setSubmitting(true);  // ✅ start
+
       try {
-       const checkCopyBase64 = await toBase64Anywhere(chequeDoc.uri);
+        const checkCopyBase64 = await toBase64Anywhere(chequeDoc.uri);
 
         const payload = {
-          CheckCopy:        checkCopyBase64,
-          Chequenumber:     values.chequeNumber,
-          BankName:         bankDisplayName,
+          CheckCopy: checkCopyBase64,
+          Chequenumber: values.chequeNumber,
+          BankName: bankDisplayName,
           ChequeHolderName: values.chequeHolderName,
         };
 
@@ -472,6 +474,9 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
         console.log('❌ InsertForm9 ERROR:', err);
         toast('Something went wrong. Try again.');
       }
+      finally {
+    setSubmitting(false);  // ✅ end — success ya error dono pe
+  }
     },
   });
 
@@ -496,15 +501,18 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
           setLoading(false);
           const c = res.Content;
 
-          if (c?.ApplicantName) setApplicantName(c.ApplicantName);
-
+          // if (c?.ApplicantName) setApplicantName(c.ApplicantName);
+          if (c?.ApplicantName) {
+            setApplicantName(c.ApplicantName);
+            formik.setFieldValue('chequeHolderName', c.ApplicantName); // ✅ yeh add karo
+          }
           formik.setValues({
-            chequeNumber:     c?.Chequenumber     ?? '',
-            bankDisplayName:  c?.BankName         ?? '',
+            chequeNumber: c?.Chequenumber ?? '',
+            bankDisplayName: c?.BankName ?? '',
             chequeHolderName: c?.ChequeHolderName ?? '',
           }, false);
 
-          if (c?.BankName)     setSelectedBank({ BankName: c.BankName });
+          if (c?.BankName) setSelectedBank({ BankName: c.BankName });
           if (c?.Securitycheck) setChequeDoc({ base64: '', uri: c.Securitycheck, name: 'Security Cheque' });
         } else {
           setLoading(false);
@@ -524,10 +532,10 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
     : '';
 
   const f = (name: keyof typeof values) => ({
-    value:        values[name],
-    error:        errors[name] as string | undefined,
-    touched:      !!touched[name],
-    onBlur:       () => setFieldTouched(name, true),
+    value: values[name],
+    error: errors[name] as string | undefined,
+    touched: !!touched[name],
+    onBlur: () => setFieldTouched(name, true),
     onChangeText: (t: string) => setFieldValue(name, t),
   });
 
@@ -539,6 +547,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
     }
     handleSubmit();
   };
+const [submitting, setSubmitting] = useState(false);
 
   return (
     <View style={s.screen}>
@@ -554,7 +563,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
           <Text style={s.declIntro}>
             I,{' '}
             <Text style={[s.declName, { color: stepColor }]}>
-              {applicantName || '_______________________________'}
+              {values.chequeHolderName || '_______________________________'}
             </Text>
             {' '}(Applicant Name), acknowledge that for my service engagement as a Cash Executive for the Company, I may be required to maintain advance funding in the Company designated wallet through UPI, NEFT, RTGS, IMPS, or Cash Deposit to perform cash pickups. I hereby agree and undertake the following:
           </Text>
@@ -565,7 +574,6 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
           <Bullet color={stepColor} text="Security Cheque Details: As a security against financial obligations (including chargebacks, mismanaged funds etc.) arising from my engagement as a Cash Executive, I am submitting a Security Cheque with the following details." />
         </SectionCard>
 
-        {/* ── Cheque Details ── */}
         <SectionCard title="Security Cheque Details" icon="checkbook" iconColor={stepColor}>
           <AppInput
             label="Cheque No."
@@ -573,7 +581,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
             keyboardType="numeric"
             maxLength={6}
             {...f('chequeNumber')}
-            
+
           />
 
           {/* Bank Picker */}
@@ -616,7 +624,8 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
           </Text>
         </View>
 
-        <NavRow onNext={onPressNext} stepColor={stepColor} />
+        <NavRow onNext={onPressNext} stepColor={stepColor}   loading={submitting}  // ✅ yeh add karo
+/>
       </ScrollView>
 
       <BankListModal
@@ -637,15 +646,15 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
 export default SecurityChequeScreen;
 
 const s = StyleSheet.create({
-  screen:          { flex: 1, backgroundColor: colors.light_blue },
-  scroll:          { padding: 16, paddingBottom: 40 },
-  req:             { color: '#EF4444', fontWeight: '700' },
-  declIntro:       { fontSize: wScale(13), color: '#475569', lineHeight: hScale(21), marginBottom: hScale(14) },
-  declName:        { fontWeight: '700' },
-  bankPickerWrap:  { marginBottom: hScale(14) },
+  screen: { flex: 1, backgroundColor: colors.light_blue },
+  scroll: { padding: 16, paddingBottom: 40 },
+  req: { color: '#EF4444', fontWeight: '700' },
+  declIntro: { fontSize: wScale(13), color: '#475569', lineHeight: hScale(21), marginBottom: hScale(14) },
+  declName: { fontWeight: '700' },
+  bankPickerWrap: { marginBottom: hScale(14) },
   bankPickerLabel: { fontSize: wScale(13), color: '#374151', fontWeight: '500', marginBottom: hScale(6) },
-  bankPickerBtn:   { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: wScale(10), paddingHorizontal: wScale(14), paddingVertical: hScale(12), backgroundColor: '#F9FAFB' },
-  bankPickerText:  { flex: 1, fontSize: wScale(13), color: '#9CA3AF', marginLeft: wScale(8) },
-  authBox:         { flexDirection: 'row', backgroundColor: '#EFF6FF', borderRadius: wScale(12), padding: wScale(14), marginBottom: hScale(16), borderWidth: 1, borderColor: '#BFDBFE', alignItems: 'flex-start' },
-  authText:        { flex: 1, fontSize: wScale(13), color: '#1E40AF', lineHeight: hScale(20), marginLeft: wScale(10) },
+  bankPickerBtn: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderRadius: wScale(10), paddingHorizontal: wScale(14), paddingVertical: hScale(12), backgroundColor: '#F9FAFB' },
+  bankPickerText: { flex: 1, fontSize: wScale(13), color: '#9CA3AF', marginLeft: wScale(8) },
+  authBox: { flexDirection: 'row', backgroundColor: '#EFF6FF', borderRadius: wScale(12), padding: wScale(14), marginBottom: hScale(16), borderWidth: 1, borderColor: '#BFDBFE', alignItems: 'flex-start' },
+  authText: { flex: 1, fontSize: wScale(13), color: '#1E40AF', lineHeight: hScale(20), marginLeft: wScale(10) },
 });
