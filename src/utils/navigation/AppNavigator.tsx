@@ -137,6 +137,7 @@ import RecentTx from '../../features/dashboard/RecentTx';
 import EditProfile from '../../features/drawer/EditProfile';
 import CableTvScreen from '../../features/Recharge/CabelTvScreen';
 import UPISeamless from '../../features/AddMoneyOps/payu/seamless/UPISeamless';
+import UPIScreen from '../../features/AddMoneyOps/payu/UPIScreen';
 import UPI from '../../features/AddMoneyOps/payu/seamless/UPI';
 import PrepaidGasScreen from '../../features/Recharge/pipegas';
 import LoginReport from '../../features/drawer/securityPages/LoginReport';
@@ -1077,7 +1078,12 @@ const AppNavigator = () => {
         component={CameraScreen}
         options={{ headerShown: false }}
       />
-          
+
+            <Stack.Screen
+        name="UPIScreen"
+        component={UPIScreen}
+        options={{ headerShown: false }}
+      />   
     </Stack.Navigator>
   );
 };

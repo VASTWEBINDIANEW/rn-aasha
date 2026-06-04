@@ -32,16 +32,14 @@ const AppContent = () => {
   const authToken = useSelector((state: any) => state.userInfo.authToken);
   const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
-  const VERSION_URL =
-    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
+ 
   const appState = useRef(AppState.currentState);
-  console.log('OTA URL:', VERSION_URL);
 const fetchOtaDetails = async () => {
   try {
     const documentSnapshot = await firestore()
       .collection('otaData')
       .doc('otadata')
-      .collection('rechargedrishti')
+      .collection('smartpay1')
       .doc('ota')
       .get();
 

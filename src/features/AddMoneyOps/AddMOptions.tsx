@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, Linking,  ToastAndroid, Image, AppState } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, Linking, ToastAndroid, Image, AppState } from 'react-native';
 import { hScale, wScale } from '../../utils/styles/dimensions';
 import { useNavigation } from '../../utils/navigation/NavigationService';
 import useAxiosHook from '../../utils/network/AxiosClient';
@@ -20,11 +20,14 @@ import { NativeModules } from "react-native";
 import OtheAddMOptions from './OtheAddMOptions';
 import { clearEntryScreen } from '../../reduxUtils/store/userInfoSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+
+import { setPayUData, setPayUtxnId } from '../../reduxUtils/store/userInfoSlice'
 const { UpiNative } = NativeModules;
 const AddMoneyOptions = ({ route }) => {
+    const dispatch = useDispatch();
 
     const { colorConfig, IsDealer, Loc_Data, cmsAddMFrom } = useSelector((state: RootState) => state.userInfo);
-    console.log(cmsAddMFrom, '-==-==');
 
     const color1 = `${colorConfig.secondaryColor}20`
     const { amount, jsonData, paymentMode, chargeType, from } = route.params;
@@ -211,7 +214,7 @@ const AddMoneyOptions = ({ route }) => {
         } catch (error) {
             setIsLoading(false);
             console.error('Error fetching charges:', error);
-        }finally{
+        } finally {
             setIsLoading(false)
         }
     }, [from, amount, navigation, upich, Qrcodestatus]);
@@ -286,7 +289,12 @@ const AddMoneyOptions = ({ route }) => {
 
         try {
             const response = await get({ url: `${APP_URLS.upistatus}` });
+            console.log(response, '@@@@@@@@@@@@@@@@@@@1111');
             const ActiveApi = response['ActiveApi']
+
+            // if(response.Message =='Currently Service is Down'){
+            //     Alert.alert(response.Message);
+            // }
             if (ActiveApi === ActiveApi) {
                 const payuamount = parseFloat(route.params['amount']);
                 const paymin = parseFloat(response['Minqr']);
@@ -474,7 +482,7 @@ const AddMoneyOptions = ({ route }) => {
         try {
             const data = await post({ url: `${APP_URLS.Chkpayu}type=${type}` })
             setPayUParams(data);
-            console.log(data);
+            console.log(data, '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
 
             var resp = data["Response"];
             var msz = data["Message"];
@@ -489,7 +497,7 @@ const AddMoneyOptions = ({ route }) => {
                 setMerchemail(data["email"]);
                 setMerchmobile(data["mobile"]);
                 setMrchname(data["name"]);
-
+                dispatch(setPayUData({ ...data, amount: amount }));
                 if (type == "CC") {
 
                     Apitransitionsencrypt("CC", data);
@@ -529,8 +537,12 @@ const AddMoneyOptions = ({ route }) => {
 
     const Apitransitionsencrypt = useCallback(async (type, data1) => {
         try {
-            const id = uuid.v4().toString().substring(0, 16);
+            // const id = uuid.v4().toString().substring(0, 16);
+            const generateTxnId = () => new Date().getTime().toString();
+            const id = generateTxnId();
+            dispatch(setPayUtxnId(id));
             setIsLoading(true)
+            setIntentLoad(true)
             const mobileNetwork = await getNetworkCarrier();
             const ip = await getMobileIp();
             const model = await getMobileDeviceId();
@@ -573,7 +585,10 @@ const AddMoneyOptions = ({ route }) => {
             savePayUParam(payUParam);
             if (resp === "Success") {
                 console.log('Navigating with payUParam:', payUParam);
-                navigation.navigate('SeamlessScreen', { payUParam });
+                navigation.navigate('UPIScreen');
+            setIntentLoad(false)
+
+                // navigation.navigate('SeamlessScreen', { payUParam });
             } else {
                 const errorMsg = data["message"] || data["txnid"];
                 Alert.alert(
@@ -583,10 +598,12 @@ const AddMoneyOptions = ({ route }) => {
                     { cancelable: false }
                 );
             }
+                        setIntentLoad(false)
+
             setIsLoading(false)
 
         } catch (error) {
-            // Global error handling
+            setIntentLoad(false)
             console.error('Error in Apitransitionsencrypt:', error.message);
             Alert.alert(
                 'Error',
@@ -796,7 +813,7 @@ const AddMoneyOptions = ({ route }) => {
             const response = await post({
                 url: `${APP_URLS.VastbazzarUPIQRGenerate}${amnt}&Type=Intent`
             });
-console.log("API Response:", response);
+            console.log("API Response:", response);
             const generatedidresponse = response["txnid"];
             const qrcode1response = response["Intenturl"];
 
@@ -924,7 +941,16 @@ console.log("API Response:", response);
                     {/* Use Intent */}
                     <TouchableOpacity
                         style={styles.row}
-                        onPress={() => Vastbazzarqr(amount)}
+                        onPress={() => {
+                            if (
+                                APP_URLS.AppName === 'Recharge Drishti' ||
+                                APP_URLS.AppName === 'Smart Pay Money'
+                            ) {
+                                upists();
+                            } else {
+                                Vastbazzarqr(amount);
+                            }
+                        }}
                     >
                         <View style={styles.leftSection}>
                             <Upipaymentoptionssvg />

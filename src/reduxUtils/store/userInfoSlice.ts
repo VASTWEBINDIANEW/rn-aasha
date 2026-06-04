@@ -2,6 +2,7 @@ import * as toolkitRaw from '@reduxjs/toolkit';
 const { createSlice } = ((toolkitRaw as any).default ?? toolkitRaw) as typeof toolkitRaw;
 
 const initialState = {
+  payuData: null, // ✅ PayU response object ko store karne ke liye
   authToken: '',
   refreshToken: '',
   userId: '',
@@ -38,7 +39,7 @@ const initialState = {
 
   latitude: '0',
   longitude: '0',
-
+payutxnid:null,
   rceIdStatus: {
     status: null,
     status2: null
@@ -77,13 +78,20 @@ const initialState = {
   signUpId: null,
   signUpPassword: null,
   logoUrl: '',
-
 };
 
 const userInfoSlice = createSlice({
   name: 'userInfo',
   initialState,
   reducers: {
+    // 🚀 NEW PAYU REDUCERS ADDED INSIDE THIS SLICE
+    setPayUtxnId: (state, action) => { state.payutxnid = action.payload; },
+    setPayUData: (state, action) => {
+      state.payuData = action.payload;
+    },
+    clearPayUData: (state) => {
+      state.payuData = null;
+    },
 
     // ===== EXISTING (UNCHANGED) =====
     setAuthToken: (state, action) => { state.authToken = action.payload; },
@@ -136,7 +144,7 @@ const userInfoSlice = createSlice({
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
     setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
 
-    reset: () => JSON.parse(JSON.stringify(initialState)),
+    reset: () => initialState,
   },
 });
 
@@ -174,6 +182,10 @@ export const {
   setIsPartial,
   setPartialAmounts,
 
+  // ✅ EXPORTS FOR PAYU DATA
+  setPayUData,
+  clearPayUData,
+  setPayUtxnId,
   // ✅ NEW EXPORTS
   setLoginId,
   setIsDemoUser,
@@ -181,7 +193,6 @@ export const {
   setSignUpId,
   setSignUpPassword,
   setLogoUrl
-
 } = userInfoSlice.actions;
 
 export default userInfoSlice.reducer;
