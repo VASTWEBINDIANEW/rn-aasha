@@ -16,7 +16,7 @@ import { RootState } from '../../reduxUtils/store';
 import NoDatafound from '../drawer/svgimgcomponents/Nodatafound';
 import SkeletonCard from '../../components/SkeletonCard';
 import { translate } from '../../utils/languageUtils/I18n';
-import { getImageSource, getImageSource2 } from '../../utils/network/NetWorkImages';
+import {  getAssetSource } from '../../utils/network/NetWorkImages';
 import FastImage from 'react-native-fast-image';
 
 // ─── Skeleton List ────────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ const DealerCard = React.memo(({ item, themeColor, secondaryColor }: {
         source={
           item.ProfileImages
             ? { uri: `http://${APP_URLS.baseWebUrl}${item.ProfileImages}` }
-            : getImageSource('bussiness-man.png')
+            : getAssetSource('bussiness-man.png')
         }
         style={styles.avatar}
       />

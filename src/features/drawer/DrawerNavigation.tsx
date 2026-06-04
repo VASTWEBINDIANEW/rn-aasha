@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, AsyncStorage, ScrollView, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Modal } from 'react-native';
 // import { createDrawerNavigator } from "@react-navigation-drawer";
 import {
   DrawerContentScrollView,
@@ -160,7 +160,7 @@ const DrawerNavigation = ({ navigation }) => {
           </DrawerContentScrollView>;
 
           return (
-            <SafeAreaView >
+            <View >
               <LinearGradient colors={[colorConfig.primaryColor, colorConfig.secondaryColor]} style={{
                 marginBottom: hScale(-20), zIndex: 99
               }}>
@@ -212,7 +212,7 @@ const DrawerNavigation = ({ navigation }) => {
 
                 </View>
               </ScrollView>
-            </SafeAreaView>
+            </View>
           );
         }}
         screenOptions={{

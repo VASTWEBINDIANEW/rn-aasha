@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, Linking, AsyncStorage, ToastAndroid, Image, AppState } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, FlatList, Linking,  ToastAndroid, Image, AppState } from 'react-native';
 import { hScale, wScale } from '../../utils/styles/dimensions';
 import { useNavigation } from '../../utils/navigation/NavigationService';
 import useAxiosHook from '../../utils/network/AxiosClient';
@@ -19,6 +19,7 @@ import ShowLoaderBtn from '../../components/ShowLoaderBtn';
 import { NativeModules } from "react-native";
 import OtheAddMOptions from './OtheAddMOptions';
 import { clearEntryScreen } from '../../reduxUtils/store/userInfoSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { UpiNative } = NativeModules;
 const AddMoneyOptions = ({ route }) => {
 
@@ -795,7 +796,7 @@ const AddMoneyOptions = ({ route }) => {
             const response = await post({
                 url: `${APP_URLS.VastbazzarUPIQRGenerate}${amnt}&Type=Intent`
             });
-
+console.log("API Response:", response);
             const generatedidresponse = response["txnid"];
             const qrcode1response = response["Intenturl"];
 

@@ -1,4 +1,4 @@
-package com.ssvcms.location;
+package com.globalmultisolution.location;
 
 import android.Manifest;
 import android.app.Activity;

@@ -45,9 +45,12 @@ const CmsScreen = () => {
 
       try {
         
-        console.log('📡 Calling API: RCEID');
-
         const res1 = await post({ url: APP_URLS.RCEID });
+console.log('📡 URL =', APP_URLS.RCEID);
+  if (typeof res1 === 'string') {
+    console.log('HTML RESPONSE RECEIVED');
+    return;
+  }
 
         console.log(
           '✅ RCEID RESPONSE:',
@@ -152,7 +155,7 @@ const CmsScreen = () => {
 
   return <View style={styles.container}>
     {renderScreen()} 
-    {/* <AttachedDocuments/> */}
+    {/* <SecurityChequeScreen/> */}
      </View>;
 };
 

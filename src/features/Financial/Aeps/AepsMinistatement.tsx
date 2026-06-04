@@ -1,9 +1,11 @@
 import { translate } from '../../../utils/languageUtils/I18n';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { Appearance, View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Image, ToastAndroid, Modal, Alert, FlatList } from 'react-native';
+import { Appearance, View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Image, ToastAndroid, Alert, FlatList } from 'react-native';
 import useAxiosHook from '../../../utils/network/AxiosClient';
 import { APP_URLS } from '../../../utils/network/urls';
+import { Modal as RNModal } from 'react-native';
+import Modal from "react-native-modal";
 import AppBar from '../../drawer/headerAppbar/AppBar';
 import AppBarSecond from '../../drawer/headerAppbar/AppBarSecond';
 import { SCREEN_HEIGHT, hScale, wScale } from '../../../utils/styles/dimensions';
@@ -35,6 +37,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { logToFirebase } from '../../../utils/firebaselog';
 import firestore from '@react-native-firebase/firestore';
 import { useIsFocused } from '@react-navigation/native';
+import TwoFAVerify from './TwoFaScreen';
 
 const AepsMinistatement = () => {
     const isFocused = useIsFocused();
@@ -88,11 +91,50 @@ const AepsMinistatement = () => {
         CheckEkyc();
 
         const banks = async () => {
+
+
+            const provider =
+                         activeAepsLine?.provider;
+                 
+                       console.log(
+                         'Current Provider:',
+                         provider
+                       );
+                 
+                       // =========================
+                       // URL SELECT
+                       // =========================
+                 
+                       let finalUrl = '';
+                 
+                       if (provider === 'NIFI') {
+                 
+                         finalUrl =
+                           APP_URLS.aepsBanklistNifi;
+                       }
+                 
+                       else if (provider === 'CHAGANS') {
+                 
+                         finalUrl =
+                           'AEPS/api/Chagan/Aeps/banklist';
+                       }
+                 
+                       else if (provider === 'FINGPAY') {
+                 
+                         finalUrl =
+                           APP_URLS.aepsBanklist;
+                       }
+                 
+                       console.log(
+                         'Calling URL:',
+                         finalUrl
+                       );
+                 
             try {
-                const url = `${APP_URLS.aepsBanklist}`;
-                const url2 = 'AEPS/api/Nifi/Aeps/banklist';
-                console.log(activeAepsLine ? url2 : url,)
-                const response = await post({ url: activeAepsLine ? url2 : url })
+                // const url = `${APP_URLS.aepsBanklist}`;
+                // const url2 = 'AEPS/api/Nifi/Aeps/banklist';
+                console.log(activeAepsLine ? finalUrl :'');
+                const response = await post({ url: finalUrl  })
                 //   console.log(response, "**********&**********************************")
                 if (response.RESULT === '0') {
                     setBanklist(response['ADDINFO']['data'])
@@ -485,6 +527,47 @@ const AepsMinistatement = () => {
 
 
     const BEnQ = useCallback(async (captureResponse1, cardnumberORUID1, pidDataX, isface) => {
+
+
+   const provider =
+               activeAepsLine?.provider;
+       
+             console.log(
+               'Current Provider:',
+               provider
+             );
+       
+             // =========================
+             // URL SELECT
+             // =========================
+       
+             let finalUrl = '';
+       
+             if (provider === 'NIFI') {
+       
+               finalUrl =
+              'AEPS/api/Nifi/app/AEPS/MiniStatement';
+             }
+       
+             else if (provider === 'CHAGANS') {
+       
+               finalUrl =
+                 'AEPS/api/Chagan/data/MiniStatement';
+             }
+       
+             else if (provider === 'FINGPAY') {
+       
+               finalUrl =
+                'AEPS/api/app/AEPS/MiniStatement';
+             }
+       
+             console.log(
+               'Calling URL:',
+               finalUrl
+             );
+
+
+
         try {
             setIsLoading(true);
             const Model = await getMobileDeviceId();
@@ -523,9 +606,7 @@ const AepsMinistatement = () => {
             console.log('Request Data:', JSON.stringify(jdata, null, 2));
 
             const response = await post({
-                url: activeAepsLine
-                    ? 'AEPS/api/Nifi/app/AEPS/MiniStatement'
-                    : 'AEPS/api/app/AEPS/MiniStatement',
+                url: finalUrl,
                 data: JSON.stringify(jdata),
                 config: { headers },
             });
@@ -803,12 +884,49 @@ const AepsMinistatement = () => {
 
     const CheckEkyc = async () => {
 
-        setIsLoading(true)
-        try {
-            const url = `${APP_URLS.checkekyc}`;
-            const url2 = 'AEPS/api/Nifi/data/CheckEkyc';
+        const provider =
+                     activeAepsLine?.provider;
+             
+                   console.log(
+                     'Current Provider:',
+                     provider
+                   );
+             
+                   // =========================
+                   // URL SELECT
+                   // =========================
+             
+                   let finalUrl = '';
+             
+                   if (provider === 'NIFI') {
+             
+                     finalUrl =
+                       'AEPS/api/Nifi/data/CheckEkyc';
+                   }
+             
+                   else if (provider === 'CHAGANS') {
+             
+                     finalUrl =
+                       'AEPS/api/Chagan/data/CheckEkyc';
+                   }
+             
+                   else if (provider === 'FINGPAY') {
+             
+                     finalUrl =
+                       APP_URLS.checkekyc;
+                   }
+             
+                   console.log(
+                     'Calling URL:',
+                     finalUrl
+                   );
 
-            const response = await get({ url: activeAepsLine ? url2 : url });
+        setIsLoading(true)
+         try {
+        //     const url = `${APP_URLS.checkekyc}`;
+        //     const url2 = 'AEPS/api/Nifi/data/CheckEkyc';
+
+            const response = await get({ url:  finalUrl });
             const msg = response.Message;
             const Status = response.Status;
             console.log(response)
@@ -1077,6 +1195,32 @@ const AepsMinistatement = () => {
                 }}
                 setisFacialTan={setisFacialTan}
             />}
+             <Modal
+                isVisible={isVisible2}
+                backdropOpacity={0}
+                animationIn="slideInUp"
+                animationOut="slideOutDown"
+                useNativeDriver={true}
+                propagateSwipe={true}
+                coverScreen={false}
+                style={{
+                    margin: 0,
+                    justifyContent: "flex-end",
+                    pointerEvents: "box-none",
+                }}
+            >
+                <View
+                    pointerEvents="auto"
+                    style={{
+                        height: "85%",
+                     
+                    }}
+                >
+                    <TwoFAVerify handle={() => setIsVisible2(false)} />
+                </View>
+            </Modal>
+
+
         </View>
     );
 };

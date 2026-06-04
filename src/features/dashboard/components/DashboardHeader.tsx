@@ -20,6 +20,8 @@ import { useLocationHook } from '../../../hooks/useLocationHook';
 import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
 import { setRceIdStatus } from '../../../reduxUtils/store/userInfoSlice';
 import { translate } from '../../../utils/languageUtils/I18n';
+import RecentTrSvg from '../../drawer/svgimgcomponents/RecentTrSvg';
+import ToselfSvg from '../../drawer/svgimgcomponents/ToselfSvg';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ExtendedBalanceType extends BalanceType {
@@ -55,11 +57,13 @@ const BalanceCard = memo(({ label, value, accentColor, align = 'left', delay = 0
   const { colorConfig, IsDealer, Loc_Data } = useSelector((state: RootState) => state.userInfo);
 
   return (
-    <Animated.View style={[styles.cardWrapper, { opacity: fadeAnim, flexDirection: isRight ? 'row-reverse' : 'row', backgroundColor: colorConfig.primaryColor, elevation: 5 }]}>
-      {/* <View style={[styles.cardSideAccent, { backgroundColor: accentColor }]} /> */}
-      <View style={[styles.card, { alignItems: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start' }]}>
-        <Text style={[styles.cardLabel, { textAlign }]} numberOfLines={1}>{label}</Text>
-        <Text style={[styles.cardValue, { textAlign }]} numberOfLines={1} adjustsFontSizeToFit>
+    <Animated.View style={[styles.cardWrapper, 
+    { opacity: fadeAnim, flexDirection: isRight ? 'row-reverse' : 'row', backgroundColor:"rgba(255,255,255,0.04)",  }]}>
+      <View style={[styles.card, {
+        alignItems: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
+      }]}>
+        <Text style={[styles.cardLabel, { textAlign: align }]} numberOfLines={1}>{label}</Text>
+        <Text style={[styles.cardValue, { textAlign: align }]} numberOfLines={1} adjustsFontSizeToFit>
           {value != null ? value.toString() : '0.00'}
         </Text>
       </View>
@@ -102,7 +106,7 @@ const DashboardHeader = ({ refreshPress }) => {
         };
         setfirmName(decryptedData.adminfarmname as string);
         setBalanceInfo(decryptedData);
-        
+
       }
 
       const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
@@ -187,12 +191,11 @@ const DashboardHeader = ({ refreshPress }) => {
 
   // ─── Balance card config ──────────────────────────────────────────────────
   const balanceCards: BalanceCardProps[] = [
-    { label: translate('Main Wallet'), value: balanceInfo?.remainbal, accentColor: '#81C784', align: 'center', delay: 80 },
-    { label: translate('Pos Wallet'), value: balanceInfo?.posremain, accentColor: colorConfig.primaryColor, align: 'left', delay: 0 },
-    { label: translate('cmsremainbal'), value: balanceInfo?.cmsremainbal, accentColor: '#FFB74D', align: 'center', delay: 160 },
-    { label: translate('holdandleanbal'), value: balanceInfo?.holdandleanbal, accentColor: '#C90909', align: 'right', delay: 240 },
+    { label: translate('Main Balance'), value: balanceInfo?.remainbal, accentColor: '#81C784', align: 'left', delay: 0 },
+    { label: translate('Pos Balance'), value: balanceInfo?.posremain, accentColor: colorConfig.primaryColor, align: 'center', delay: 80 },
+    { label: translate('CMS Balance'), value: balanceInfo?.cmsremainbal, accentColor: '#FFB74D', align: 'center', delay: 160 },
+    { label: translate('Hold & Lean'), value: balanceInfo?.holdandleanbal, accentColor: '#C90909', align: 'right', delay: 240 },
   ];
-
   const notifCount = notifications.length;
 
   return (
@@ -211,9 +214,21 @@ const DashboardHeader = ({ refreshPress }) => {
                 {/* <Image source={require('../../drawer/assets/menu2.png')} style={styles.menuImg} /> */}
               </TouchableOpacity>
             ) : (
-              <MenuIcon />
+              <View style={styles.menuview}>
+                <MenuIcon />
+              </View>
+
             )}
 
+            <Text
+              style={styles.firmName}
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              adjustsFontSizeToFit        // ✅ auto font size adjust karega
+              minimumFontScale={0.5}      // minimum 50% of original font size tak jayega
+            >
+              {firmname}
+            </Text>
             {APP_URLS.AppName === 'STdigiPe' && (
               <Image source={require('../../drawer/assets/stdigipe.jpg')} style={styles.brandLogo} />
             )}
@@ -233,29 +248,31 @@ const DashboardHeader = ({ refreshPress }) => {
               </TouchableOpacity>
             )}
 
-            {isNotifPermission && (
-              <TouchableOpacity onPress={requestNotifPermission} style={styles.iconBtn}>
-                <Entypo name="bell" size={15} color="#FFB74D" />
-                <View style={styles.notifDot} />
-              </TouchableOpacity>
-            )}
+           <View>
+               <TouchableOpacity  
+              style={styles.notiBell}
 
-            {APP_URLS.AppName === 'STdigiPe' && (
-              <TouchableOpacity style={styles.iconBtn}>
-                <QrcodSvg size={20} />
-              </TouchableOpacity>
-            )}
-
-            <Text
-              style={styles.firmName}
-              ellipsizeMode="tail"
-              numberOfLines={1}
-              adjustsFontSizeToFit        // ✅ auto font size adjust karega
-              minimumFontScale={0.5}      // minimum 50% of original font size tak jayega
-            >
-              {firmname}
+             onPress={() => navigation.navigate({ name: "PostoMain" })}   
+                    >
+              <ToselfSvg  size={20} color="#fff" />
+            </TouchableOpacity>
+            <Text style={{fontSize:wScale(9),color:'#fff',fontWeight:'700',textAlign:'center'}}>
+              {translate('to Wallet')}
             </Text>
+</View>
+            <TouchableOpacity
+              style={styles.notiBell}
 
+              onPress={() => navigation.navigate({ name: "RecentTx" })}            >
+              <RecentTrSvg size={25} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.notiBell}
+
+              onPress={() => navigation.navigate({ name: "QRScanScreen" })}            >
+              <QrcodSvg size={25} color="#fff" />
+
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.notiRow}
               onPress={() => navigation.navigate('Notifications')}
@@ -324,14 +341,20 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     maxWidth: wScale(190),
     paddingHorizontal: wScale(4),
+    marginLeft: wScale(-5)
   },
-  notiRow: { flexDirection: 'row', alignItems: 'center' },
-  notiBell: {
+  notiRow: { flexDirection: 'row', alignItems: 'center', },
+  menuview: {
     backgroundColor: 'rgba(79, 195, 247, 0.12)',
     borderRadius: wScale(30), padding: wScale(5),
     borderWidth: 1, borderColor: 'rgba(79, 195, 247, 0.25)',
     overflow: 'hidden',
-
+  },
+  notiBell: {
+    // backgroundColor: 'rgba(79, 195, 247, 0.12)',
+    borderRadius: wScale(30), padding: wScale(5),
+    borderWidth: 1, borderColor: 'rgba(79, 195, 247, 0.25)',
+    overflow: 'hidden', marginLeft: wScale(4)
   },
   notiBadge: {
     position: 'absolute', top: -1, right: 0,

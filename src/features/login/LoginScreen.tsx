@@ -68,9 +68,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import LanguageButton from '../../components/LanguageButton';
 import CheckSvg from '../drawer/svgimgcomponents/CheckSvg';
 import FastImage from 'react-native-fast-image';
-import { getImageSource } from '../../utils/network/NetWorkImages';
+import { getAssetSource } from '../../utils/network/NetWorkImages';
 const LoginScreen = () => {
-  const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword } = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl} = useSelector((state: RootState) => state.userInfo);
   const [modalVisible, setModalVisible] = useState(false)
   const [userEmail, setUserEmail] = useState(signUpId || '');
   const [userPassword, setUserPassword] = useState(signUpPassword || '');
@@ -454,6 +454,7 @@ const LoginScreen = () => {
       });
 
       const response = responseRaw?.data ?? responseRaw ?? {};
+console.log(response);
 
       addDebugStep('API_RESPONSE', {
         data: response
@@ -478,8 +479,8 @@ const LoginScreen = () => {
             status: 'INFO'
           });
 
-          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-          return;
+          // Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+          // return;
         }
 
         authenticate(response);
@@ -529,57 +530,84 @@ const LoginScreen = () => {
         msg = 'Unexpected response';
       }
 
-    } catch (error) {
+   } catch (error) {
 
-      const apiError =
-        error?.response?.data ||
-        error?.data ||
-        error;
+  const apiError =
+    error?.response?.data ||
+    error?.data ||
+    error;
 
-      const errorDescription =
-        apiError?.error_description ||
-        apiError?.message ||
-        apiError?.error ||
-        error?.message ||
-        'Network failed';
+  const errorDescription =
+    apiError?.error_description ||
+    apiError?.message ||
+    apiError?.error ||
+    error?.message ||
+    'Network failed';
 
-      msg = errorDescription;
+  msg = errorDescription;
 
-      addDebugStep('CATCH_ERROR', {
-        status: 'ERROR',
-        message: errorDescription,
-        data: apiError
-      });
+  addDebugStep('CATCH_ERROR', {
+    status: 'ERROR',
+    message: errorDescription,
+    data: apiError
+  });
 
-      Alert.alert('Error', errorDescription);
+  console.log('FULL ERROR =>', JSON.stringify(apiError, null, 2));
 
-      // 🔥 Backup save (अगर finally skip हो जाए)
-      const debug = getDebugJson();
-      await saveDebugToStorage(debug);
+  // 🔥 OTP CASE
+  if (apiError?.error === 'SENDOTP') {
 
-    } finally {
+    addDebugStep('OTP_RESEND', {
+      status: 'INFO',
+      message: 'Opening OTP Modal'
+    });
 
-      addDebugStep('FINAL', {
-        message: 'Flow completed',
-        data: { role, msg }
-      });
+    // modal force reopen
+    setShowOtpModal(false);
 
-      const debug = getDebugJson();
+    setTimeout(() => {
+      setShowOtpModal(true);
+    }, 100);
 
-      console.log("🧪 FULL DEBUG JSON 👉", JSON.stringify(debug, null, 2));
+    // Alert.alert(
+    //   'OTP Sent',
+    //   apiError?.error_description || 'OTP Send To Your Registered Email'
+    // );
+ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Email', ToastAndroid.LONG);
+  } else {
 
-      // 🔥 FINAL SAVE
-      await saveDebugToStorage(debug);
+    Alert.alert('Error', errorDescription);
+  }
 
-      onReceiveNotification2({
-        notification: {
-          title: role || 'Login',
-          body: msg || 'Done',
-        },
-      });
+  // 🔥 Backup save
+  const debug = getDebugJson();
+  await saveDebugToStorage(debug);
 
-      setIsLoading(false);
-    }
+} finally {
+
+  addDebugStep('FINAL', {
+    message: 'Flow completed',
+    data: { role, msg }
+  });
+
+  const debug = getDebugJson();
+
+  console.log(
+    '🧪 FULL DEBUG JSON 👉',
+    JSON.stringify(debug, null, 2)
+  );
+
+  await saveDebugToStorage(debug);
+
+  onReceiveNotification2({
+    notification: {
+      title: role || 'Login',
+      body: msg || 'Done',
+    },
+  });
+
+  setIsLoading(false);
+}
 
   }, [
     dispatch,
@@ -793,135 +821,8 @@ const LoginScreen = () => {
   }
 
 
-  // const onPressLogin = useCallback(async (otp) => {
-  //   const uniqueId = 'DEBUG_OPPO';
-  //   Keyboard.dismiss();
-  //   setIsLoading(true);
-  //   let debugRole = 'NOT_SET';
-  //   let debugMsg = 'INITIAL_STATE';
 
-  //   try {
-  //    // await appendLog(iswritelog, "--- START LOGIN PROCESS ---", uniqueId);
-  //     setShowOtpModal(false);
-
-  //     const net = (await getCarrier()) || 'wifi/net';
-
-  //     const rawData = [
-  //       safeValue(userEmail), safeValue(userPassword), otp, safeValue(mobileNumber),
-  //       safeValue(deviceInfo?.buildId), safeValue(deviceInfo?.uniqueId),
-  //       safeValue(Loc_Data?.latitude), safeValue(Loc_Data?.longitude),
-  //       safeValue(deviceInfo?.modelNumber), safeValue(deviceInfo?.brand),
-  //       safeValue(deviceInfo?.ipAddress), safeValue(deviceInfo?.address),
-  //       safeValue(deviceInfo?.city), safeValue(deviceInfo?.postalCode), safeValue(net)
-  //     ];
-  // console.log('🔐 RAW DATA:', rawData.join(', '));
-
-  //     const encryption = encrypt(rawData);
-  //     if (!encryption) throw new Error('Encryption Object is null');
-  //     if (!encryption?.encryptedData || encryption.encryptedData.length < 15)
-  //       throw new Error('Incomplete Encrypted Data');
-
-  //     const loginData = {
-  //       UserName: encryption.encryptedData[0],
-  //       Password: encryption.encryptedData[1],
-  //       'X-OTP': encryption.encryptedData[2],
-  //       Mobile: encryption.encryptedData[3],
-  //       Imei: encryption.encryptedData[4],
-  //       Devicetoken: encryption.encryptedData[5],
-  //       Latitude: encryption.encryptedData[6],
-  //       Longitude: encryption.encryptedData[7],
-  //       ModelNo: encryption.encryptedData[8],
-  //       BrandName: encryption.encryptedData[9],
-  //       IPAddress: encryption.encryptedData[10],
-  //       City: encryption.encryptedData[11],
-  //       Address: encryption.encryptedData[12],
-  //       PostalCode: encryption.encryptedData[13],
-  //       InternetTYPE: encryption.encryptedData[14],
-  //       grant_type: 'password',
-  //     };
-
-  //     const config = {
-  //       headers: {
-  //         'Content-Type': 'application/x-www-form-urlencoded',
-  //         Authorization: 'bearer',
-  //         value1: encryption.keyEncode,
-  //         value2: encryption.ivEncode,
-  //       },
-  //     };
-
-  //     // ─── API Call ────────────────────────────────────────────────
-  //     let response;
-  //     try {
-  //       response = await post({ url: APP_URLS.getToken, data: loginData, config });
-  //    ///   await appendLog(iswritelog, `RAW_RESPONSE: ${JSON.stringify(response)}`, uniqueId);
-  //     } catch (networkError) {
-  //       debugRole = 'NETWORK_ERROR';
-  //       debugMsg = networkError?.message || 'Network request failed';
-  //       //Alert.alert('Network Error', 'Internet connection check karein aur dobara try karein.');
-  //       return;
-  //     }
-
-  //     // ─── Null / Empty Response ───────────────────────────────────
-  //     if (!response) {
-  //       debugRole = 'NULL_RESPONSE';
-  //       debugMsg = 'Server returned null/undefined';
-  //       //Alert.alert('Server Error', 'Server se koi response nahi aaya. Please retry.');
-  //       return;
-  //     }
-
-  //     // ─── Success ─────────────────────────────────────────────────
-  //     if (response) {
-  //       debugRole = response.role || 'No Role Found';
-  //       debugMsg = `Login successful — Role: ${debugRole}`;
-
-  //       if (response?.role === 'Admin') {
-  //         debugRole = 'ADMIN_BLOCKED';
-  //         debugMsg = 'Admin login blocked on app';
-  //         Alert.alert('', 'Admin users are not allowed to login from the app. Please use the web portal to access your account.');
-  //         return;
-  //       }
-
-  //       if (response.VideoKYC === 'VideoKYCPENDING') {
-  //         debugRole = 'VIDEO_KYC_PENDING';
-  //         debugMsg = 'Video KYC awaiting admin approval';
-  //         Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-  //         return;
-  //       }
-
-  //       dispatch(setIsDealer(debugRole === 'Dealer'));
-  //       authenticate(response);
-  //       dispatch(setUserId(response?.userId));
-  //       dispatch(setRefreshToken(response?.refresh_token));
-  //       userData(response[".expires"]);
-
-  //     // ─── API-Level Error ──────────────────────────────────────────
-  //     } else if (response?.error) {
-  //       debugRole = 'API_ERROR';
-  //       debugMsg = response?.error_description || 'Unknown API Error';
-  //       Alert.alert('Login Error', debugMsg);
-  //       if (response.error === 'SENDOTP') setShowOtpModal(true);
-
-  //     // ─── Unexpected Response (yahi NOT_SET ka asli reason tha) ───
-  //     } else {
-  //       debugRole = 'UNEXPECTED_RESPONSE';
-  //       debugMsg = `No token or error in response: ${JSON.stringify(response)}`;
-  //       //await appendLog(iswritelog, `UNEXPECTED: ${debugMsg}`, uniqueId);
-  //       //Alert.alert('Error', 'Server se unexpected response mila. Support se contact karein.');
-  //     }
-
-  //   } catch (error) {
-  //     debugRole = 'EXCEPTION';
-  //     debugMsg = error?.message ?? 'Unknown exception (no message)';
-  //     //await appendLog(iswritelog, `EXCEPTION: ${debugMsg}`, uniqueId).catch(() => {});
-  //     ToastAndroid.show(`Error: ${debugMsg}`, ToastAndroid.LONG);
-
-  //   } finally {
-  //      appendLog(iswritelog, `--- END LOGIN | role=${debugRole} | msg=${debugMsg} ---`, uniqueId)
-  //       .catch(() => {});
-  //     onReceiveNotification2({ notification: { title: debugRole, body: debugMsg } });
-  //     setIsLoading(false);
-  //   }
-  // }, [dispatch, navigation, post, userEmail, userPassword, mobileNumber, Loc_Data, deviceInfo]);
+ 
   const onPressLogin2 = useCallback(async () => {
     Keyboard.dismiss();
     setIsLoading(true);
@@ -955,12 +856,15 @@ const LoginScreen = () => {
         },
       };
       const response = await post({ url: APP_URLS.getToken, data: loginData, config });
+
+      console.log("API Response:", response);
       if (response?.access_token) {
         debugRole = response.role || 'No Role Found';
         debugMsg = `finally ${debugRole} Login process completed.`;
         dispatch(setIsDealer(debugRole === 'Dealer'));
         if (response.VideoKYC === 'VideoKYCPENDING') {
-          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.'); return;
+          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+          //  return;
         }
         authenticate(response);
         dispatch(setUserId(response?.userId));
@@ -970,7 +874,8 @@ const LoginScreen = () => {
         debugRole = 'API_ERROR';
         debugMsg = response?.error_description || 'Unknown API Error';
         Alert.alert('Login Error', debugMsg);
-        if (response.error === 'SENDOTP') setShowOtpModal(true);
+        if (response.error === 'SENDOTP') 
+          setShowOtpModal(true);
       }
     } catch (error) {
       debugRole = 'EXCEPTION'; debugMsg = error.message;
@@ -1105,7 +1010,7 @@ const LoginScreen = () => {
           <FastImage
             source={{
               priority: FastImage.priority.high,
-              uri: `${IMAGE_BASE_URL}${APP_URLS.app_logo}`
+              uri:logoUrl
             }}
             // source={require('../../.
             // ./assets/images/app_logo.png')}
@@ -1169,14 +1074,16 @@ const LoginScreen = () => {
               <FastImage
                 source={{
                   priority: FastImage.priority.high,
-                  uri: `${IMAGE_BASE_URL}${APP_URLS.app_logo}`
+                  uri:logoUrl
                 }}
                 style={styles.logoImg}
                 resizeMode={FastImage.resizeMode.contain}
               />
+
+              
             </LinearGradient>
             <Text style={styles.appName}>{APP_URLS.AppName}</Text>
-            <Text style={styles.tagline}>{translate("Welcome back")}</Text>
+            <Text style={styles.tagline}>{translate("Welcome back.")}</Text>
           </View>
 
           {/* ── Form Card ── */}

@@ -171,18 +171,51 @@ const OnPressEnq = async (fingerprintDataString, pidDataXml) => {
     setIsLoading(true);
     try {
       const Model = await getMobileDeviceId();
+       const provider =
+      activeAepsLine?.provider;
       const jdata = {
-        capxml: pidDataX, captureResponse: captureResponse1, cardnumberORUID: cardnumberORUID1,
+       capxml: pidDataX,captureResponse: captureResponse1, cardnumberORUID: cardnumberORUID1,
         languageCode: 'en', latitude, longitude, mobileNumber: '', merchantTranId: userId,
         merchantTransactionId: userId, paymentType: 'B', otpnum: '', requestRemarks: 'TN3000CA06532',
         subMerchantId: 'A2zsuvidhaa', timestamp: formattedDate, transactionType: 'M',
         name: '', Address: 'Address', transactionAmount: ''
       };
+      let finalUrl="";
+
+        if (provider === 'NIFI') {
+
+      finalUrl =
+        APP_URLS.AepsKycFinScanNifi;
+    }
+
+    else if (provider === 'CHAGANS') {
+
+      finalUrl =
+        'AEPS/api/Chagan/data/EkycVerifyFinger'
+    }
+
+    else if (provider === 'FINGPAY') {
+
+      finalUrl =
+        APP_URLS.AepsKycFinScan;
+    }
+
+    console.log(
+      'Calling URL:',
+      finalUrl
+    );
+
+  console.log('Request Payload:', JSON.stringify(jdata, null, 2));
+  console.log('Request Payload:', { 'trnTimestamp': formattedDate, 'deviceIMEI': Model, "Content-type": "application/json" });
+
       const response = await post({
-        url: activeAepsLine ? APP_URLS.AepsKycFinScanNifi : APP_URLS.AepsKycFinScan,
+        url: finalUrl,
         data: jdata,
         config: { headers: { 'trnTimestamp': formattedDate, 'deviceIMEI': Model, "Content-type": "application/json" } },
       });
+
+
+console.log('API Response:', JSON.stringify(response, null, 2));
       setIsLoading(false);
       Alert.alert('Message:', `\n${response.Status === true ? 'Success' : 'Failed'}\n${response.Message}`, [
         { text: 'OK', onPress: () => navigation?.navigate(response.Status === true ? "AepsTabScreen" : "ReportScreen") },

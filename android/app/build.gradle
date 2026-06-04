@@ -13,12 +13,12 @@ react {
 }
 
 android {
-    namespace "com.ssvcms"
+    namespace "com.globalmultisolution"
     compileSdk 35
     ndkVersion "27.2.12479018"
 
     defaultConfig {
-        applicationId "com.ssvcms"
+        applicationId "com.globalmultisolution"
         minSdk 24
         targetSdk 35
         versionCode 1
@@ -43,10 +43,12 @@ android {
 
    signingConfigs {
     release {
-        storeFile file('ssvcms-release.keystore')
-        storePassword 'ssvcms.in@123'
-        keyAlias 'ssvcms'
-        keyPassword 'ssvcms.in@123'
+         if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MY_KEYSTORE_PASSWORD
+                keyAlias MY_KEY_ALIAS
+                keyPassword MY_KEY_PASSWORD
+            }
     }
 }
 

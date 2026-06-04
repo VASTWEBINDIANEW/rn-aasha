@@ -1,4 +1,4 @@
-package com.ssvcms.security;
+package com.globalmultisolution.security;
 
 import android.app.Activity;
 import android.app.KeyguardManager;

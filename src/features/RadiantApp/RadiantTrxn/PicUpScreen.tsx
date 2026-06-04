@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, ToastAndroid, Alert, ActivityIndicator, PermissionsAndroid, Image, AsyncStorage, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, ToastAndroid, Alert, ActivityIndicator, PermissionsAndroid, Image, Keyboard } from 'react-native';
 import { hScale, SCREEN_HEIGHT, wScale } from '../../../utils/styles/dimensions';
 import { FlashList } from '@shopify/flash-list';
 import { FontSize } from '../../../utils/styles/theme';
@@ -38,13 +38,15 @@ import OnlinePickUpQrSheet from '../../../components/OnlinePickUpQrSheet';
 import QrcodSvg from '../../drawer/svgimgcomponents/QrcodSvg';
 import uuid from 'react-native-uuid';
 import { log } from 'console';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import TimeoutAlertModal from '../components/TimeoutModal';
 const PicUpScreen = () => {
   const { colorConfig, Loc_Data, cmsVerify, rctype, rcPrePayAnomut, isPartial, currentPartialAmount, totalPartialAmount } = useSelector((state: RootState) => state.userInfo);
   const color1 = `${colorConfig.secondaryColor}20`;
   const rout = useRoute();
   const { item, CodeId, Mobile, item2, selectedModes } = rout.params || {};
   console.log(rout.params, '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@1');
-
+  const [timeoutModal, setTimeoutModal] = useState(false);
   const [isLoading2, setIsloading2] = useState(false);
   const [amount, setAmount] = useState(rctype === 'PrePay' ? rcPrePayAnomut : "");
   const [Ramount, setRAmount] = useState(rctype === 'PrePay' ? rcPrePayAnomut : "");
@@ -80,12 +82,13 @@ const PicUpScreen = () => {
   const [isScan, setIsScan] = useState(false);
   const [ceid, setCeid] = useState("")
   const navigation = useNavigation();
+  const [cashPickupList, setCashPickupList] = useState<any[]>([]);
   const { post } = useAxiosHook()
   const { remarkList, childRemarkList,
     fetchMasterRemarkList, fetchChildRemarkList,
     setRadiantOtp, setRadiantDynamicOtp,
     otpResponse, dynamicOtpResponse, submitCashPickupResponse,
-    submitCashPickupTransaction, isLoading } = useRadiantHook();
+    submitCashPickupTransaction, isLoading, fetchCashPickupTransactionList } = useRadiantHook();
   const currencyData = [
     { key: 'Online', val: '0', path: require('../../../../assets/images/coinsR.jpg') },
 
@@ -312,9 +315,10 @@ const PicUpScreen = () => {
     if (!Loc_Data['latitude'] || !Loc_Data['longitude']) {
       return null;
     }
-    setIsLoad(true)
-    const pickuptype = 'Online';
 
+    setIsLoad(true);
+
+    const pickuptype = 'Online';
     const newId = uuid.v4();
     console.log("Generated ID:", newId);
 
@@ -335,34 +339,17 @@ const PicUpScreen = () => {
       'CType': rctype,
       'Uniqueid': newId,
       'IsPartial': isPartial
-
     };
-    if (pickuptype == 'Online') {
 
+    if (pickuptype == 'Online') {
       transaction = {
-        "requestType": "cashPickupTransSubmit",
-        "type": "Pickup",
-        "ceId": ceid,
-        "shopId": item.ShopId,
-        "transId": item.TransId,
-        "noRecs": toNumber(transactionCount),
-        "transParam": cashPickupData,
-        "depType": item.DepTypess,
-        "qrTransId": "",
-        "latitude": Loc_Data['latitude'],
-        "longitude": Loc_Data['longitude'],
-        "pickuptype": 'Online',
+        ...transaction,
         "ClientName": item2.Name,
         "Clientmobile": item2.Mobile,
         "Clientemail": item2.Email,
-        "Modelnumber": model,
-        'CType': rctype,
-        'Uniqueid': newId,
-        'IsPartial': isPartial
-
-
       };
     }
+
     if (item.qr_status === 'Radiant') {
       transaction = {
         "requestType": "radiantQRProcess",
@@ -372,56 +359,61 @@ const PicUpScreen = () => {
         "qr_pic_status": qrData
       }
     }
-    console.log(transaction)
 
+    console.log("📌 Transaction:", JSON.stringify(transaction, null, 2));
 
+    try {
 
-    const res = await submitCashPickupTransaction(transaction);
+      const res = await submitCashPickupTransaction(transaction);
 
-    console.log(res, '$$$$$$$$$$$$$$$$$$$$')
-    console.log("📌 Final Request Payload:", JSON.stringify(transaction, null, 2));
+      console.log("📥 API Response:", JSON.stringify(res, null, 2));
 
-    console.log("📤 Calling API with Params:", JSON.stringify(transaction, null, 2));
+      if (res?.Content?.ADDINFO?.status === 'success') {
 
-    console.log("📥 API Response:", JSON.stringify(res, null, 2));
-    if (res?.Content?.ADDINFO?.status === 'success') {
+        await AsyncStorage.setItem('pickup_status', 'unverified');
+        setCashPickupData([]);
 
-      await AsyncStorage.setItem('pickup_status', 'unverified');
-
-      if (CodeId) {
-        setDetailsModalVisible(false);
-
-        navigation.navigate('PickupSummaryScreen', {
-          CodeId: item.TransId || '',
-          status: res?.Content?.ADDINFO?.status,
-          message: res?.Content?.ADDINFO?.message
-        });
+        if (CodeId) {
+          setDetailsModalVisible(false);
+          navigation.navigate('PickupSummaryScreen', {
+            CodeId: item.TransId || '',
+            status: res?.Content?.ADDINFO?.status,
+            message: res?.Content?.ADDINFO?.message
+          });
+        } else {
+          navigation.goBack();
+        }
 
       } else {
-        navigation.goBack();
+        Alert.alert(
+          "Error",
+          res?.Content?.ADDINFO?.message || 'Something went wrong.',
+          [{ text: "OK", onPress: () => navigation.navigate('RadiantTransactionScreen') }]
+        );
       }
 
-      return;
+    } catch (error: any) {
+
+      // ── Timeout — backend pe submit hua hoga ──
+      if (error?.code === 'ECONNABORTED') {
+        console.log('⚠️ TIMEOUT — Backend pe submit hua hoga');
+
+        setTimeoutModal(true);
+
+      } else {
+        Alert.alert(
+          '❌ Error',
+          error?.message || 'Something went wrong.',
+          [{ text: 'OK', onPress: () => navigation.navigate('RadiantTransactionScreen') }]
+        );
+      }
+
+    } finally {
+      setIsLoad(false);  // ← hamesha false hoga
+      setCashPickupData([]);
+      setDetailsModalVisible(false);
     }
 
-
-    else {
-      Alert.alert(
-        "Error",
-        res?.Content?.ADDINFO?.message || 'Something went wrong.',
-        [
-          {
-            text: "OK",
-            onPress: () => {
-              navigation.goBack();
-            }
-          }
-        ]
-      );
-    }
-    setIsLoad(false)
-
-    setCashPickupData([]);
   }, [
     cashPickupData,
     item,
@@ -429,8 +421,32 @@ const PicUpScreen = () => {
     submitCashPickupTransaction,
     submitCashPickupResponse,
     toNumber,
-    Loc_Data['latitude'], Loc_Data['longitude']
+    Loc_Data['latitude'],
+    Loc_Data['longitude']
   ]);
+
+
+  const handleTimeoutOk = async () => {
+    setTimeoutModal(false);
+    if (isPartial) {
+      navigation.navigate('RadiantPrepayReport');
+    } else {
+      try {
+        const res = await fetchCashPickupTransactionList();
+        const list = res ?? [];
+        setCashPickupList(list);
+        if (list.length > 0) {
+          navigation.navigate('CashPickup');
+        } else {
+          navigation.navigate('RadiantPrepayReport');
+        }
+      } catch (e) {
+        console.log('❌ fetchCashPickupTransactionList error:', e);
+        navigation.navigate('RadiantTransactionScreen');
+      }
+    }
+  };
+
   useEffect(() => {
 
     const checkCE_status = async () => {
@@ -788,96 +804,315 @@ const PicUpScreen = () => {
 
 
   const handleSubmit = useCallback(async () => {
+
+    console.log(
+      "\n=========== HANDLE SUBMIT START ===========\n"
+    );
+
+    console.log("ROUTE PARAMS =>");
+
+    console.log(
+      JSON.stringify(
+        {
+          item,
+          CodeId,
+          Mobile,
+          item2,
+          selectedModes
+        },
+        null,
+        2
+      )
+    );
+
     setIsLoad(true);
     setIsloading2(true);
     setisOtpSended(true);
 
     try {
-      console.log(item.OtpDay, '%%%%%%%%%%%%%%%');
-      console.log(["CurrentTransaction", "Daily", "Weekly-Sun"].includes(item.OtpDay));
 
-      if (["CurrentTransaction", "Daily", "Weekly-Sun"].includes(item.OtpDay)) {
-        const res = await setRadiantOtp(
-          item.TransId,
-          '',
-          item.ShopId,
-          amount,
-          item.OtpDay,
-          '',
-          CodeId ? item2.Email : ''
+      console.log("OtpDay =>", item?.OtpDay);
+
+      console.log(
+        "Match Result =>",
+        ["CurrentTransaction", "Daily", "Weekly-Sun"]
+          .includes(item?.OtpDay)
+      );
+
+      /* ===================================================
+         NORMAL OTP FLOW
+      =================================================== */
+
+      if (
+        ["CurrentTransaction", "Daily", "Weekly-Sun"]
+          .includes(item?.OtpDay)
+      ) {
+
+        console.log(
+          "\n=========== NORMAL OTP FLOW ===========\n"
         );
 
-        console.log(res, '***********&&&&&******');
+        const requestPayload = {
+          TransId: item?.TransId,
+          Empty1: '',
+          ShopId: item?.ShopId,
+          Amount: amount,
+          OtpDay: item?.OtpDay,
+          Empty2: '',
+          Email: CodeId ? item2?.Email : ''
+        };
+
+        console.log(
+          "API FUNCTION => setRadiantOtp"
+        );
+
+        console.log(
+          "REQUEST PAYLOAD =>"
+        );
+
+        console.log(
+          JSON.stringify(
+            requestPayload,
+            null,
+            2
+          )
+        );
+
+        const res = await setRadiantOtp(
+          requestPayload.TransId,
+          requestPayload.Empty1,
+          requestPayload.ShopId,
+          requestPayload.Amount,
+          requestPayload.OtpDay,
+          requestPayload.Empty2,
+          requestPayload.Email
+        );
+
+        console.log(
+          "FULL RESPONSE =>"
+        );
+
+        console.log(
+          JSON.stringify(res, null, 2)
+        );
+
         setDetailsModalVisible(false);
 
-        if (res?.Content?.ADDINFO?.status === 'success') {
-          setClientOtp(res?.Content?.ADDINFO?.otp_pin || '');
+        if (
+          res?.Content?.ADDINFO?.status === 'success'
+        ) {
+
+          console.log(
+            "OTP SUCCESS"
+          );
+
+          console.log(
+            "OTP =>",
+            res?.Content?.ADDINFO?.otp_pin
+          );
+
+          setClientOtp(
+            res?.Content?.ADDINFO?.otp_pin || ''
+          );
+
+          console.log(
+            "OTP MODAL OPEN"
+          );
+
           setOtpModalVisible(true);
+
         } else {
+
+          console.log(
+            "OTP FAILED"
+          );
+
+          console.log(
+            "FAIL MESSAGE =>",
+            res?.Content?.ADDINFO?.message
+          );
+
           setOtpModalVisible(false);
+
           ToastAndroid.showWithGravity(
-            res?.Content?.ADDINFO?.message || 'Something went wrong!',
+            res?.Content?.ADDINFO?.message ||
+            'Something went wrong!',
             ToastAndroid.SHORT,
             ToastAndroid.BOTTOM
           );
         }
       }
 
-      // ✅ Case 2: Empty OtpDay (open mobile modal)
-      else if (item.OtpDay === '') {
+      /* ===================================================
+         EMPTY OTP DAY
+      =================================================== */
+
+      else if (item?.OtpDay === '') {
+
+        console.log(
+          "\n=========== EMPTY OTP DAY FLOW ===========\n"
+        );
+
+        console.log(
+          "Opening Mobile Modal"
+        );
+
         setDetailsModalVisible(false);
+
         setMobilemodel(true);
 
-        // 🟢 Turn off loader only for this branch
-        setIsLoad(false);
-        setIsloading2(false);
-        return; // stop execution
+        return;
       }
 
-      // ✅ Case 3: AxisTransaction
-      else if (item.OtpDay === 'AxisTransaction') {
+      /* ===================================================
+         AXIS FLOW
+      =================================================== */
+
+      else if (
+        item?.OtpDay === 'AxisTransaction'
+      ) {
+
+        console.log(
+          "\n=========== AXIS OTP FLOW ===========\n"
+        );
+
+        const requestPayload = {
+          TransId: item?.TransId,
+          Mobile: item2?.Mobile,
+          ShopId: item?.ShopId,
+          Amount: amount,
+          OtpDay: item?.OtpDay,
+          Empty: '',
+          Email: CodeId ? item2?.Email : ''
+        };
+
+        console.log(
+          "API FUNCTION => setRadiantDynamicOtp"
+        );
+
+        console.log(
+          "REQUEST PAYLOAD =>"
+        );
+
+        console.log(
+          JSON.stringify(
+            requestPayload,
+            null,
+            2
+          )
+        );
+
         const res = await setRadiantDynamicOtp(
-          item.TransId,
-          item2.Mobile,
-          item.ShopId,
-          amount,
-          item.OtpDay,
-          '',
-          CodeId ? item2.Email : ''
+          requestPayload.TransId,
+          requestPayload.Mobile,
+          requestPayload.ShopId,
+          requestPayload.Amount,
+          requestPayload.OtpDay,
+          requestPayload.Empty,
+          requestPayload.Email
+        );
+
+        console.log(
+          "FULL RESPONSE =>"
+        );
+
+        console.log(
+          JSON.stringify(res, null, 2)
         );
 
         if (res) {
-          if (item2.Mobile) {
+
+          console.log(
+            "AXIS OTP =>",
+            res?.Content?.ADDINFO?.otp_pin
+          );
+
+          setClientOtp(
+            res?.Content?.ADDINFO?.otp_pin || ''
+          );
+
+          if (item2?.Mobile) {
+
+            console.log(
+              "Toast Mobile =>",
+              item2.Mobile
+            );
+
             ToastAndroid.showWithGravity(
               `OTP has been sent to ${item2.Mobile} number`,
               ToastAndroid.SHORT,
               ToastAndroid.BOTTOM
             );
           }
-          setClientOtp(res?.Content?.ADDINFO?.otp_pin || '');
         }
 
         closeMobileModal();
       }
-    } catch (err) {
-      console.error('handleSubmit error:', err);
+
+      /* ===================================================
+         UNKNOWN FLOW
+      =================================================== */
+
+      else {
+
+        console.log(
+          "\n=========== UNKNOWN FLOW ===========\n"
+        );
+
+        console.log(
+          "Unhandled OtpDay =>",
+          item?.OtpDay
+        );
+      }
+
+    } catch (err: any) {
+
+      console.log(
+        "\n=========== HANDLE SUBMIT ERROR ===========\n"
+      );
+
+      console.log(
+        "FULL ERROR =>"
+      );
+
+      console.log(
+        JSON.stringify(err, null, 2)
+      );
+
+      console.log(
+        "ERROR MESSAGE =>",
+        err?.message
+      );
+
+      console.log(
+        "ERROR STACK =>",
+        err?.stack
+      );
+
       ToastAndroid.showWithGravity(
         'Something went wrong. Please try again.',
         ToastAndroid.SHORT,
         ToastAndroid.BOTTOM
       );
+
     } finally {
-      setIsLoad(true);
-      setIsloading2(true);
 
-      setTimeout(() => {
-        setIsLoad(prev => prev ? false : prev);
-        setIsloading2(prev => prev ? false : prev);
-      }, 200); // slight delay to avoid immediate false reset
+      console.log(
+        "\n=========== HANDLE SUBMIT FINISHED ===========\n"
+      );
+
+      setIsLoad(false);
+      setIsloading2(false);
     }
-  }, [item, item2, amount, CodeId]);
 
-
+  }, [
+    item,
+    item2,
+    amount,
+    CodeId,
+    Mobile,
+    selectedModes
+  ]);
 
   const closeMobileModal = () => {
     setMobilemodel(false);
@@ -1286,7 +1521,7 @@ const PicUpScreen = () => {
             )}
 
             <LinearGradient
-              colors={[colorConfig.primaryColor,colorConfig.secondaryColor  ]}
+              colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.summaryCard}
@@ -1308,7 +1543,7 @@ const PicUpScreen = () => {
 
                 <View style={styles.summaryItem}>
                   <Text style={styles.summaryLabel}>Total Amount</Text>
-                  <Text style={[styles.summaryValue,styles.summaryValueHighlight]}>{finalAmount}</Text>
+                  <Text style={[styles.summaryValue, styles.summaryValueHighlight]}>{finalAmount}</Text>
                 </View>
               </View>
             </LinearGradient>
@@ -1737,7 +1972,11 @@ const PicUpScreen = () => {
                   />
                 </View>
               </BottomSheet>
-
+              <TimeoutAlertModal
+                visible={timeoutModal}
+                onOk={handleTimeoutOk}
+                onDismiss={handleTimeoutOk}
+              />
             </View>
           </ScrollView >
         </View >)}
@@ -1996,7 +2235,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     // backgroundColor:'rgba(0, 0, 0, 0.2)', 
     paddingVertical: hScale(3),
-        borderRadius: 8,
+    borderRadius: 8,
 
   },
 
@@ -2024,7 +2263,7 @@ const styles = StyleSheet.create({
 
   summaryValueHighlight: {
     color: '#FFD700',
-   
+
   },
 
 

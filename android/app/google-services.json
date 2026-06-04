@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "1098473629755",
-    "project_id": "ssvcms-8bbbb",
-    "storage_bucket": "ssvcms-8bbbb.firebasestorage.app"
+    "project_number": "471696178807",
+    "project_id": "global-multi-solution",
+    "storage_bucket": "global-multi-solution.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1098473629755:android:9a37fcdf5360eaa45bd41e",
+        "mobilesdk_app_id": "1:471696178807:android:17a7855244bafade8c5072",
         "android_client_info": {
-          "package_name": "com.ssvcms"
+          "package_name": "com.globalmultisolution"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDfX5f8qcLjz042pjlXFbCN0UbWHB-hKak"
+          "current_key": "AIzaSyBaALZ1jC9blcUVUCatF8ps0J38JDcqBxc"
         }
       ],
       "services": {

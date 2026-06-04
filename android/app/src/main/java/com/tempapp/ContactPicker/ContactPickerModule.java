@@ -1,4 +1,4 @@
-package com.ssvcms.ContactPicker;
+package com.globalmultisolution.ContactPicker;
 
 import android.app.Activity;
 import android.content.Intent;

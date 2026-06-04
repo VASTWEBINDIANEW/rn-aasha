@@ -15,15 +15,15 @@ import { hScale, wScale } from '../../../utils/styles/dimensions';
 import { AepsContext } from './context/AepsContext';
 import { RootState } from '../../../reduxUtils/store';
 
-import AepsCW            from './AepsCashwithdrawl';
-import BalanceCheck      from './Balancecheck';
+import AepsCW from './AepsCashwithdrawl';
+import BalanceCheck from './Balancecheck';
 import AepsMinistatement from './AepsMinistatement';
-import AdharPay          from './aadharpay';
+import AdharPay from './aadharpay';
 
-import CheckBlance   from '../../../utils/svgUtils/CheckBlance';
-import Aeps          from '../../../utils/svgUtils/Aeps';
-import AadharPaysvg  from '../../../utils/svgUtils/AadhaarPaysvg';
-import StatementSvg  from '../../../utils/svgUtils/StatementSvg';
+import CheckBlance from '../../../utils/svgUtils/CheckBlance';
+import Aeps from '../../../utils/svgUtils/Aeps';
+import AadharPaysvg from '../../../utils/svgUtils/AadhaarPaysvg';
+import StatementSvg from '../../../utils/svgUtils/StatementSvg';
 import { translate } from '../../../utils/languageUtils/I18n';
 
 // ─── Screen map ───────────────────────────────────────────────────────────────
@@ -31,37 +31,37 @@ const SCREEN_MAP: Record<string, React.ComponentType> = {
   AepsCW,
   BalanceCheck,
   AepsMiniStatement: AepsMinistatement,
-  AadharPay:         AdharPay,
+  AadharPay: AdharPay,
 };
 
 // ─── Service config ───────────────────────────────────────────────────────────
 const SERVICES = [
   {
-    key:      'AepsCW',
-    title:    'Cash\nWithdrawal',
+    key: 'AepsCW',
+    title: 'Cash\nWithdrawal',
     subtitle: 'Withdraw cash via Aadhaar',
-    icon:     () => <AadharPaysvg />,
+    icon: () => <AadharPaysvg />,
     barColor: '#4CAF50',
   },
   {
-    key:      'BalanceCheck',
-    title:    'Balance\nCheck',
+    key: 'BalanceCheck',
+    title: 'Balance\nCheck',
     subtitle: 'Check account balance',
-    icon:     () => <CheckBlance />,
+    icon: () => <CheckBlance />,
     barColor: '#2196F3',
   },
   {
-    key:      'AepsMiniStatement',
-    title:    'Mini\nStatement',
+    key: 'AepsMiniStatement',
+    title: 'Mini\nStatement',
     subtitle: 'View last transactions',
-    icon:     () => <StatementSvg />,
+    icon: () => <StatementSvg />,
     barColor: '#FF9800',
   },
   {
-    key:      'AadharPay',
-    title:    'Aadhaar\nPay',
+    key: 'AadharPay',
+    title: 'Aadhaar\nPay',
     subtitle: 'Pay using Aadhaar',
-    icon:     () => <Aeps />,
+    icon: () => <Aeps />,
     barColor: '#9C27B0',
   },
 ];
@@ -69,50 +69,71 @@ const SERVICES = [
 // ─── Component ────────────────────────────────────────────────────────────────
 const AepsTabScreen = () => {
   const navigation = useNavigation<any>();
-  const { get }    = useAxiosHook();
+  const { get } = useAxiosHook();
 
   const { colorConfig, activeAepsLine } = useSelector((s: RootState) => s.userInfo);
-  const color1     = colorConfig.primaryColor;
+  const color1 = colorConfig.primaryColor;
   const themeColor = activeAepsLine ? '#1FAA59' : '#F4C430';
-  const themeBg    = activeAepsLine ? '#E8F5E9' : '#FFFDE7';
+  const themeBg = activeAepsLine ? '#E8F5E9' : '#FFFDE7';
 
   const [activeService, setActiveService] = useState<string | null>(null);
-  const [UserStatus, setUserStatus]       = useState('');
+  const [UserStatus, setUserStatus] = useState('');
   const [showEkycModal, setShowEkycModal] = useState(false);
-  const [isProcessing, setIsProcessing]   = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const prevLineRef  = useRef(activeAepsLine);
+  const prevLineRef = useRef(activeAepsLine);
   const isApiCalling = useRef(false);
 
   // ── Context state ──
   const [fingerprintData, setFingerprintData] = useState<any>();
-  const [aadharNumber,    setAadharNumber]    = useState('');
-  const [bankName,        setBankName]        = useState('');
-  const [mobileNumber,    setMobileNumber]    = useState('');
-  const [consumerName,    setConsumerName]    = useState('');
-  const [isValid,         setIsValid]         = useState(false);
-  const [deviceName,      setDeviceName]      = useState('Device');
-  const [bankid,          setBankId]          = useState('');
+  const [aadharNumber, setAadharNumber] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [consumerName, setConsumerName] = useState('');
+  const [isValid, setIsValid] = useState(false);
+  const [deviceName, setDeviceName] = useState('Device');
+  const [bankid, setBankId] = useState('');
+  const [showRegisterButton, setShowRegisterButton] = useState(false);
 
   // ── Android back ──
   useEffect(() => {
+    console.log('Active AEPS Line:', activeAepsLine);
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       if (activeService) { setActiveService(null); return true; }
       return false;
     });
     return () => sub.remove();
+
+
+
   }, [activeService]);
 
   // ── API: AEPS status ──
   const CheckAeps = useCallback(async () => {
+
+   const provider =
+        activeAepsLine?.provider;
+
+      console.log(
+        'Current Provider:',
+        provider
+      );
+
+      if (provider === 'CHAGANS') {
+          setUserStatus('Success');
+          return;
+      }
+
     try {
+       
       const url = activeAepsLine
         ? 'AEPS/api/Nifi/data/AepsStatusCheck'
-        : 'AEPS/api/data/AepsStatusCheck';
+        : 'AEPS/api/  /AepsStatusCheck';
       const response = await get({ url });
       if (response?.Response === 'Success') {
         setUserStatus('Success');
       } else {
+        setUserStatus('Success');
         navigation.navigate('ServicepurchaseScreen', { typename: 'AEPS' });
       }
     } catch (err: any) {
@@ -121,37 +142,320 @@ const AepsTabScreen = () => {
   }, [activeAepsLine, get]);
 
   // ── API: eKYC status ──
-  const CheckEkyc = useCallback(async () => {
-    if (isApiCalling.current) return;
+  //   const CheckEkyc = useCallback(async () => {
+  //     if (isApiCalling.current) return;
+
+  //     console.log('Checking eKYC status for line:', activeAepsLine ? 'NIFI' : 'Standard');
+  //     try {
+  //       setIsProcessing(true);
+  //       isApiCalling.current = true;
+  //       console.log('Calling API:', activeAepsLine ? 'AEPS/api/Nifi/data/CheckEkyc' : APP_URLS.checkekyc);
+  //       const finalUrl = activeAepsLine ? 'AEPS/api/Nifi/data/CheckEkyc' : APP_URLS.checkekyc;
+  //       const response = await get({ url: finalUrl });
+  // console.log('eKYC Check Response:', response);
+  //       if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+  //         throw new Error('Server Error (404/500)');
+  //       }
+  //       const msg    = response?.Message;
+  //       const status = response?.Status;
+
+  //       if (status === true)        { await CheckAeps(); return; }
+  //       if (msg === '2FAREQUIRED')  { setUserStatus('Success'); return; }
+  //       if (msg === 'REQUIREDOTP')  { setUserStatus(msg); setShowEkycModal(true); return; }
+  //       if (msg === 'REQUIREDSCAN') { navigation.navigate('Aepsekycscan'); return; }
+
+  //       Alert.alert(
+  //         translate('notice') || 'Notice',
+  //         msg || 'Unknown Status',
+  //         [{ text: 'Go Back', onPress: () => navigation.goBack() }]
+  //       );
+  //     } catch (e: any) {
+  //       Alert.alert('API Error', e?.message || 'Internal Server Error');
+  //     } finally {
+  //       isApiCalling.current = false;
+  //       setIsProcessing(false);
+  //     }
+  //   }, [activeAepsLine, get, CheckAeps]);
+
+
+  const RegisterMerchant = useCallback(async () => {
+
     try {
+
       setIsProcessing(true);
-      isApiCalling.current = true;
-      const finalUrl = activeAepsLine ? 'AEPS/api/Nifi/data/CheckEkyc' : APP_URLS.checkekyc;
-      const response = await get({ url: finalUrl });
 
-      if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
-        throw new Error('Server Error (404/500)');
+      const response = await get({
+        url: 'AEPS/api/Chagan/data/RegisterMerchant'
+      });
+
+      console.log(
+        'REGISTER MERCHANT RESPONSE:',
+        response
+      );
+
+      if (
+        response?.Status === true ||
+        response?.Message === 'Success' ||
+        response?.Message === 'DONE'
+      ) {
+
+        Alert.alert(
+          'Success',
+          'Merchant Registered Successfully'
+        );
+
+        setShowRegisterButton(false);
+
+        navigation.navigate(
+          'Aepsekycscan'
+        );
+
+        return;
       }
-      const msg    = response?.Message;
-      const status = response?.Status;
-
-      if (status === true)        { await CheckAeps(); return; }
-      if (msg === '2FAREQUIRED')  { setUserStatus('Success'); return; }
-      if (msg === 'REQUIREDOTP')  { setUserStatus(msg); setShowEkycModal(true); return; }
-      if (msg === 'REQUIREDSCAN') { navigation.navigate('Aepsekycscan'); return; }
 
       Alert.alert(
-        translate('notice') || 'Notice',
-        msg || 'Unknown Status',
-        [{ text: 'Go Back', onPress: () => navigation.goBack() }]
+        'Notice',
+        response?.Message ||
+        'Registration Failed'
       );
+
     } catch (e: any) {
-      Alert.alert('API Error', e?.message || 'Internal Server Error');
+
+      console.log(
+        'REGISTER MERCHANT ERROR:',
+        e
+      );
+
+      Alert.alert(
+        'API Error',
+        e?.message ||
+        'Something went wrong'
+      );
+
     } finally {
-      isApiCalling.current = false;
+
       setIsProcessing(false);
     }
-  }, [activeAepsLine, get, CheckAeps]);
+
+  }, [get, navigation]);
+
+
+
+  const CheckEkyc = useCallback(async () => {
+
+    if (isApiCalling.current) return;
+
+    try {
+
+      setIsProcessing(true);
+
+      isApiCalling.current = true;
+
+      const provider =
+        activeAepsLine?.provider;
+
+      console.log(
+        'Current Provider:',
+        provider
+      );
+
+      // =========================
+      // URL SELECT
+      // =========================
+
+      let finalUrl = '';
+
+      if (provider === 'NIFI') {
+
+        finalUrl =
+          'AEPS/api/Nifi/data/CheckEkyc';
+      }
+
+      else if (provider === 'CHAGANS') {
+
+        finalUrl =
+          'AEPS/api/Chagan/data/CheckEkyc';
+      }
+
+      else if (provider === 'FINGPAY') {
+
+        finalUrl =
+          APP_URLS.checkekyc;
+      }
+
+      console.log(
+        'Calling URL:',
+        finalUrl
+      );
+
+      const response =
+        await get({
+          url: finalUrl
+        });
+
+      console.log(
+        'eKYC RESPONSE:',
+        response
+      );
+
+      // =========================
+      // HTML ERROR
+      // =========================
+
+      if (
+        typeof response === 'string' &&
+        response.includes('<!DOCTYPE html>')
+      ) {
+
+        throw new Error(
+          'Server Error (404/500)'
+        );
+      }
+
+      // =========================
+      // RESPONSE VALUE
+      // =========================
+
+      const status =
+        response?.Status;
+
+      const message =
+        response?.Message ||
+        response;
+
+      // ====================================
+      // COMMON SUCCESS
+      // ====================================
+
+      if (
+        status === true ||
+        message === 'DONE'
+      ) {
+
+        await CheckAeps();
+
+        return;
+      }
+
+      // ====================================
+      // 2FA REQUIRED
+      // ====================================
+
+      if (
+        message === '2FAREQUIRED'
+      ) {
+
+        setUserStatus('Success');
+
+        return;
+      }
+
+      // ====================================
+      // OTP REQUIRED
+      // ====================================
+
+      if (
+        message === 'REQUIREDOTP'
+      ) {
+
+        setUserStatus(
+          'REQUIREDOTP'
+        );
+
+        setShowEkycModal(true);
+
+        return;
+      }
+
+      // ====================================
+      // SCAN REQUIRED
+      // ====================================
+
+      if (
+        message === 'REQUIREDSCAN'
+      ) {
+
+        navigation.navigate(
+          'Aepsekycscan'
+        );
+
+        return;
+      }
+
+
+      if (
+        message === 'REQUIREDEKYC'
+      ) {
+
+        setShowRegisterButton(true);
+        console.log(
+          'eKYC required. Showing register button.'
+        );
+        return;
+
+      }
+
+      // ====================================
+      // APPROVAL PENDING
+      // ====================================
+
+      if (
+        message === 'APPROVAL-PENDING'
+      ) {
+
+        Alert.alert(
+          'Approval Pending',
+          'Your eKYC approval is pending. Please wait for admin approval.'
+        );
+
+        return;
+      }
+
+      // ====================================
+      // DEFAULT
+      // ====================================
+
+      Alert.alert(
+        translate('notice') ||
+        'Notice',
+
+        message ||
+        'Unknown Status',
+
+        [
+          {
+            text: 'Go Back',
+            onPress: () =>
+              navigation.goBack()
+          }
+        ]
+      );
+
+    } catch (e: any) {
+
+      console.log(
+        'EKYC ERROR:',
+        e
+      );
+
+      Alert.alert(
+        'API Error',
+        e?.message ||
+        'Internal Server Error'
+      );
+
+    } finally {
+
+      isApiCalling.current = false;
+
+      setIsProcessing(false);
+    }
+
+  }, [
+    activeAepsLine,
+    get,
+    CheckAeps
+  ]);
 
   useEffect(() => {
     if (prevLineRef.current !== activeAepsLine || UserStatus === '') {
@@ -163,14 +467,14 @@ const AepsTabScreen = () => {
   // ── Context value ──
   const contextValue = {
     fingerprintData, setFingerprintData,
-    aadharNumber,    setAadharNumber,
-    consumerName,    setConsumerName,
-    mobileNumber,    setMobileNumber,
-    bankName,        setBankName,
+    aadharNumber, setAadharNumber,
+    consumerName, setConsumerName,
+    mobileNumber, setMobileNumber,
+    bankName, setBankName,
     scanFingerprint: null,
-    isValid,         setIsValid,
-    deviceName,      setDeviceName,
-    bankid,          setBankId,
+    isValid, setIsValid,
+    deviceName, setDeviceName,
+    bankid, setBankId,
   };
 
   // ── Glass Header (shared) ──
@@ -194,7 +498,7 @@ const AepsTabScreen = () => {
       <View style={[styles.lineChip, { borderColor: themeColor }]}>
         <View style={[styles.lineDot, { backgroundColor: themeColor }]} />
         <Text style={[styles.lineLabel, { color: themeColor }]}>
-          {activeAepsLine ? 'NIFI' : 'Standard'}
+          {activeAepsLine ? 'Standard' : 'Standard'}
         </Text>
       </View>
     </View>
@@ -272,10 +576,12 @@ const AepsTabScreen = () => {
               </Text>
             </View>
           ) : UserStatus === 'Success' ? (
+
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
+
               <Text style={styles.sectionLabel}>{translate('Choose a Service')}</Text>
 
               <View style={styles.grid}>
@@ -337,6 +643,39 @@ const AepsTabScreen = () => {
               </View>
             </View>
           </Modal>
+
+
+          {
+            showRegisterButton && (
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+
+                style={{
+                  marginHorizontal: 20,
+                  marginTop: 20,
+                  backgroundColor: '#1FAA59',
+                  paddingVertical: 14,
+                  borderRadius: 14,
+                  alignItems: 'center',
+                }}
+
+                onPress={RegisterMerchant}
+              >
+
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: 15,
+                  }}
+                >
+                  Register Merchant
+                </Text>
+
+              </TouchableOpacity>
+            )
+          }
         </View>
       )}
     </AepsContext.Provider>
@@ -377,10 +716,10 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     marginRight: wScale(10),
   },
-  backArrow:      { fontSize: wScale(20), color: '#fff', fontWeight: '300', lineHeight: 22 },
+  backArrow: { fontSize: wScale(20), color: '#fff', fontWeight: '300', lineHeight: 22 },
   headerTextWrap: { flex: 1 },
-  headerTitle:    { fontSize: wScale(17), fontWeight: '800', color: '#fff' },
-  headerSub:      { fontSize: wScale(11), color: 'rgba(255,255,255,0.7)', marginTop: 2 },
+  headerTitle: { fontSize: wScale(17), fontWeight: '800', color: '#fff' },
+  headerSub: { fontSize: wScale(11), color: 'rgba(255,255,255,0.7)', marginTop: 2 },
   lineChip: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -388,7 +727,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wScale(10), paddingVertical: hScale(5),
     borderRadius: 20,
   },
-  lineDot:   { width: 7, height: 7, borderRadius: 4, marginRight: 5 },
+  lineDot: { width: 7, height: 7, borderRadius: 4, marginRight: 5 },
   lineLabel: { fontSize: wScale(11), fontWeight: '700' },
 
   // Loader

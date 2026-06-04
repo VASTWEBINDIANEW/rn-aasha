@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ToastAndroid, AsyncStorage } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ToastAndroid,  } from 'react-native';
 import AppBarSecond from '../../drawer/headerAppbar/AppBarSecond';
 import { APP_URLS } from '../../../utils/network/urls';
 import useAxiosHook from '../../../utils/network/AxiosClient';
@@ -9,6 +9,7 @@ import CmsRefreshSvg from '../../drawer/svgimgcomponents/CmsRefreshSvg';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxUtils/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CmsCodeStatus({ route }) {
     // console.warn(route.params.item1);

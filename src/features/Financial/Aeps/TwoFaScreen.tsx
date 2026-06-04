@@ -429,10 +429,49 @@ const TwoFAVerify = ({ handle }) => {
       console.log("Error reading jdata", error);
     }
   };
+  const provider =
+             activeAepsLine?.provider;
 
   const BEnQ = useCallback(async (captureResponse1, cardnumberORUID1, pidDataX, isFace) => {
     try {
       setIsLoading(true);
+const provider =
+             activeAepsLine?.provider;
+     
+           console.log(
+             'Current Provider:',
+             provider
+           );
+     
+           // =========================
+           // URL SELECT
+           // =========================
+     
+           let finalUrl = '';
+     
+           if (provider === 'NIFI') {
+     
+             finalUrl =
+              APP_URLS?.twofaNifi ?? "" ;
+           }
+     
+           else if (provider === 'CHAGANS') {
+     
+             finalUrl =
+               'AEPS/api/Chagan/data/Validate2FA';
+           }
+     
+           else if (provider === 'FINGPAY') {
+     
+             finalUrl =
+               APP_URLS?.twofa ?? "";
+           }
+     
+           console.log(
+             'Calling URL:',
+             finalUrl
+           );
+
 
       const Model = getMobileDeviceId();
       const address = 'vwi';
@@ -476,7 +515,7 @@ const TwoFAVerify = ({ handle }) => {
       //  await logToFile('Request Body', jdata);
 
       const response = await post({
-        url: activeAepsLine ? APP_URLS?.twofaNifi ?? "" : APP_URLS?.twofa ?? "",
+        url: finalUrl,
 
         data: data,
         config: { headers },
@@ -758,7 +797,7 @@ const TwoFAVerify = ({ handle }) => {
         <SelectDevice setDeviceName={setDeviceName}
           isface2={true}
           device={deviceName}
-          isface={true}
+          isface={provider === 'CHAGANS' ? false : true}
           opPress={() => {
             loadJdata();    // 👈 function call
 

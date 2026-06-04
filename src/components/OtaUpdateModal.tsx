@@ -1,37 +1,83 @@
-import { AppState, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { hScale, wScale } from '../utils/styles/dimensions';
+import FastImage from 'react-native-fast-image';
+import { RootState } from '../reduxUtils/store';
+import { useSelector } from 'react-redux';
 
-// ── OTA Update Modal Component ──
-const OtaUpdateModal = ({ status, progress }: { 
-  status: 'idle' | 'downloading' | 'success'; 
-  progress: number 
+const OtaUpdateModal = ({ status, progress }: {
+  status: 'idle' | 'downloading' | 'installing' | 'success' | 'failed';
+  progress: number
 }) => {
+    const { logoUrl } = useSelector((state: RootState) => state.userInfo);
+
   if (status === 'idle') return null;
 
   return (
     <View style={ota.overlay}>
       <View style={ota.card}>
-        {status === 'downloading' ? (
+
+        {status === 'downloading' && (
           <>
-            <Text style={ota.title}>Updating App...</Text>
+            <Image
+              source={{ uri: logoUrl }}
+             style={ota.logo}
+              resizeMode="contain"
+            />
+            <Text style={ota.title}>Downloading Update...</Text>
             <Text style={ota.subtitle}>Please wait, do not close the app</Text>
             <View style={ota.progressBg}>
               <View style={[ota.progressFill, { width: `${progress}%` }]} />
             </View>
             <Text style={ota.percent}>{progress}%</Text>
           </>
-        ) : (
+        )}
+
+        {status === 'installing' && (
           <>
-            <Text style={ota.emoji}>✅</Text>
+             <Image
+              source={{ uri: logoUrl }}
+             style={ota.logo}
+              resizeMode="contain"
+            />
+            <Text style={ota.title}>Installing Update...</Text>
+            <Text style={ota.subtitle}>Almost done, app will restart shortly</Text>
+            <View style={ota.progressBg}>
+              <View style={[ota.progressFill, { width: '100%' }]} />
+            </View>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+             <Image
+              source={{ uri: logoUrl }}
+             style={ota.logo}
+              resizeMode="contain"
+            />
             <Text style={ota.title}>Update Complete!</Text>
             <Text style={ota.subtitle}>Restarting app...</Text>
           </>
         )}
+
+        {status === 'failed' && (
+          <>
+             <Image
+              source={{ uri: logoUrl }}
+             style={ota.logo}
+              resizeMode="contain"
+            />
+            <Text style={[ota.title, { color: '#EF4444' }]}>Update Failed</Text>
+            <Text style={ota.subtitle}>Something went wrong. Try again later.</Text>
+          </>
+        )}
+
       </View>
     </View>
   );
 };
-export default OtaUpdateModal ;
+
+export default OtaUpdateModal;
+
 const ota = StyleSheet.create({
   overlay: {
     position: 'absolute',
@@ -78,8 +124,10 @@ const ota = StyleSheet.create({
     marginTop: hScale(8),
     fontWeight: '600',
   },
-  emoji: {
-    fontSize: wScale(32),
-    marginBottom: hScale(8),
+  logo: {
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+    marginBottom: 16,
   },
 });

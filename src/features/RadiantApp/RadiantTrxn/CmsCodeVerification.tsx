@@ -75,27 +75,32 @@ const CmsCodeVerification = ({ route }) => {
 
         })
 
-        try {
-            const url = `${APP_URLS.RadiantSendcode}`
-            const res = await post({
-                url, data: {
-                    "clientmobile": item.Mobile,
-                    "clientemail": item.Email,
-                    "clientname": item.Name,
-                    "Shopid": item1.ShopId,
-                    "PointAddress": item1.PointName,
-                    "Sendvia": selectedModes
+       try {
+  const url = `${APP_URLS.RadiantSendcode}`;
+  
+  const payload = {
+    "clientmobile": item.Mobile,
+    "clientemail": item.Email,
+    "clientname": item.Name,
+    "Shopid": item1.ShopId,
+    "PointAddress": item1.PointName,
+    "Sendvia": selectedModes
+  };
 
-                }
+  console.log('📡 URL:', url);
+  console.log('📦 REQUEST PAYLOAD:', JSON.stringify(payload, null, 2));
 
-            });
-            setScratchCode(res.Content.ADDINFO.scrachcode)
-            setCodeId(res.Content.ADDINFO.idno)
+  const res = await post({ url, data: payload });
 
-            setIsLoad(false)
+  console.log('✅ FULL RESPONSE:', JSON.stringify(res, null, 2));
+  console.log('✅ StatusCode:', res?.StatusCode);
+  console.log('✅ scrachcode:', res?.Content?.ADDINFO?.scrachcode);
+  console.log('✅ idno:', res?.Content?.ADDINFO?.idno);
 
-            console.log(res, '......................', res.Content.ADDINFO.scrachcode)
-        } catch (error) {
+  setScratchCode(res.Content.ADDINFO.scrachcode);
+  setCodeId(res.Content.ADDINFO.idno);
+  setIsLoad(false);
+} catch (error) {
             setIsLoad(false)
 
         }

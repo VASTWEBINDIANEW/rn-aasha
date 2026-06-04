@@ -7,8 +7,11 @@ const initialState = {
   userId: '',
   Mpin: '',
   appLanguage: 'en',
-  activeAepsLine: null,
-
+  activeAepsLine: {
+    line: '',
+    provider: '',
+    status: false,
+  },
   colorConfig: {
     primaryColor: '#3A7DFF',
     secondaryColor: '#9D5B87',
@@ -73,6 +76,8 @@ const initialState = {
   unLocked: false,
   signUpId: null,
   signUpPassword: null,
+  logoUrl: '',
+
 };
 
 const userInfoSlice = createSlice({
@@ -129,6 +134,7 @@ const userInfoSlice = createSlice({
     setUnlocked: (state, action) => { state.unLocked = action.payload; },
     setSignUpId: (state, action) => { state.signUpId = action.payload; },
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
+    setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
 
     reset: () => JSON.parse(JSON.stringify(initialState)),
   },
@@ -173,7 +179,8 @@ export const {
   setIsDemoUser,
   setUnlocked,
   setSignUpId,
-  setSignUpPassword
+  setSignUpPassword,
+  setLogoUrl
 
 } = userInfoSlice.actions;
 

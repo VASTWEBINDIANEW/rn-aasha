@@ -249,5 +249,6 @@ const styles = StyleSheet.create({
   screeitemname: {
     color: "white",
     textAlign: "center",
+    fontSize: wScale(12),
   },
 });

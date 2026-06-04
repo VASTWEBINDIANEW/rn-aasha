@@ -20,7 +20,7 @@ import GradientBorder from '../../../components/AnimatedBorderView';
 import NoDatafound from '../../drawer/svgimgcomponents/Nodatafound';
 import DynamicButton from '../../drawer/button/DynamicButton';
 import CmsPayoutStructure from './CmsPayoutStructure';
-import { getImageSource2 } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 
 const CmsShowPayoutStructure = () => {
     const { colorConfig } = useSelector((state: RootState) => state.userInfo);
@@ -45,7 +45,7 @@ const CmsShowPayoutStructure = () => {
     return (
         <View style={{ flex: 1, marginBottom: hScale(10) }}>
             <View>
-                <ImageBackground source={getImageSource2('cmsTableB.jpeg')}
+                <ImageBackground source={getAssetSource('cmsTableB.jpeg')}
                     resizeMode='cover'
                     style={styles.bgImage}>
                     <Text style={styles.title}>{translate("RCE_Payout_Structure")}</Text>

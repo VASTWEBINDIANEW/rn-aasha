@@ -22,7 +22,7 @@ import { hScale, wScale } from '../../../utils/styles/dimensions';
 import { SvgUri } from 'react-native-svg';
 import BackArrow from '../../../utils/svgUtils/BackArrow';
 import FastImage from "react-native-fast-image";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 
 const DealerHome = () => {
   const { colorConfig } = useSelector((state) => state.userInfo);
@@ -140,7 +140,7 @@ useEffect(() => {
              
              <FastImage   
              style={{height:hScale(35),width:wScale(40)}}
-             source={getImageSource(`${APP_URLS.cms_logo}`)}/>
+             source={getAssetSource(`${APP_URLS.cms_logo}`)}/>
                 <Text style={styles.iconText}>{'Cms'}</Text>
               </TouchableOpacity>
             </View>

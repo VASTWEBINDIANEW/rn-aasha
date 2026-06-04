@@ -152,7 +152,7 @@ const CarouselView = () => {
 };
 
 const styles = StyleSheet.create({
-  wrapper: { marginVertical: hScale(4) },
+  wrapper: { marginVertical: hScale(10) },
 
   frame: {
     borderRadius:  16,

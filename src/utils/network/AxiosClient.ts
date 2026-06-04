@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { reset, setAuthToken, setRefreshToken, setUserId } from '../../reduxUtils/store/userInfoSlice';
 import { APP_URLS } from './urls';
 import { encrypt } from '../encryptionUtils';
-import { Alert } from 'react-native';
 
 const useAxiosHook = () => {
   const { authToken = '', refreshToken, IsDealer } = useSelector(
@@ -22,8 +21,9 @@ const useAxiosHook = () => {
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.ssvcms.in/',
+        baseURL: 'http://native.rechargedrishti.com/',
         //  baseURL: 'http://native.skeshari.in/',
+        timeout: 120000
       }),
     [],
   );
@@ -138,6 +138,8 @@ const useAxiosHook = () => {
 
       // Dealer prefix handling
       if (config.url) {
+      console.log('🌐 FULL URL:', `${config.baseURL}${config.url}`);
+      console.log('📡 IsDealer:', IsDealer);       // ← add
         if (IsDealer) {
           if (
             config.url.startsWith("api/Radiant/") ||
@@ -146,6 +148,8 @@ const useAxiosHook = () => {
             config.url = `Dealer/${config.url}`;
           }
         }
+              console.log('📡 AFTER URL:', config.url);   // ← add
+
       }
       return config;
     },

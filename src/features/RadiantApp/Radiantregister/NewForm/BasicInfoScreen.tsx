@@ -141,13 +141,16 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
           url: APP_URLS.InsertForm1UpdateJson,
           data: payload,
         });
+        console.log('====================================');
+        console.log();
+        console.log('====================================');
         console.log('📥 InsertForm1 RESPONSE:', JSON.stringify(res, null, 2));
 
         if (res?.StatusCode === 200) {
           showToast('Basic info saved!');
           updateStep('basicInfo', values);
           nextStep();
-          onNext(1);
+          onNext();
         } else {
           showToast('Submit failed');
         }
@@ -194,7 +197,7 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
       return '';
     }
   };
-  const [loading,setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -203,7 +206,7 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
         console.log('✅ ShowForm1 RESPONSE:', JSON.stringify(res, null, 2));
 
         if (res?.StatusCode === 200) {
-                    setLoading(false);
+          setLoading(false);
 
           const c = res.Content;
 
@@ -251,7 +254,7 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
     <View style={s.screen}>
 
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
-              {loading&&<ShowLoader/>}
+        {loading && <ShowLoader />}
 
         {/* Personal Details */}
         <SectionCard title="Personal Details" icon="account" iconColor={stepColor}>

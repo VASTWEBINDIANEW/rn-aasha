@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Image } from "react-native";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 import FastImage from "react-native-fast-image";
 
 const Refund = ({ size, color }) => {
@@ -17,7 +17,7 @@ const Refund = ({ size, color }) => {
         >
             <FastImage 
                 style={{ height: size * 0.9, width: size * 0.5 }} 
-                source={getImageSource('refund.png')}
+                source={getAssetSource('refund.png')}
                 resizeMode="contain"
             />
         </View>

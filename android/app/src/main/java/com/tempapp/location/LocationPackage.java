@@ -1,4 +1,4 @@
-package com.ssvcms.location;
+package com.globalmultisolution.location;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

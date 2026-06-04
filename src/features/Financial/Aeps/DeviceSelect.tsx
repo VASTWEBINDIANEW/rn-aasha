@@ -124,7 +124,7 @@ return;
 
         </TouchableOpacity >
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           disabled={!isface}
           onPress={check}
           style={[styles.facestyle, isface && styles.bnaktru
@@ -134,7 +134,7 @@ return;
             Face {'\n'}Auth
           </Text>
           <FacescanSvg />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
 
       </View>
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   selectButton: {
     borderRadius: 8,
-    width: '70%'
+    width: '100%'
   },
   devicerow: {
     flexDirection: 'row',

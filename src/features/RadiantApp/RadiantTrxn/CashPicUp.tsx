@@ -222,7 +222,9 @@ const fetchData1 = async (item: any) => {
     <View style={styles.main}>
 
       {/* ── Header ── */}
-      <AppBarSecond title="Add Pickup Request" />
+      <AppBarSecond title="Add Pickup Request"  onPressBack={() => {
+            navigation.navigate('RadiantTransactionScreen',
+            );}}/>
 
       {/* ── Wallet / QR ── */}
       <View>
@@ -298,7 +300,12 @@ const styles = StyleSheet.create({
   // ── Top Bar ──
   topAppBar:     { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: wScale(20), marginBottom: hScale(15), borderWidth: hScale(4), borderRadius: 10, alignItems: 'center', paddingVertical: hScale(5) },
   topText:       { color: '#000', fontSize: wScale(16), textTransform: 'uppercase', textAlign: 'right' },
-  locationTxt:   { fontSize: wScale(14), color: '#fff', left: wScale(18), paddingHorizontal: wScale(4), borderRadius: 4, marginBottom: -11, zIndex: 99, height: hScale(18), textAlign: 'center', lineHeight: hScale(16) },
+  locationTxt:   { fontSize: wScale(14), color: '#fff',
+    paddingHorizontal: 
+    wScale(4), borderRadius: 4, marginBottom: -11, zIndex: 99, height: hScale(18), textAlign: 'center', lineHeight: hScale(16) ,
+    width:'88%',
+  alignSelf: 'center',  // ✅ center ho jayega 
+  },
 
   // ── List Item ──
   linearGradient:{ marginBottom: hScale(10), borderRadius: 5, elevation: 5 },

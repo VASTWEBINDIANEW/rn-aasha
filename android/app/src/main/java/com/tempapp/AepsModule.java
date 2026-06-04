@@ -1,4 +1,4 @@
-package com.ssvcms;
+package com.globalmultisolution;
 
 import android.app.Activity;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package com.ssvcms.security;
+package com.globalmultisolution.security;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

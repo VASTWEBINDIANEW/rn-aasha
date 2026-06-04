@@ -12,7 +12,7 @@ import { RootState } from '../../../reduxUtils/store';
 import BackSvg from '../../drawer/svgimgcomponents/BackSvg';
 import { Button } from 'react-native-paper';
 import FastImage from "react-native-fast-image";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 import { APP_URLS } from "../../../utils/network/urls";
 
 const Requirementscms = () => {
@@ -57,7 +57,7 @@ const Requirementscms = () => {
       <View style={[styles.topcontainer,]}>
         <FastImage 
         
-                source={getImageSource(`${APP_URLS.cms_logo}`)}
+                source={getAssetSource(`${APP_URLS.cms_logo}`)}
           style={styles.imgstyle}
           resizeMode="contain" />
         <View style={styles.column}>

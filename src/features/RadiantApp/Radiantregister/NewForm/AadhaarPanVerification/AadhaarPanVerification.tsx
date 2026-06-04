@@ -61,7 +61,7 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
         mobile.verified &&  // ← pre-fill se true aa jayega
         email.verified;
 
-  const [loading,setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const checkForm1Status = async () => {
@@ -70,7 +70,7 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
                 console.log('✅ STEP 1 RESPONSE:', JSON.stringify(res, null, 2));
 
                 if (res) {
-                              setLoading(false);
+                    setLoading(false);
 
                 }
 
@@ -187,44 +187,88 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
     const onPanChange = (t: string) => {
         setPan({ ...initPan(), value: t.toUpperCase() });
     };
-   const verifyPan = useCallback(async () => {
-    if (!isPanValid) return;
+    
+    const verifyPan = useCallback(async () => {
+        if (!isPanValid) return;
 
-    setPan(p => ({ ...p, loading: true, error: "" }));
-
-    try {
-        const url = `${APP_URLS.VerifyPanCard}pancardnumber=${pan.value}`;
-        console.log('📡 PAN URL:', url);
-
-        const res = await post({ url });
-        console.log('✅ PAN RESPONSE:', JSON.stringify(res, null, 2));
-        console.log('✅ checkpan:', res?.checkpan);
-        console.log('✅ StatusCode:', res?.StatusCode);
-        console.log('✅ All keys:', Object.keys(res || {})); // 👈 exact keys dekho
-
-        if (res?.checkpan === true || res?.StatusCode === 200) {
-            setPan(p => ({ ...p, loading: false, verified: true }));
-            toast("PAN verified!");
-        } else {
-            setPan(p => ({
-                ...p,
-                loading: false,
-                error: res?.message || "Invalid PAN number"
-            }));
-        }
-
-    } catch (err) {
-        console.log('❌ PAN ERROR:', JSON.stringify(err, null, 2)); // 👈 full error dekho
-        console.log('❌ ERR Keys:', Object.keys(err || {}));
-        console.log('❌ ERR Message:', err?.Message || err?.message);
-
-        setPan(p => ({
-            ...p,
-            loading: false,
-            error: "Verification failed. Try again."
+        setPan(prev => ({
+            ...prev,
+            loading: true,
+            error: "",
         }));
-    }
-}, [pan.value, isPanValid]);
+
+        try {
+            const url = `${APP_URLS.VerifyPanCard}pancardnumber=${pan.value}`;
+
+            console.log("📡 PAN URL:", url);
+
+            const res = await post({ url });
+
+            console.log(
+                "✅ PAN RESPONSE:",
+                JSON.stringify(res, null, 2),
+            );
+
+            // ✅ Different success checks
+            const isSuccess =
+                res?.checkpan === true ||
+                res?.checkpan === "true" ||
+                res?.StatusCode === 200 ||
+                res?.status === 200 ||
+                res?.success === true;
+
+            if (isSuccess) {
+                setPan(prev => ({
+                    ...prev,
+                    loading: false,
+                    verified: true,
+                    error: "",
+                }));
+
+                toast(
+                    res?.message ||
+                    res?.Message ||
+                    "PAN verified successfully!",
+                );
+
+            } else {
+                const errorMessage =
+                    res?.message ||
+                    res?.Message ||
+                    "Invalid PAN number";
+
+                toast(errorMessage);
+
+                setPan(prev => ({
+                    ...prev,
+                    loading: false,
+                    verified: false,
+                    error: errorMessage,
+                }));
+            }
+
+        } catch (err: any) {
+            console.log(
+                "❌ PAN ERROR:",
+                JSON.stringify(err, null, 2),
+            );
+
+            const errorMessage =
+                err?.response?.data?.message ||
+                err?.response?.data?.Message ||
+                err?.message ||
+                "Verification failed. Try again.";
+
+            setPan(prev => ({
+                ...prev,
+                loading: false,
+                verified: false,
+                error: errorMessage,
+            }));
+
+            toast(errorMessage);
+        }
+    }, [pan.value, isPanValid]);
 
     const onMobileChange = (t: string) => {
         const clean = t.replace(/\D/g, "").slice(0, 10);
@@ -280,6 +324,8 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
     }, [mobile.value, mobile.otpValue]);
 
     const onEmailChange = (t: string) => {
+         console.log('📧 EMAIL VALUE:', t);
+    console.log('📧 IS VALID:', EMAIL_REGEX.test(t));
         setEmail({ ...initEmail(), value: t });
     };
 
@@ -329,32 +375,46 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
         }
     }, [email.value, email.otpValue]);
 
-    const handleSubmit   = async () => {
-            try {
-                const res = await post({ url: APP_URLS.AadhaarPanCheck });
-                console.log('✅ STEP 1 RESPONSE:', JSON.stringify(res, null, 2));
+    const handleSubmit = async () => {
+        console.log('🚀 handleSubmit START');
+        if (!canSubmit) return;
+        setSubmitLoading(true);
 
-                if (res?.info?.form1sts === true) {
-                    onNext(0);
-
-                    return;
-                }
-
-               
-
-            } catch (err) {
-                console.log('❌ STEP 1 ERROR:', err);
+        try {
+            // Temporarily post() ki jagah direct call
+            const res = await post({ url: APP_URLS.AadhaarPanCheck });
+            console.log('📦 RES VALUE:', res);           // undefined hai?
+            console.log('📦 RES TYPE:', typeof res);
+            console.log('📦 RES INFO:', JSON.stringify(res?.info, null, 2));
+            // Agar res undefined hai to seedha onNext()
+            if (!res) {
+                console.warn('⚠️ res is undefined/null — checking differently');
+                onNext();  // ← temporarily test karo
+                return;
             }
-        };
+
+            if (res?.info?.form1sts === true) {
+                onNext();
+                return;
+            }
+
+            console.warn('⚠️ form1sts:', res?.info);
+
+        } catch (err) {
+            console.log('❌ CATCH:', err);
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
 
     return (
         <View style={s.main}>
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              {loading&&<ShowLoader/>}
+                {loading && <ShowLoader />}
 
                 <View style={s.container}>
 
-                        <MobileCard
+                    <MobileCard
                         mobile={mobile}
                         isValid={isMobileValid}
                         onChange={onMobileChange}
@@ -394,18 +454,22 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
                         onVerify={verifyPan}
                     />
 
-                
+
 
                     <TouchableOpacity
                         style={[
                             s.submitBtn,
                             canSubmit
                                 ? { backgroundColor: stepColor }
-                                : 
+                                :
                                 s.submitOff,
-                            {backgroundColor: stepColor}
+                            { backgroundColor: stepColor }
                         ]}
-                        onPress={handleSubmit}
+                        onPress={async () => {
+                            console.log('🔘 DIRECT PRESS');
+                            await handleSubmit();
+                            console.log('🔘 AFTER handleSubmit');
+                        }}
                         disabled={!canSubmit || submitLoading}
                     >
                         {submitLoading ? (

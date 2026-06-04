@@ -27,7 +27,7 @@ const MenuIcon = () => {
       }}
       style={styles.MenuDottcontainer}>
 
-      <SvgXml xml={setting} width={wScale(40)} height={wScale(40)} />
+      <SvgXml xml={setting} width={wScale(30)} height={wScale(30)} />
     </Pressable>
   );
 };

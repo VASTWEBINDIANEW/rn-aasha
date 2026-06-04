@@ -1,4 +1,4 @@
-package com.ssvcms   // ✅ was com.worldpayone
+package com.globalmultisolution   // ✅ was com.worldpayone
 
 import android.Manifest
 import android.app.Activity

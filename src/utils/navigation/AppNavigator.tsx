@@ -188,6 +188,7 @@ import SelfieScreen from '../../features/RadiantApp/selfiescreen';
 import CommissionReport from '../../features/Acount/maxuspay';
 import RadiantStep from '../../features/RadiantApp/Radiantregister/RadiantStep';
 import ApprovalStatusScreen from '../../features/RadiantApp/Radiantregister/ApprovalStatusScreen';
+import CameraScreen from '../../components/CameraScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -1069,6 +1070,11 @@ const AppNavigator = () => {
        <Stack.Screen
         name="CommissionReport"
         component={CommissionReport}
+        options={{ headerShown: false }}
+      />
+       <Stack.Screen
+        name="CameraScreen"
+        component={CameraScreen}
         options={{ headerShown: false }}
       />
           

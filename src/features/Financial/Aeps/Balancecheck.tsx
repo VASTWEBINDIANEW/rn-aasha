@@ -82,11 +82,48 @@ const BalanceCheck = ({ }) => {
         CheckEkyc();
 
         const banks = async () => {
+
+             const provider =
+             activeAepsLine?.provider;
+     
+           console.log(
+             'Current Provider:',
+             provider
+           );
+     
+           // =========================
+           // URL SELECT
+           // =========================
+     
+           let finalUrl = '';
+     
+           if (provider === 'NIFI') {
+     
+             finalUrl =
+               APP_URLS.aepsBanklistNifi;
+           }
+     
+           else if (provider === 'CHAGANS') {
+     
+             finalUrl =
+               'AEPS/api/Chagan/Aeps/banklist';
+           }
+     
+           else if (provider === 'FINGPAY') {
+     
+             finalUrl =
+               APP_URLS.aepsBanklist;
+           }
+     
+           console.log(
+             'Calling URL:',
+             finalUrl
+           );
             try {
-                const url = `${APP_URLS.aepsBanklist}`;
-                const url2 = `AEPS/api/Nifi/Aeps/banklist`;
+                // const url = `${APP_URLS.aepsBanklist}`;
+                // const url2 = `AEPS/api/Nifi/Aeps/banklist`;
                 //  console.log(activeAepsLine ? url2 : url,)
-                const response = await post({ url: activeAepsLine ? url2 : url })
+                const response = await post({ url: finalUrl })
                 //  console.log(response, "**********&**********************************")
                 if (response.RESULT === '0') {
                     setBanklist(response['ADDINFO']['data'])
@@ -566,7 +603,7 @@ const OnPressEnq = async (fingerprintDataString, pidDataXml) => {
         const cardnumberORUID = {
             adhaarNumber: aadharNumber,
             indicatorforUID: "0",
-            nationalBankIdentificationNumber: bankid
+            nationalBankIdentificationNumber: bankid,
         };
 
         const captureResponse = {
@@ -615,6 +652,47 @@ const OnPressEnq = async (fingerprintDataString, pidDataXml) => {
 
 const BEnQ = useCallback(async (captureResponse1, cardnumberORUID1, pidDataX, isface) => {
         try {
+
+   const provider =
+               activeAepsLine?.provider;
+       
+             console.log(
+               'Current Provider:',
+               provider
+             );
+       
+             // =========================
+             // URL SELECT
+             // =========================
+       
+             let finalUrl = '';
+       
+             if (provider === 'NIFI') {
+       
+               finalUrl =
+              'AEPS/api/Nifi/app/AEPS/balanceEnquiry';
+             }
+       
+             else if (provider === 'CHAGANS') {
+       
+               finalUrl =
+                 'AEPS/api/Chagan/data/balanceEnquiry';
+             }
+       
+             else if (provider === 'FINGPAY') {
+       
+               finalUrl =
+                'AEPS/api/app/AEPS/balanceEnquiry';
+             }
+       
+             console.log(
+               'Calling URL:',
+               finalUrl
+             );
+       
+
+
+
             setIsLoading(true);
             const Model = getMobileDeviceId();
             const address = latitude;
@@ -651,7 +729,7 @@ const BEnQ = useCallback(async (captureResponse1, cardnumberORUID1, pidDataX, is
             console.log('Request Data:', data);
 
             const response = await post({
-                url: activeAepsLine ? 'AEPS/api/Nifi/app/AEPS/balanceEnquiry' : 'AEPS/api/app/AEPS/balanceEnquiry',
+                url: finalUrl,
                 data: data,
                 config: { headers },
             });
@@ -966,9 +1044,46 @@ const BEnQ = useCallback(async (captureResponse1, cardnumberORUID1, pidDataX, is
 
         setIsLoading(true);
 
+        const provider =
+                activeAepsLine?.provider;
+        
+              console.log(
+                'Current Provider:',
+                provider
+              );
+        
+              // =========================
+              // URL SELECT
+              // =========================
+        
+              let finalUrl = '';
+        
+              if (provider === 'NIFI') {
+        
+                finalUrl =
+                  'AEPS/api/Nifi/data/CheckEkyc';
+              }
+        
+              else if (provider === 'CHAGANS') {
+        
+                finalUrl =
+                  'AEPS/api/Chagan/data/CheckEkyc';
+              }
+        
+              else if (provider === 'FINGPAY') {
+        
+                finalUrl =
+                  APP_URLS.checkekyc;
+              }
+        
+              console.log(
+                'Calling URL:',
+                finalUrl
+              );
+
         try {
             const response = await get({
-                url: APP_URLS.checkekyc, // ✅ direct use
+                url: finalUrl, // ✅ direct use
             });
 
             console.log('Check EKYC Response:', response);

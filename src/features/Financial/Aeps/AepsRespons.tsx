@@ -23,7 +23,7 @@ const AepsResponse = ({ route }) => {
         quality: 0.7,
       });
       await Share.open({
-        message: translate(`key_hiiams_47 ${APP_URLS.AppName} App.`),
+        message: `key_hiiams_47 ${APP_URLS.AppName} app.`,
         url: uri,
       });
     } catch (e) {

@@ -13,7 +13,7 @@ import DocPaddingSvg from '../../drawer/svgimgcomponents/DocPaddingSvg';
 import LocationSvg from '../../drawer/svgimgcomponents/LocationSvg';
 import PaddingSvg2 from '../../drawer/svgimgcomponents/PaddingSvg2';
 import FastImage from "react-native-fast-image";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 
 
 const Pendingcms = () => {
@@ -81,7 +81,7 @@ const Pendingcms = () => {
     <View style={{ flex: 1 }}>
       <View style={[styles.topcontainer]}>
         <FastImage
-          source={getImageSource(`${APP_URLS.cms_logo}`)}
+          source={getAssetSource(`${APP_URLS.cms_logo}`)}
           style={styles.imgstyle}
           resizeMode="contain"
         />

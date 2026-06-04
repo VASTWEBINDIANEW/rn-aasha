@@ -20,7 +20,7 @@ import RNFS from 'react-native-fs';
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
 import { AppInput, SectionCard, NavRow, getStepColor } from '../../components/FormUI';
-import { colors } from '../../../../utils/styles/theme';
+import { colors, FontSize } from '../../../../utils/styles/theme';
 import useAxiosHook from '../../../../utils/network/AxiosClient';
 import { APP_URLS } from '../../../../utils/network/urls';
 import { toast } from './AadhaarPanVerification/types';
@@ -238,7 +238,6 @@ const ChequeUpload = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [previewUri, setPreviewUri] = useState('');
 
   const [showPreview, setShowPreview] = useState(false);
   const [pendingAsset, setPendingAsset] = useState<{ uri: string; name: string } | null>(null);
@@ -248,7 +247,6 @@ const ChequeUpload = ({
 
   const handleAsset = (uri: string, fileName: string) => {
     setPendingAsset({ uri, name: fileName });
-    setPreviewUri(uri);
     setShowPreview(true);
   };
 
@@ -328,7 +326,6 @@ const ChequeUpload = ({
         <TouchableOpacity
           style={cu.preview}
           onPress={() => {
-            setPreviewUri(doc.uri);
             setShowPreview(true);
           }}
           activeOpacity={0.9}
@@ -371,7 +368,7 @@ const ChequeUpload = ({
 
       <ImagePreviewModal
         visible={showPreview}
-        imageUri={previewUri || doc.uri}
+        imageUri={pendingAsset?.uri || doc.uri}
         reUploadBtn={true}
         saveClose={() => setShowPreview(false)}
         onClose={() => {
@@ -446,7 +443,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
         toast('Please upload security cheque copy');
         return;
       }
-        setSubmitting(true);  // ✅ start
+      setSubmitting(true);  // ✅ start
 
       try {
         const checkCopyBase64 = await toBase64Anywhere(chequeDoc.uri);
@@ -475,13 +472,15 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
         toast('Something went wrong. Try again.');
       }
       finally {
-    setSubmitting(false);  // ✅ end — success ya error dono pe
-  }
+        setSubmitting(false);  // ✅ end — success ya error dono pe
+      }
     },
   });
 
   const { values, errors, touched, handleSubmit, setFieldValue, setFieldTouched } = formik;
-
+  useEffect(() => {
+    console.log('📦 chequeDoc changed:', chequeDoc);
+  }, [chequeDoc]);
   useEffect(() => {
     const fetchBank = async () => {
       try {
@@ -513,7 +512,12 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
           }, false);
 
           if (c?.BankName) setSelectedBank({ BankName: c.BankName });
-          if (c?.Securitycheck) setChequeDoc({ base64: '', uri: c.Securitycheck, name: 'Security Cheque' });
+          if (c?.Securitycheck) {
+            const uri = c.Securitycheck.replace(/\\/g, '/');
+            const cacheBustedUri = `${uri}?t=${Date.now()}`;  // ✅ cache bust
+            console.log('🖼️ Setting chequeDoc URI:', cacheBustedUri);
+            setChequeDoc({ base64: '', uri: cacheBustedUri, name: 'Security Cheque' });
+          }
         } else {
           setLoading(false);
         }
@@ -547,7 +551,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
     }
     handleSubmit();
   };
-const [submitting, setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   return (
     <View style={s.screen}>
@@ -575,6 +579,16 @@ const [submitting, setSubmitting] = useState(false);
         </SectionCard>
 
         <SectionCard title="Security Cheque Details" icon="checkbook" iconColor={stepColor}>
+          <View style={s.Crow}>
+            <Text style={s.payeeLabel}>
+              Payee's Name :
+            </Text>
+
+            {/* Value — Blue */}
+            <Text style={s.payeeValue}>
+              radiant cash management services Ltd
+            </Text>
+          </View>
           <AppInput
             label="Cheque No."
             placeholder="Enter cheque number"
@@ -624,8 +638,8 @@ const [submitting, setSubmitting] = useState(false);
           </Text>
         </View>
 
-        <NavRow onNext={onPressNext} stepColor={stepColor}   loading={submitting}  // ✅ yeh add karo
-/>
+        <NavRow onNext={onPressNext} stepColor={stepColor} loading={submitting}  // ✅ yeh add karo
+        />
       </ScrollView>
 
       <BankListModal
@@ -657,4 +671,24 @@ const s = StyleSheet.create({
   bankPickerText: { flex: 1, fontSize: wScale(13), color: '#9CA3AF', marginLeft: wScale(8) },
   authBox: { flexDirection: 'row', backgroundColor: '#EFF6FF', borderRadius: wScale(12), padding: wScale(14), marginBottom: hScale(16), borderWidth: 1, borderColor: '#BFDBFE', alignItems: 'flex-start' },
   authText: { flex: 1, fontSize: wScale(13), color: '#1E40AF', lineHeight: hScale(20), marginLeft: wScale(10) },
+  payeeLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#1F2937',      // black/dark
+    marginBottom: 2,
+  },
+  payeeValue: {
+
+    color: '#185FA5',      // blue
+    marginBottom: 12,
+    fontSize: wScale(18),
+    fontWeight: 'bold',
+    textTransform: 'capitalize'
+  },
+  Crow: {
+    borderRadius: 5,
+    borderWidth: wScale(.5),
+    backgroundColor: '#dfe5f2',
+    paddingLeft: wScale(15)
+  }
 });

@@ -19,31 +19,29 @@ export const KYCSchema = Yup.object({
 export const BasicInfoSchema = Yup.object({
 
   fullName: Yup.string()
+    .trim()
     .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
     .min(3, 'Too short')
     .required('Full name required'),
 
-dob: Yup.string()
-  .matches(
-    /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})$/,
-    'Format: DD/MM/YYYY or YYYY-MM-DD'
-  )
-  .required('DOB required'),
-
-  // age: Yup.number()
-  //   .typeError('Age must be a number')
-  //   .min(18, 'Must be 18+')
-  //   .max(80, 'Invalid age')
-  //   .required('Age required'),
+  dob: Yup.string()
+    .matches(
+      /^(\d{2}\/\d{2}\/\d{4}|\d{4}-\d{2}-\d{2})$/,
+      'Format: DD/MM/YYYY or YYYY-MM-DD'
+    )
+    .required('DOB required'),
 
   gender: Yup.string()
     .oneOf(['Male', 'Female', 'Other'])
     .required('Select gender'),
 
   alternateNo: Yup.string()
-    .matches(/^[6-9]\d{9}$/, 'Invalid alternate number')
-    .notRequired()
-    .nullable(),
+    .nullable()
+    .transform(v => v === '' ? null : v)
+    .matches(/^[6-9]\d{9}$/, {
+      message: 'Invalid alternate number',
+      excludeEmptyString: true,
+    }),
 
   religion: Yup.string()
     .required('Select religion'),
@@ -56,6 +54,7 @@ dob: Yup.string()
     .required('Select marital status'),
 
   noOfChildren: Yup.number()
+    .transform((v, o) => o === '' ? undefined : v)
     .when('maritalStatus', {
       is: 'Married',
       then: schema =>
@@ -68,89 +67,59 @@ dob: Yup.string()
     }),
 
   fatherName: Yup.string()
+    .trim()
     .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
     .required("Father's name required"),
 
   fatherOccupation: Yup.string()
+    .trim()
     .required("Father's occupation required"),
 
+  // ✅ REQUIRED
   motherName: Yup.string()
+    .trim()
     .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
-    .notRequired(),
+    .required("Mother's name required"),
 
+  // ✅ REQUIRED
   motherOccupation: Yup.string()
-    .notRequired(),
+    .trim()
+    .required("Mother's occupation required"),
 
   spouseName: Yup.string()
     .when('maritalStatus', {
       is: 'Married',
       then: schema =>
         schema
+          .trim()
           .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
           .required("Spouse name required"),
-      otherwise: schema => schema.notRequired(),
+      otherwise: schema =>
+        schema.nullable().transform(() => null),
     }),
 
   spouseOccupation: Yup.string()
     .when('maritalStatus', {
       is: 'Married',
-      then: schema => schema.required("Spouse occupation required"),
-      otherwise: schema => schema.notRequired(),
+      then: schema =>
+        schema.required("Spouse occupation required"),
+      otherwise: schema =>
+        schema.nullable().transform(() => null),
     }),
-    optionalDoc:   Yup.string().optional(),
-optionalDocId: Yup.string().when('optionalDoc', {
-  is: (v: string) => v !== '',
-  then:      s => s.required('Document number required'),
-  otherwise: s => s.optional(),
-}),
-    
 
+  // ✅ REQUIRED
+  optionalDoc: Yup.string()
+    .required('Select document type'),
+
+  optionalDocId: Yup.string()
+    .when('optionalDoc', {
+      is: (v: string) => !!v,
+      then: schema =>
+        schema.required('Document number required'),
+      otherwise: schema =>
+        schema.notRequired(),
+    }),
 });
-
-
-// export const EducationSchema = Yup.object({
-//   educations: Yup.array().of(
-//     Yup.object({
-//       qualification: Yup.string()
-//         .oneOf([
-//           '10th',
-//           '12th',
-//           'Diploma',
-//           'Graduate',
-//           'Post Graduate',
-//           'BA',
-//           'BSc',
-//           'BCom',
-//           'Art',
-//           'Other'
-//         ])
-//         .required('Select qualification'),
-
-//       college: Yup.string()
-//         .min(3, 'College name too short')
-//         .required('College required'),
-
-//       board: Yup.string()
-//         .min(2, 'Board name too short')
-//         .required('Board required'),
-
-//       fromDate: Yup.string()
-//         .matches(/^\d{4}-\d{2}-\d{2}$/, 'Enter valid From Date (YYYY-MM-DD)')
-//         .required('From Date required'),
-
-//       toDate: Yup.string()
-//         .matches(/^\d{4}-\d{2}-\d{2}$/, 'Enter valid To Date (YYYY-MM-DD)')
-//         .required('To Date required'),
-
-//       percentage: Yup.string()
-//         .required('Percentage required'),
-//     })
-//   )
-// });
-
-
-
-
 
 export const EducationSchema = Yup.object({
   educations: Yup.array().of(

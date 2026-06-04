@@ -7,6 +7,7 @@ import {
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
+  setLogoUrl,
   setNeedUpdate,
   setVersionData
 } from './reduxUtils/store/userInfoSlice';
@@ -117,7 +118,7 @@ export const AppContainer = () => {
 
   }, [authToken]);
 
-  
+
   const checkGPSOnResume = async () => {
     try {
 
@@ -148,42 +149,42 @@ export const AppContainer = () => {
       console.log("Resume Error", e);
     }
   };
-const [allowed, setAllowed] = useState(null);
+  const [allowed, setAllowed] = useState(null);
 
-useEffect(() => {
-  const subscriber = firestore()
-    .collection('appAccess')
-    .doc('appAccess')
-    .onSnapshot(
-      documentSnapshot => {
-        try {
-          if (documentSnapshot?.exists) {
+  useEffect(() => {
+    const subscriber = firestore()
+      .collection('appAccess')
+      .doc('appAccess')
+      .onSnapshot(
+        documentSnapshot => {
+          try {
+            if (documentSnapshot?.exists) {
 
-            const data = documentSnapshot.data();
+              const data = documentSnapshot.data();
 
-            const status = data?.isAllowed ?? false;
+              const status = data?.isAllowed ?? false;
 
-            setAllowed(status);
+              setAllowed(status);
 
-            console.log('User allowed status:', status);
+              console.log('User allowed status:', status);
 
-          } else {
+            } else {
+              setAllowed(false);
+              console.log('Document does not exist');
+            }
+          } catch (error) {
+            console.log('Firestore read error:', error);
             setAllowed(false);
-            console.log('Document does not exist');
           }
-        } catch (error) {
-          console.log('Firestore read error:', error);
+        },
+        error => {
+          console.log('Snapshot listener error:', error);
           setAllowed(false);
         }
-      },
-      error => {
-        console.log('Snapshot listener error:', error);
-        setAllowed(false);
-      }
-    );
+      );
 
-  return () => subscriber();
-}, []);
+    return () => subscriber();
+  }, []);
   const initAppAndLocation = async () => {
 
     let granted = false;
@@ -316,7 +317,12 @@ useEffect(() => {
         }));
       }
       const version = await get({ url: APP_URLS.current_version });
-
+      console.log('====================================');
+      console.log(version);
+      console.log('====================================');
+      if (version) {
+        dispatch(setLogoUrl(version.Logo))
+      }
       if (version.isgoogle) {
         setUpdate(version.isgoogle);
 
@@ -324,11 +330,11 @@ useEffect(() => {
         setUpdate(APP_URLS.version === version.currentversion);
       }
 
-const bundleId = DeviceInfo.getBundleId(); // Get it locally inside fetchAppData
-// if (version?.PackageName) {
-//   const mismatch = bundleId !== version.PackageName;
-//   setpkgmiss(mismatch);
-// }
+      const bundleId = DeviceInfo.getBundleId(); // Get it locally inside fetchAppData
+      // if (version?.PackageName) {
+      //   const mismatch = bundleId !== version.PackageName;
+      //   setpkgmiss(mismatch);
+      // }
 
       if (version?.PackageName) {
 
@@ -368,25 +374,25 @@ const bundleId = DeviceInfo.getBundleId(); // Get it locally inside fetchAppData
 
     return () => unsubscribe();
   }, []);
-  // --- 2. RENDER LOGIC (Priority Based) ---
+  // --- 2. RENDER LOGIC (Priority Based) --- 
 
   const renderMainContent = () => {
-    if (pkgmiss) {
-      return (
-        <BlockedMessageAnimated
-          message={'Invalid application package detected.\nContact developer.'}
-          bubbleCount={15}
-        />
-      );
-    }
+    // if (pkgmiss) {
+    //   return (
+    //     <BlockedMessageAnimated
+    //       message={'Invalid application package detected.\nContact developer.'}
+    //       bubbleCount={15}
+    //     />
+    //   );
+    // }
     if (connectionLost) {
       return <ConnectionLost onRetry={() => console.log('retry')} />
     }
 
-    if(APP_URLS.AppName ==='Maxus Pay'){
-        if (!update && allowed == true) {
-      return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
-    }
+    if (APP_URLS.AppName === 'Maxus Pay') {
+      if (!update && allowed == true) {
+        return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
+      }
     }
     if (!update) {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;

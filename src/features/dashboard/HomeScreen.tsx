@@ -26,7 +26,7 @@ import NewsSlider from "../../components/SliderText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QrcodSvg from '../drawer/svgimgcomponents/QrcodSvg';
 import FastImage from "react-native-fast-image";
-import { getImageSource, getImageSource2 } from "../../utils/network/NetWorkImages";
+import {  getAssetSource } from "../../utils/network/NetWorkImages";
 
 // ─── Glow Orbs (same as ReportScreen / AccReportScreen) ──────────────────────
 const GlowOrbs = ({ primaryColor }: { primaryColor: string }) => (
@@ -57,31 +57,50 @@ interface GlassSectionProps {
   children: React.ReactNode;
 }
 
-const GlassSection = ({ title, rightElement, children }: GlassSectionProps) => (
-  <View style={styles.glassSection}>
-    {/* Glass fill */}
-    <LinearGradient
-      colors={["rgba(13, 8, 8, 0.13)", "rgba(255,255,255,0.04)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={StyleSheet.absoluteFillObject}
-    />
-    {/* Top shimmer */}
-    <LinearGradient
-      colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.sectionTopShimmer}
-    />
+const GlassSection = ({
+  title,
+  rightElement,
+  children,
+}: GlassSectionProps) => {
 
-    <View style={styles.sectionTitleRow}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {rightElement}
+  const { colorConfig } = useSelector(
+    (state: RootState) => state.userInfo
+  );
+
+  return (
+    <View style={styles.glassSection}>
+      
+      {/* Glass fill */}
+      <LinearGradient
+        colors={["rgba(13, 8, 8, 0.13)", "rgba(255,255,255,0.04)"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      {/* Top shimmer */}
+      <LinearGradient
+        colors={[
+          colorConfig.secondaryColor,
+          colorConfig.secondaryColor,
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.sectionTopShimmer}
+      />
+
+      <View style={styles.sectionTitleRow}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {rightElement}
+      </View>
+
+      <View style={styles.sectionContent}>
+        {children}
+      </View>
+
     </View>
-
-    <View style={styles.sectionContent}>{children}</View>
-  </View>
-);
+  );
+};
 
 // ─── Quick Action Button ──────────────────────────────────────────────────────
 interface QuickBtnProps {
@@ -177,12 +196,31 @@ const HomeScreen = () => {
       }
       if (storedItems) setSavedItems(JSON.parse(storedItems));
 
-      const themeResponse = await post({ url: APP_URLS.ThemeChangeTime });
-      const backendTime   = themeResponse?.FullDateTime;
-      const localTime     = themeChangeTime?.themeUpdateTime;
+    let backendTime = null;
 
-      if (backendTime === localTime && dashboardData && Object.keys(dashboardData).length > 0) {
-        setFinanceSectionData(dashboardData.financeSectionData || []);
+try {
+  const themeResponse = await post({
+    url: APP_URLS.ThemeChangeTime,
+  });
+
+  backendTime = themeResponse?.FullDateTime;
+} catch (error) {
+  console.log(
+    "ThemeChangeTime API not available, skipping cache check"
+  );
+}
+
+const localTime = themeChangeTime?.themeUpdateTime;
+
+console.log('====================================');
+console.log(backendTime, localTime);
+console.log('====================================');
+if (
+  backendTime &&
+  backendTime === localTime &&
+  dashboardData &&
+  Object.keys(dashboardData).length > 0
+) {        setFinanceSectionData(dashboardData.financeSectionData || []);
         setOtherSectionData(dashboardData.otherSectionData   || []);
         setTravelSectionData(dashboardData.travelSectionData  || []);
         setCmsSectionData(dashboardData.cmsSectionData        || []);
@@ -195,13 +233,19 @@ const HomeScreen = () => {
         return;
       }
 
-      const [rRes, fRes, oRes, tRes, cRes] = await Promise.all([
-        post({ url: APP_URLS.getRechargeSectionImages }),
-        post({ url: APP_URLS.getFinanceSectionImages }),
-        post({ url: APP_URLS.getOtherSectionImages }),
-        post({ url: APP_URLS.getTravelSectionImages }),
-        post({ url: APP_URLS.getcmsSectionImages }),
-      ]);
+    const results = await Promise.allSettled([
+  post({ url: APP_URLS.getRechargeSectionImages }),
+  post({ url: APP_URLS.getFinanceSectionImages }),
+  post({ url: APP_URLS.getOtherSectionImages }),
+  post({ url: APP_URLS.getTravelSectionImages }),
+  post({ url: APP_URLS.getcmsSectionImages }),
+]);
+
+const rRes = results[0].status === "fulfilled" ? results[0].value : [];
+const fRes = results[1].status === "fulfilled" ? results[1].value : [];
+const oRes = results[2].status === "fulfilled" ? results[2].value : [];
+const tRes = results[3].status === "fulfilled" ? results[3].value : [];
+const cRes = results[4].status === "fulfilled" ? results[4].value : [];
 
       const filtered = rRes?.filter((i: any) => i.name !== "Hide More1") || [];
       const first7   = filtered.slice(0, 7);
@@ -215,8 +259,9 @@ const HomeScreen = () => {
 
       dispatch(setDashboardData({ rechargeSectionData: rRes || [], financeSectionData: fRes || [],
         otherSectionData: oRes || [], travelSectionData: tRes || [], cmsSectionData: cRes || [] }));
-      dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
-      setRefreshing(false);
+if (backendTime) {
+  dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
+}      setRefreshing(false);
     } catch (e) {
       console.error("Fetch Data Error:", e);
       setRefreshing(false);
@@ -257,11 +302,11 @@ const HomeScreen = () => {
       if      (APstatus.verify_type === "all")    isVerify = APstatus.aadhar_status && APstatus.pan_status;
       else if (APstatus.verify_type === "aadhar") isVerify = APstatus.aadhar_status === true;
       else if (APstatus.verify_type === "pan")    isVerify = APstatus.pan_status    === true;
-      if (!isVerify) {
-        navigation.replace("AadhrPanVerify", {
-          aadharcard: APstatus.aadhar, pancard: APstatus.pan, verify_type: APstatus.verify_type,
-        });
-      }
+      // if (!isVerify) {
+      //   navigation.replace("AadhrPanVerify", {
+      //     aadharcard: APstatus.aadhar, pancard: APstatus.pan, verify_type: APstatus.verify_type,
+      //   });
+      // }
     } catch (e) {
       console.error("Error in adharpanStatus:", e);
     }
@@ -286,9 +331,9 @@ const HomeScreen = () => {
       <DashboardHeader refreshPress={onRefresh} />
 
       {/* News ticker (non-Divyanshi) */}
-      {APP_URLS.AppName !== "Divyanshi Pay" && newsData?.length > 0 && (
+      {/* { newsData?.length > 0 && ( */}
         <NewsSlider data={newsData} />
-      )}
+      {/* )} */}
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -302,41 +347,13 @@ const HomeScreen = () => {
           />
         }
       >
-        {/* ── Quick Action Row ── */}
-        <View style={styles.quickRow}>
-           <QuickBtn
-                    icon={<QrcodSvg size={18} color="#fff" />}
-                    label={translate("Scan & Pay")}
-                    onPress={() => navigation.navigate({ name: "QRScanScreen" })}
-                    primaryColor={colorConfig.primaryColor}
-                  />
-
-          <QuickBtn
-            icon={<ToselfSvg size={18} color="#fff" />}
-            label={translate("Move_Wallet")}
-            onPress={() => navigation.navigate({ name: "PostoMain" })}
-            primaryColor={colorConfig.primaryColor}
-          />
-          <QuickBtn
-            icon={<HoldcreditSvg size={18} color="#fff" />}
-            label={translate("Hold_Credit")}
-            onPress={() => navigation.navigate({ name: "HoldAndCredit" })}
-            primaryColor={colorConfig.primaryColor}
-          />
-          
-          <QuickBtn
-            icon={<RecentTrSvg size={18} color="#fff" />}
-            label={translate("Recent_Tr")}
-            onPress={() => navigation.navigate("RecentTx")}
-            primaryColor={colorConfig.primaryColor}
-          />
-        </View>
+   
 
         {/* ── Quick Access ── */}
         {APP_URLS.AppName !== "Divyanshi Pay" && (
           <View style={styles.glassSection}>
             <LinearGradient
-              colors={["rgba(255,255,255,0.13)", "rgba(255,255,255,0.04)"]}
+              colors={[colorConfig.secondaryColor, colorConfig.secondaryColor]}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
             />
@@ -348,7 +365,7 @@ const HomeScreen = () => {
 
             <View style={styles.quickAccessHeader}>
               <View style={styles.qaLeft}>
-                <Text style={styles.qaHi}>{translate("Hi")}</Text>
+                <Text style={styles.qaHi}>{translate("Hi.")}</Text>
                 <Text style={styles.qaName} numberOfLines={1} ellipsizeMode="tail">
                   {FirmDet}
                 </Text>
@@ -356,7 +373,7 @@ const HomeScreen = () => {
               </View>
               <Pressable
                 onPress={() => navigation.navigate({ name: "QuickAccessScreen" })}
-                style={[styles.editBtn, { backgroundColor: `${colorConfig.primaryColor}90` }]}
+                style={[styles.editBtn, { backgroundColor: `${colorConfig.secondaryColor}90` }]}
               >
                 <LottieView
                   autoPlay loop
@@ -379,17 +396,12 @@ const HomeScreen = () => {
           <CarouselView />
         </View>
 
-        {/* News ticker (Divyanshi only) */}
-        {APP_URLS.AppName === "Divyanshi Pay" && newsData?.length > 0 && (
-          <NewsSlider data={newsData} />
-        )}
-
-        {/* ── Recharge & Pay Bills ── */}
+       
         <GlassSection
           title={translate("Recharge_Pay_Bill")}
           rightElement={
             <FastImage
-              source={getImageSource2("bblogo.png")}
+              source={getAssetSource("bblogo.png")}
               style={styles.bblogo}
             />
           }
@@ -411,7 +423,7 @@ const HomeScreen = () => {
             title={translate("Our_Exclusive_CMS")}
             rightElement={
               <FastImage
-                source={getImageSource(`${APP_URLS.cms_logo}`)}
+                source={getAssetSource(`${APP_URLS.cms_logo}`)}
                 style={styles.cmsLogo}
               />
             }
@@ -486,7 +498,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingHorizontal: wScale(10),
-    paddingTop:        hScale(6),
+    paddingTop:        hScale(0),
     paddingBottom:     hScale(80),
   },
 
@@ -554,7 +566,7 @@ const styles = StyleSheet.create({
     flexDirection:  "row",
     justifyContent: "space-between",
     alignItems:     "center",
-    paddingTop:     hScale(12),
+    paddingTop:     hScale(5),
     paddingHorizontal: wScale(14),
     paddingRight:   wScale(12),
   },
@@ -577,7 +589,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems:     "center",
     paddingHorizontal: wScale(14),
-    paddingTop:     hScale(10),
+    paddingTop:     hScale(5),
     paddingBottom:  hScale(4),
     backgroundColor: "rgba(255,255,255,0.05)",
   },
@@ -611,7 +623,7 @@ const styles = StyleSheet.create({
   lotiSmall: { height: hScale(18), width: wScale(18) },
 
   // ── Carousel ──
-  carouselWrap: { marginVertical: hScale(6) },
+  carouselWrap: { marginVertical: hScale(0) },
 
   // ── Logos ──
   bblogo:  { height: wScale(25), width: wScale(20) },

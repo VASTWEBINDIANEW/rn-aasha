@@ -104,6 +104,9 @@ const handleImageSelect = async (side) => {
     ToastAndroid.showWithGravity(message, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
   };
   const uploadDoCxAdhar = async () => {
+      console.log('🌐 BASE URL:', APP_URLS.baseWebUrl);
+  console.log('🌐 FULL URL:', `https://${APP_URLS.baseWebUrl}${IsDealer ? "api/user/UploadRetailerDocumentsByDealer" : 'api/user/UploadDocumentsImages'}`);
+
     if (!frontImage64) {
       showToast('Please select front side of aadhar card')
       setIsUploading(false)
@@ -130,7 +133,7 @@ const handleImageSelect = async (side) => {
     console.log(body);
 
     try {
-      const response = await fetch(`https://${APP_URLS.baseWebUrl}/${IsDealer ? "api/user/UploadRetailerDocumentsByDealer" : 'api/user/UploadDocumentsImages'}`, {
+const response = await fetch(`https://${APP_URLS.baseWebUrl}${IsDealer ? "api/user/UploadRetailerDocumentsByDealer" : 'api/user/UploadDocumentsImages'}`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",

@@ -15,6 +15,8 @@ const NewsSlider = ({ data }) => {
         <View style={styles.container}>
             <Marquee spacing={0} speed={1}>
                 <View style={styles.scrollContainer}>
+
+                    
                     {data.map((item, index) => (
                         <View key={index} style={styles.itemContainer}>
                             <Text style={styles.itemText}>

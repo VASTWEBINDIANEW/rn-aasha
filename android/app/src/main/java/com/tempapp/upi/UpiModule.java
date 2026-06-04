@@ -1,4 +1,4 @@
-package com.ssvcms.upi;
+package com.globalmultisolution.upi;
 
 import android.app.Activity;
 import android.content.Intent;

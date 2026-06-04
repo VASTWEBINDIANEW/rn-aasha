@@ -10,7 +10,7 @@ import { APP_URLS } from "../../../utils/network/urls";
 import Share from "react-native-share";
 import { shareSlipImage } from "../../../utils/shareSlipImage ";
 import FastImage from "react-native-fast-image";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 
 const PrepaySlipSummary = ({ route, }) => {
     const { slipData, action } = route.params;
@@ -98,7 +98,7 @@ console.log(action);
 
                         <FastImage 
                         
-                        source={getImageSource(`${APP_URLS.cms_logo}`)} 
+                        source={getAssetSource(`${APP_URLS.cms_logo}`)} 
                         
                         style={styles.imgstyle} resizeMode="contain" />
                         <View>
@@ -106,7 +106,7 @@ console.log(action);
                             <Text style={styles.title2}>{translate("CASH_MANAGEMENT_SERVICES_LIMITED")}</Text>
                             <Text style={styles.companyISO}>{translate("An_ISO_9001_2015_Company")}</Text>
                         </View>
-                        <FastImage source={getImageSource('CmsSlipQr.jpg')}
+                        <FastImage source={getAssetSource('CmsSlipQr.jpg')}
                             style={{ width: wScale(70), height: hScale(70), }} resizeMode='center' />
                     </View>
 

@@ -94,79 +94,332 @@ const useRadiantHook = () => {
   }, []);
 
 
-  const setRadiantDynamicOtp = useCallback(async (transId, mobileNo, shopId, amount, qrTransId, reqType, Email) => {
-    console.log({
-              "Email": Email,
+const setRadiantDynamicOtp = useCallback(
+  async (
+    transId,
+    mobileNo,
+    shopId,
+    amount,
+    qrTransId,
+    reqType,
+    Email
+  ) => {
 
-      "trans_id": transId,
-      "mobile_no": mobileNo,
-      "shop_id": shopId,
-      "tot_amount": amount,
-      "QR_transid": qrTransId,
-      //  "request_type": reqType,
-    });
+    const requestPayload = {
+      Email: Email || "",
+      trans_id: transId || "",
+      mobile_no: mobileNo || "",
+      shop_id: shopId || "",
+      tot_amount: amount || 0,
+      QR_transid: qrTransId || "",
+      request_type: reqType || ""
+    };
+
+    console.log(
+      "\n================ DYNAMIC OTP API START ================\n"
+    );
+
+    /* ---------------- FULL URL ---------------- */
+
+    const fullUrl =
+      `http://native.${APP_URLS.baseWebUrl}/${APP_URLS.setDynamicOtp}`;
+
+    console.log(
+      "API URL =>",
+      fullUrl
+    );
+
+    /* ---------------- REQUEST ---------------- */
+
+    console.log(
+      "\nREQUEST PAYLOAD =>"
+    );
+
+    console.log(
+      JSON.stringify(
+        requestPayload,
+        null,
+        2
+      )
+    );
 
     setIsLoading(true);
 
     try {
+
       const res = await post({
         url: APP_URLS.setDynamicOtp,
-        data: {
-          "Email": Email,
-          "trans_id": transId,
-          "mobile_no": mobileNo,
-          "shop_id": shopId,
-          "tot_amount": amount,
-          "QR_transid": qrTransId,
-          // "request_type": reqType,
-        }
+        data: requestPayload,
+        timeout: 120000
       });
 
-      console.log(res);
-      console.log('--------------------------setRadiantDynamicOtp---------------------------------------')
-      console.log(res)
-      setIsLoading(false);
+      /* ---------------- RESPONSE ---------------- */
 
-      if (!res.Content?.ADDINFO) {
+      console.log(
+        "\nRESPONSE =>"
+      );
+
+      console.log(
+        JSON.stringify(
+          res,
+          null,
+          2
+        )
+      );
+
+      /* ---------------- STATUS ---------------- */
+
+      const status =
+        res?.Content?.ADDINFO?.status;
+
+      const message =
+        res?.Content?.ADDINFO?.message;
+
+      const otp =
+        res?.Content?.ADDINFO?.otp_pin;
+
+      console.log(
+        "\nSTATUS =>",
+        status
+      );
+
+      console.log(
+        "MESSAGE =>",
+        message
+      );
+
+      console.log(
+        "OTP =>",
+        otp
+      );
+
+      console.log(
+        "TRANS ID =>",
+        res?.Content?.ADDINFO?.trans_id
+      );
+
+      /* ---------------- VALIDATION ---------------- */
+
+      if (!res) {
+
+        throw new Error(
+          "API returned empty response"
+        );
+      }
+
+      if (
+        res?.StatusCode !== 200
+      ) {
+
+        throw new Error(
+          `Invalid StatusCode ${res?.StatusCode}`
+        );
+      }
+
+      if (
+        !res?.Content
+      ) {
+
+        throw new Error(
+          "Content missing in API response"
+        );
+      }
+
+      if (
+        status !== "success"
+      ) {
+
+        console.log(
+          "\nOTP API FAILED =>",
+          message
+        );
+      }
+
+      return res;
+
+    } catch (error: any) {
+
+      console.log(
+        "\n================ API ERROR ================\n"
+      );
+
+      console.log(
+        "ERROR MESSAGE =>",
+        error?.message
+      );
+
+      console.log(
+        "ERROR CODE =>",
+        error?.code
+      );
+
+      console.log(
+        "ERROR STATUS =>",
+        error?.response?.status
+      );
+
+      console.log(
+        "ERROR RESPONSE =>"
+      );
+
+      console.log(
+        JSON.stringify(
+          error?.response?.data,
+          null,
+          2
+        )
+      );
+
+      console.log(
+        "FULL ERROR =>"
+      );
+
+      console.log(
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
+
+      if (
+        error?.code === 'ECONNABORTED'
+      ) {
+
         ToastAndroid.showWithGravity(
-          'Failed to fetch Dynamic OTP: ADDINFO is missing or invalid!',
+          'Server timeout. Please try again.',
           ToastAndroid.SHORT,
           ToastAndroid.BOTTOM
         );
+
       } else {
 
-        return res;
-        //  setDynamicOtpResponse(res);
+        ToastAndroid.showWithGravity(
+          error?.message ||
+          'Something went wrong!',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM
+        );
       }
-    } catch (error) {
+
+      return {
+        success: false,
+        error: error?.message
+      };
+
+    } finally {
+
       setIsLoading(false);
-      ToastAndroid.showWithGravity(
-        'Network Error: Something went wrong while fetching OTP.',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM
+
+      console.log(
+        "\n================ DYNAMIC OTP API END ================\n"
       );
     }
-  }, []);
 
-  const submitCashPickupTransaction = useCallback(async (transaction) => {
+  },
+  [post]
+);
+
+
+const submitCashPickupTransaction = useCallback(
+  async (transaction) => {
+
+    console.log(
+      "\n================ FINAL SUBMIT API START ================\n"
+    );
+
+    console.log(
+      "API URL =>",
+      APP_URLS.submitCashPickup
+    );
+    console.log(
+  "🌐 FULL URL =>",
+  `${APP_URLS.baseapiurl}${APP_URLS.submitCashPickup}`
+);
+
+    console.log(
+      "\nFINAL REQUEST PAYLOAD =>"
+    );
+
+    console.log(
+      JSON.stringify(
+        transaction,
+        null,
+        2
+      )
+    );
+
     setIsLoading(true);
-    console.log(transaction, '***************************')
 
-    
-    const res = await post({ url: APP_URLS.submitCashPickup, data: transaction });
-    setIsLoading(false);
-    console.log(res, '---------------------------submitCashPickupTransaction---------------------------')
+    try {
 
-    // if(res?.Content?.ADDINFO?.status === 'success'){
-    //      Alert.alert("Success", res?.Content?.ADDINFO?.message);
-    //    }
-    //    else{
-    //     // Alert.alert("Error", res?.Content?.ADDINFO?.message || 'Something went wrong.');
-    //    }
-    //setSubmitCashPickupResponse(res);
+      const res = await post({
+        url: APP_URLS.submitCashPickup,
+        data: transaction
+      });
 
-    return res;
-  }, []);
+      console.log(
+        "\nFINAL API RESPONSE =>"
+      );
+
+      console.log(
+        JSON.stringify(
+          res,
+          null,
+          2
+        )
+      );
+
+      console.log(
+        "\nSTATUS =>",
+        res?.Content?.ADDINFO?.status
+      );
+
+      console.log(
+        "MESSAGE =>",
+        res?.Content?.ADDINFO?.message
+      );
+
+      console.log(
+        "TRANS ID =>",
+        res?.Content?.ADDINFO?.trans_id
+      );
+
+      return res;
+
+    } catch (error: any) {
+
+      console.log(
+        "\nFINAL API ERROR =>"
+      );
+
+      console.log(
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
+
+      console.log(
+        "ERROR MESSAGE =>",
+        error?.message
+      );
+
+      throw error;
+
+    } finally {
+
+      setIsLoading(false);
+
+      console.log(
+        "\n================ FINAL SUBMIT API END ================\n"
+      );
+    }
+
+  },
+  []
+);
 
   const setCashPickupQrTransaction = useCallback(async (reqData) => {
     setIsLoading(true);

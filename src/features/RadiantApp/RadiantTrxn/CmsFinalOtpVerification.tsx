@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, ToastAndroid, AsyncStorage, Animated, BackHandler, Alert, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, ToastAndroid,  Animated, BackHandler, Alert, Keyboard } from 'react-native';
 import AppBarSecond from '../../drawer/headerAppbar/AppBarSecond';
 import CmsFinalOtopSvg from '../../drawer/svgimgcomponents/CmsFinalOtopSvg';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '../../../utils/navigation/NavigationService';
 import { useDispatch } from 'react-redux';
 import { setCmsVerify } from '../../../reduxUtils/store/userInfoSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CmsFinalOtpVerification = ({ route }) => {
   const { rctype, rcPrePayAnomut } = useSelector((state: RootState,) => state.userInfo);

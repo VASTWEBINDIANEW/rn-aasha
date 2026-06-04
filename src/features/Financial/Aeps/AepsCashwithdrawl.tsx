@@ -90,7 +90,8 @@ const isFocused = useIsFocused(); // Check karega ki kya ye tab screen par dikh 
     const [isScan, setIsScan] = useState(false);
     const [isFacialTan, setisFacialTan] = useState(false)
     const { get, post } = useAxiosHook();
-
+const provider =
+             activeAepsLine?.provider;
     const isFirstCall = useRef(false);
     useEffect(() => {
         setIsVisible2(false)
@@ -104,14 +105,50 @@ const isFocused = useIsFocused(); // Check karega ki kya ye tab screen par dikh 
         CheckEkyc();
         // 🔹 Bank list API
         const banks = async () => {
+      const provider =
+             activeAepsLine?.provider;
+     
+           console.log(
+             'Current Provider:',
+             provider
+           );
+     
+           // =========================
+           // URL SELECT
+           // =========================
+     
+           let finalUrl = '';
+     
+           if (provider === 'NIFI') {
+     
+             finalUrl =
+               APP_URLS.aepsBanklistNifi;
+           }
+     
+           else if (provider === 'CHAGANS') {
+     
+             finalUrl =
+               'AEPS/api/Chagan/Aeps/banklist';
+           }
+     
+           else if (provider === 'FINGPAY') {
+     
+             finalUrl =
+               APP_URLS.aepsBanklist;
+           }
+     
+           console.log(
+             'Calling URL:',
+             finalUrl
+           );
+     
+            
             try {
                 const response = await post({
-                    url: activeAepsLine
-                        ? APP_URLS.aepsBanklistNifi
-                        : APP_URLS.aepsBanklist,
+                    url: finalUrl,
                 });
 
-                console.log(response?.ADDINFO?.data?.[0]);
+                console.log("***********",response?.ADDINFO?.data?.[0]);
 
                 if (response?.RESULT === '0') {
                     setBanklist(response.ADDINFO.data);
@@ -661,6 +698,44 @@ const saveFaceResponse = async (data) => {
         ToastAndroid.show(String(isface ? 'ok' : 'OK'), ToastAndroid.SHORT);
         setIsLoading(true);
 
+        
+   const provider =
+               activeAepsLine?.provider;
+       
+             console.log(
+               'Current Provider:',
+               provider
+             );
+       
+             // =========================
+             // URL SELECT
+             // =========================
+       
+             let finalUrl = '';
+       
+             if (provider === 'NIFI') {
+       
+               finalUrl =
+              'AEPS/api/Nifi/app/Aeps/cashWithdrawal';
+             }
+       
+             else if (provider === 'CHAGANS') {
+       
+               finalUrl =
+                 'AEPS/api/Chagan/data/cashWithdrawal';
+             }
+       
+             else if (provider === 'FINGPAY') {
+       
+               finalUrl =
+                'AEPS/api/app/Aeps/cashWithdrawal';
+             }
+       
+             console.log(
+               'Calling URL:',
+               finalUrl
+             );
+
         try {
             const Model = getMobileDeviceId();
             const address = latitude + longitude;
@@ -696,7 +771,7 @@ const saveFaceResponse = async (data) => {
             const data = JSON.stringify(jdata);
 
             const response = await post({
-                url: activeAepsLine ? 'AEPS/api/Nifi/app/Aeps/cashWithdrawal' : 'AEPS/api/app/Aeps/cashWithdrawal',
+                url: finalUrl,
                 data: data,
                 config: { headers },
             });
@@ -930,8 +1005,47 @@ setIsLoading(false);
     const CheckEkyc = async () => {
         setIsLoading(true);
         try {
-            const url = activeAepsLine ? APP_URLS.checkekycNifi : APP_URLS.checkekyc;
-            const response = await get({ url });
+      
+       const provider =
+             activeAepsLine?.provider;
+     
+           console.log(
+             'Current Provider:',
+             provider
+           );
+     
+           // =========================
+           // URL SELECT
+           // =========================
+     
+           let finalUrl = '';
+     
+           if (provider === 'NIFI') {
+     
+             finalUrl =
+               'AEPS/api/Nifi/data/CheckEkyc';
+           }
+     
+           else if (provider === 'CHAGANS') {
+     
+             finalUrl =
+               'AEPS/api/Chagan/data/CheckEkyc';
+           }
+     
+           else if (provider === 'FINGPAY') {
+     
+             finalUrl =
+               APP_URLS.checkekyc;
+           }
+     
+           console.log(
+             'Calling URL:',
+             finalUrl
+           );
+     
+
+
+            const response = await get({ url: finalUrl });
 
             console.log("EKYC Response:", response);
 
@@ -1175,7 +1289,7 @@ setIsLoading(false);
                             setDeviceName={setDeviceName}
                             device={'Device'}
                             isface2={false}
-                            isface={isFacialTan}
+                            isface={provider === 'CHAGANS' ? false :isFacialTan}
                             opPress={() => {
                                 setDeviceName(deviceName);
                                 handleSelection(deviceName);

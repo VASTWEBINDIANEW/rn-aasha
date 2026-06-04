@@ -15,7 +15,7 @@ import { ALERT_TYPE, AlertNotificationRoot, Dialog } from 'react-native-alert-no
 import { APP_URLS } from '../../../utils/network/urls';
 import useAxiosHook from '../../../utils/network/AxiosClient';
 import FastImage from "react-native-fast-image";
-import { getImageSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../../utils/network/NetWorkImages";
 
 const Availabilitybusiness = () => {
   const { colorConfig, userId } = useSelector((state: RootState) => state.userInfo);
@@ -84,7 +84,7 @@ const Availabilitybusiness = () => {
       <View style={[styles.topcontainer,]}>
         <FastImage
         
-                source={getImageSource(`${APP_URLS.cms_logo}`)}
+                source={getAssetSource(`${APP_URLS.cms_logo}`)}
           style={styles.imgstyle}
           resizeMode="contain" />
         <View style={[styles.column,]}>

@@ -340,7 +340,10 @@ const RadiantPrepayReport = () => {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <AppBarSecond title="Cash Pickup Report" />
+      <AppBarSecond title="Cash Pickup Report" 
+       onPressBack={() => {
+            navigation.navigate('CashPickup',
+            );}}/>
 
       <DateRangePicker
         isStShow={true}

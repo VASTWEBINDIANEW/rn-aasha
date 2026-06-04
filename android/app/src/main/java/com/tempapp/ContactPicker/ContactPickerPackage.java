@@ -1,4 +1,4 @@
-package com.ssvcms.ContactPicker;
+package com.globalmultisolution.ContactPicker;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

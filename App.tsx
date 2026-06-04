@@ -17,86 +17,135 @@ import { setUnlocked } from './src/reduxUtils/store/userInfoSlice';
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
 import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
-
+import firestore from '@react-native-firebase/firestore';
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-// ── State add karo AppContent ke andar ──
-const [otaProgress, setOtaProgress] = useState(0);
-const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'success'>('idle');
+  // ── State add karo AppContent ke andar ──
+  const [otaProgress, setOtaProgress] = useState(0);
+  const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
-const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
-const VERSION_URL =
-  `https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/${formatted}/version.json`;
+  const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
+  const isUpdating = useRef(false);
+  const VERSION_URL =
+    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
+  console.log('OTA URL:', VERSION_URL);
+const fetchOtaDetails = async () => {
+  try {
+    const documentSnapshot = await firestore()
+      .collection('otaData')
+      .doc('otadata')
+      .collection('rechargedrishti')
+      .doc('ota')
+      .get();
 
-  const checkOta = async () => {
-    try {
-      const res = await fetch(VERSION_URL + '?t=' + Date.now());
-      const data = await res.json();
-
-      const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-      const latest = Number(data.version);
-
-      console.log('Installed:', installed, 'Latest:', latest);
-
-      if (!latest || isNaN(latest)) return;
-
-      if (latest > installed  && data.status) {
-        console.log('🚀 New OTA update found');
-        startUpdate(data);
-      } else {
-        console.log('✅ Already latest version');
-      }
-    } catch (error) {
-      console.log('OTA check failed', error);
+    if (!documentSnapshot.exists) {
+      console.log('OTA document not found');
+      return null;
     }
-  };
+
+    return documentSnapshot.data();
+  } catch (error) {
+    console.log('Firestore Error:', error);
+    return null;
+  }
+};
+const checkOta = async () => {
+  try {
+    const data = await fetchOtaDetails();
+
+    if (!data) {
+      return;
+    }
+
+    const installed =
+      Number(await OtUpdate.getCurrentVersion()) || 0;
+
+    const latest = Number(data.version);
+
+    console.log('Installed Version:', installed);
+    console.log('Firebase Version:', latest);
+    console.log('Bundle URL:', data.url);
+
+    if (!latest || isNaN(latest)) {
+      return;
+    }
+
+    if (
+      latest > installed &&
+      data.status === true &&
+      data.url
+    ) {
+      console.log('🚀 New OTA update found');
+
+      startUpdate({
+        version: latest,
+        bundle_url: data.url,
+      });
+    } else {
+      //Alert.alert('✅ Already latest version');
+    }
+  } catch (error) {
+    console.log('OTA Check Failed:', error);
+  }
+};
 
   // ✅ START UPDATE
   const startUpdate = async (data: any) => {
-  setOtaStatus('downloading'); // ✅ modal dikhao
-  setOtaProgress(0);
+    if (isUpdating.current) {
+      console.log('OTA already running');
+      return;
+    }
 
-  try {
-    await OtUpdate.downloadBundleUri(
-      ReactNativeBlobUtil,
-      data.bundle_url,
-      Number(data.version),
-      {
-        restartAfterInstall: true,
-        restartDelay: 1500,
+    isUpdating.current = true;
 
-        updateSuccess() {
-          setOtaStatus('success'); // ✅ success UI
-          console.log('✅ OTA Updated:', data.version);
-        },
+    setOtaStatus('downloading');
+    setOtaProgress(0);
 
-        updateFail(error) {
-          setOtaStatus('idle'); // ✅ modal band karo
-          console.log('❌ OTA Failed:', error);
-          toast.show('Update Failed', { type: 'danger' });
-        },
+    try {
+      await OtUpdate.downloadBundleUri(
+        ReactNativeBlobUtil,
+        data.bundle_url,
+        Number(data.version),
+        {
+          restartAfterInstall: true,
+          restartDelay: 1500,
+          notification: false,
+          useDownloadManager: false,
 
-        progress(received, total) {
-          if (total > 0) {
-            const percent = Math.floor((received / total) * 100);
-            setOtaProgress(percent); // ✅ progress update
-            console.log(`Download: ${percent}%`);
-          }
-        },
-      }
-    );
-  } catch (error) {
-    setOtaStatus('idle');
-    console.log('OTA execution error:', error);
-  }
-};
+          updateSuccess() {
+            console.log('✅ OTA Updated:', data.version);
+            setOtaStatus('success');
+          },
+
+          updateFail(error) {
+            console.log('❌ OTA Failed:', error);
+            setOtaStatus('failed');
+          },
+
+          progress(received, total) {
+            if (total > 0) {
+              const percent = Math.floor(
+                (received / total) * 100
+              );
+              setOtaProgress(percent);
+            }
+          },
+        }
+      );
+    } catch (error) {
+      console.log('OTA error:', error);
+      setOtaStatus('failed');
+    } finally {
+      isUpdating.current = false;
+    }
+  };
 
   // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
@@ -105,6 +154,8 @@ const VERSION_URL =
 
   // ✅ APP RESUME CHECK
   useEffect(() => {
+    checkOta(); // ✅ App open hone pe bhi check karo
+fetchOtaDetails()
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
@@ -121,17 +172,18 @@ const VERSION_URL =
   }, []);
 
   return (
-  <>
-    <OtaUpdateModal status={otaStatus} progress={otaProgress} />
-    <NavigationContainer
-      key={language}
-      ref={navigationRef}
-      onReady={() => RNBootSplash.hide({ fade: true })}
-    >
-      <AppContainer />
-    </NavigationContainer>
-  </>
-);
+    <>
+      <OtaUpdateModal status={otaStatus} progress={otaProgress} />
+      <NavigationContainer
+        key={language}
+        ref={navigationRef}
+        onReady={() => RNBootSplash.hide({ fade: true })}
+      >
+
+        <AppContainer />
+      </NavigationContainer>
+    </>
+  );
 };
 
 function App() {
@@ -155,9 +207,9 @@ function App() {
                 <PersistGate loading={null} persistor={persistor}>
 
                   <FormProvider>
-                      <AppContent />
+                    <AppContent />
                   </FormProvider>
-                
+
                 </PersistGate>
               </PaperProvider>
             </Provider>

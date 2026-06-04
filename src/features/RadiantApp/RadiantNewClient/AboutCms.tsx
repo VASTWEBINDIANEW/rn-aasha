@@ -13,7 +13,7 @@ import { APP_URLS } from '../../../utils/network/urls';
 import useAxiosHook from '../../../utils/network/AxiosClient';
 import ShowLoader from '../../../components/ShowLoder';
 import FastImage from "react-native-fast-image";
-import { getImageSource, getImageSource2 } from "../../../utils/network/NetWorkImages";
+import {  getAssetSource } from "../../../utils/network/NetWorkImages";
 
 const AboutCms = () => {
     const { colorConfig } = useSelector((state: RootState) => state.userInfo);
@@ -77,7 +77,7 @@ const AboutCms = () => {
             <View style={[styles.topcontainer,]}>
                 <FastImage 
                 
-                source={getImageSource(`${APP_URLS.cms_logo}`)}
+                source={getAssetSource(`${APP_URLS.cms_logo}`)}
                     style={styles.imgstyle}
                     resizeMode="contain" />
                 <View style={styles.column}>
@@ -111,7 +111,7 @@ const AboutCms = () => {
                     </View>
                     <View style={styles.matimg}>
 
-                        <FastImage source={getImageSource2('map.png')}
+                        <FastImage source={getAssetSource('map.png')}
                             style={styles.mapstyle}
                             resizeMode="contain" />
                     </View>

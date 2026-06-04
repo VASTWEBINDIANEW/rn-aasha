@@ -16,10 +16,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useSelector } from 'react-redux';
 import FastImage from "react-native-fast-image";
 import { APP_URLS } from "../utils/network/urls";
-import { getImageSource } from "../utils/network/NetWorkImages";
+import { getAssetSource } from "../utils/network/NetWorkImages";
 
 const ShowLoader = () => {
-    const { colorConfig } = useSelector((state: RootState) => state.userInfo);
+    const { colorConfig,logoUrl } = useSelector((state: RootState) => state.userInfo);
     const [backPressCount, setBackPressCount] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const navigation = useNavigation();
@@ -63,10 +63,14 @@ const ShowLoader = () => {
                         />
 
                         <FastImage
-                            source={getImageSource(`${APP_URLS.app_logo}`)}
-                            style={styles.logo}
-                            resizeMode="contain"
+                            source={getAssetSource(`${APP_URLS.app_logo}`)}
+                            
                         />
+                       <Image
+                                     source={{ uri: logoUrl }}
+                                    style={styles.logo}
+                                     resizeMode="contain"
+                                   />
                     </View>
 
                     {/* Text */}
