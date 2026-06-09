@@ -368,3 +368,15 @@ export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-
 
 const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
 export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
+<<<<<<< HEAD
+=======
+
+
+
+
+// export const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/digitalindiapay/';
+export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/assets/';  // ← add karo
+
+// const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
+// export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
+>>>>>>> 114a502e76848d2b2918120f5dca29da7e3f9aea
