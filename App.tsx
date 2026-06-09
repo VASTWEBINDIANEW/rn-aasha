@@ -154,8 +154,8 @@ const checkOta = async () => {
 
   // ✅ APP RESUME CHECK
   useEffect(() => {
-    checkOta(); // ✅ App open hone pe bhi check karo
-fetchOtaDetails()
+  //  checkOta(); // ✅ App open hone pe bhi check karo
+//fetchOtaDetails()
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&

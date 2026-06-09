@@ -34,7 +34,7 @@ import {
 } from 'react-native-alert-notification';
 import messaging from '@react-native-firebase/messaging';
 
-import { APP_URLS, IMAGE_BASE_URL, logoUrl } from '../../utils/network/urls';
+import { APP_URLS,  } from '../../utils/network/urls';
 import {
   setAuthToken,
   setColorConfig,

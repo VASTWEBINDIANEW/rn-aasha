@@ -13,7 +13,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxUtils/store";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useNavigation } from "../../../utils/navigation/NavigationService";
-import { translate } from '../../../utils/languageUtils/I18n';
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const T = {
@@ -67,13 +66,13 @@ const ActionBanner = ({
                 <View style={bs.rulesDivider} />
                 <View style={bs.rulesRow}>
                     <View style={bs.ruleItem}>
-                        <Text style={bs.rulesBadgeText}>{translate('Leave Rules')}</Text>
+                        <Text style={bs.rulesBadgeText}>Leave Rules</Text>
                         <Text style={bs.rulesText}>
-                            {translate("Approved leave incurs a")}{" "}
+                            Approved leave incurs a{" "}
                             <Text style={{ color: T.holiday, fontWeight: "700" }}>₹125 fine</Text>
-                            {", "}{translate("unapproved leave costs")}{" "}
+                            {", "}unapproved leave costs{" "}
                             <Text style={{ color: T.danger, fontWeight: "700" }}>₹250</Text>
-                            {". "}{translate("Submit or cancel by clicking the date before 10:00 AM")}{" "}
+                            {". "}Submit or cancel by clicking the date before{" "}
                             <Text style={{ color: T.warning, fontWeight: "700" }}>10:00 AM</Text>.
                         </Text>
                     </View>

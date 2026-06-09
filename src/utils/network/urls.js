@@ -5,9 +5,9 @@ export const APP_URLS = {
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
-  baseapiurl: 'http://native.rechargedrishti.com/',
+  baseapiurl: 'http://native.ssvcms.in/',
   // baseWebUrl: 'vastwebindia.com/',
-  baseWebUrl: 'rechargedrishti.com/',
+  baseWebUrl: 'ssvcms.in/',
 
   AppName: 'Recharge Drishti',
   app_logo: 'sonicswipe.png',
@@ -16,7 +16,7 @@ export const APP_URLS = {
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
   current_version: 'Common/api/data/Check_Android_Current_Version?vs_no=7',
-  version: '13.0.3',
+  version: '2.0.6',
   AepsBankInfo: 'AEPS/api/data/AepsBankInfo',
   daywisecommsofuser: 'Money/api/Money/daywisecommsofuser',
   ExtracommReport: 'Money/api/Money/ExtracommReport',
@@ -363,8 +363,8 @@ export const APP_URLS = {
   AccountVerify: 'api/Radiant/AccountVerify',
   RadiantFormALLStatus: 'api/Radiant/RadiantFormALLStatus'
 };
-export const IMAGE_BASE_URL = 'https://cdn.jsdelivr.net/gh/Vwi-app/vwiImages@main/';
+export const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/digitalindiapay/';
+export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/assets/';  // ← add karo
 
 const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
 export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
-
