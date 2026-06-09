@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSelector } from 'react-redux';
 import FastImage from "react-native-fast-image";
 import { APP_URLS } from "../utils/network/urls";
-import { getAssetSource } from "../utils/network/NetWorkImages";
+import { getAssetSource, getImageSource2 } from "../utils/network/NetWorkImages";
 
 const ShowLoader = () => {
     const { colorConfig,logoUrl } = useSelector((state: RootState) => state.userInfo);
@@ -62,10 +62,8 @@ const ShowLoader = () => {
                             color={colorConfig?.secondaryColor || "#6C63FF"}
                         />
 
-                        <FastImage
-                            source={getAssetSource(`${APP_URLS.app_logo}`)}
-                            
-                        />
+                       
+                       
                        <Image
                                      source={{ uri: logoUrl }}
                                     style={styles.logo}

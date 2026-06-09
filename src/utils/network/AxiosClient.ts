@@ -41,7 +41,7 @@ const useAxiosHook = () => {
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.smartpay1.in/',
+        baseURL: 'http://native.stdigipe.in/',
         // baseURL: 'http://native.skeshari.in/',
         timeout: 120000,
       }),

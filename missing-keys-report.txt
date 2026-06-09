@@ -1,0 +1,595 @@
+======================================================================
+  MISSING TRANSLATION KEYS REPORT
+======================================================================
+  Scan Directory : C:\Users\user\rn-aasha
+  en.json        : C:\Users\user\rn-aasha\src\utils\languageUtils\en.json
+  Generated At   : 6/8/2026, 6:45:26 PM
+======================================================================
+  Total translate() usages : 1883
+  Unique keys used         : 1098
+  Skipped (by config)      : 0
+  Missing in en.json       : 139
+======================================================================
+
+1. KEY: "256-bit encrypted & RBI compliant"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 373)
+
+2. KEY: "A newer version of the app is available for a better experience."
+     → src/features/dashboard/components/Update.tsx  (line 148)
+
+3. KEY: "Aadhar_Not_Verified"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 143)
+
+4. KEY: "Aadhar_Verified"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 143)
+
+5. KEY: "Account_Holder"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 338)
+
+6. KEY: "Amount_Mismatch"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 419)
+
+7. KEY: "Amount_minimum_100"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 88)
+
+8. KEY: "An error occurred. Please try again."
+     → src/features/drawer/securityPages/ChangeForgetPin.tsx  (line 165)
+     → src/features/drawer/securityPages/ChangeForgetPin.tsx  (line 190)
+
+9. KEY: "Approved leave incurs a"
+     → src/features/RadiantApp/CmsSalarySheet/PickupSalaryCalendar.tsx  (line 72)
+
+10. KEY: "Are you sure you want to log out?"
+     → src/features/drawer/Logout.tsx  (line 52)
+
+11. KEY: "Bank_Ref"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 258)
+
+12. KEY: "CMS Balance"
+     → src/features/dashboard/components/DashboardHeader.tsx  (line 196)
+
+13. KEY: "Camera_permission_subtitle"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 168)
+
+14. KEY: "ChangePassword.ERROR"
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 140)
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 159)
+
+15. KEY: "ChangePassword.OK"
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 129)
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 142)
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 161)
+
+16. KEY: "ChangePassword.Passwords do not match"
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 194)
+
+17. KEY: "ChangePassword.Please Enter Old Password !!!"
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 176)
+
+18. KEY: "ChangePassword.SUCCESS"
+     → src/features/drawer/securityPages/Changepassword.tsx  (line 123)
+
+19. KEY: "Choose Language"
+     → src/features/drawer/settingPages/LanguageSettings.tsx  (line 134)
+
+20. KEY: "Choose Options For Upload"
+     → src/hooks/useCameraCapture.ts  (line 81)
+
+21. KEY: "Choose your preferred UPI app"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 352)
+
+22. KEY: "Click Scan Finger and place your finger on the scanner."
+     → src/features/Financial/Aeps/aepsKycScan.tsx  (line 277)
+
+23. KEY: "Connect your Biometric Device (Mantra, Morpho, etc.) via OTG."
+     → src/features/Financial/Aeps/aepsKycScan.tsx  (line 271)
+
+24. KEY: "Copied to clipboard!  :"
+     → src/features/History/RechargeHistory.tsx  (line 64)
+
+25. KEY: "Downloading"
+     → src/features/dashboard/components/Update.tsx  (line 193)
+     → src/features/dashboard/components/Update.tsx  (line 199)
+
+26. KEY: "End_to_End_Encrypted"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 222)
+
+27. KEY: "Enter your UPI ID to pay directly"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 322)
+
+28. KEY: "Enter_valid_amount"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 83)
+
+29. KEY: "Error_Try_Again"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 181)
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 281)
+
+30. KEY: "Failed to fetch device information."
+     → src/features/dashboard/WalletScreen.tsx  (line 512)
+     → src/features/dashboard/wallettttt.tsx  (line 455)
+
+31. KEY: "Fast & Secure Payment"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 301)
+
+32. KEY: "Follow these steps"
+     → src/features/Financial/Aeps/aepsKycScan.tsx  (line 268)
+
+33. KEY: "Get_OTP"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 504)
+
+34. KEY: "Go_To_Dashboard"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 270)
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 276)
+
+35. KEY: "Hi."
+     → src/features/dashboard/HomeScreen.tsx  (line 368)
+
+36. KEY: "Hold & Lean"
+     → src/features/dashboard/components/DashboardHeader.tsx  (line 197)
+
+37. KEY: "Initializing_Camera"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 191)
+
+38. KEY: "Invalid UPI ID"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 172)
+
+39. KEY: "Invalid response format"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 59)
+
+40. KEY: "Invalid_QR"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 136)
+
+41. KEY: "Leave Rules"
+     → src/features/RadiantApp/CmsSalarySheet/PickupSalaryCalendar.tsx  (line 70)
+
+42. KEY: "Loading..."
+     → src/features/Financial/PanCard/PanServicePurchase.tsx  (line 294)
+     → src/features/History/PGReport.tsx  (line 316)
+     → src/features/History/PGReport.tsx  (line 325)
+
+43. KEY: "Missing status in response"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 64)
+
+44. KEY: "No results for"
+     → src/components/ElectricityOperatorBottomSheet.tsx  (line 252)
+
+45. KEY: "Not_a_valid_UPI_QR"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 136)
+
+46. KEY: "OTP_Send_Error"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 177)
+
+47. KEY: "Open UPI App to Pay"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 367)
+
+48. KEY: "PIN_Length_Error"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 483)
+
+49. KEY: "PIN_must_be_4_or_6"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 93)
+
+50. KEY: "Pan_Not_Verified"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 146)
+
+51. KEY: "Pan_Verified"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 146)
+
+52. KEY: "Pay via UPI App"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 351)
+
+53. KEY: "Pay via UPI ID"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 321)
+
+54. KEY: "Payment failed. Please try again."
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 127)
+
+55. KEY: "Payment_Details"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 281)
+
+56. KEY: "Payment_Response"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 269)
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 273)
+
+57. KEY: "Payoutkyc"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 337)
+
+58. KEY: "Please allow location to continue."
+     → src/AppContainer.tsx  (line 208)
+
+59. KEY: "Please complete your KYC verification to use Money Transfer services."
+     → src/features/Financial/VastDMT/MoneyTransfer.tsx  (line 85)
+
+60. KEY: "Please complete your verification to enable all AEPS features."
+     → src/features/Financial/Aeps/aepsKycScan.tsx  (line 263)
+
+61. KEY: "Please do not close the app..."
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 286)
+
+62. KEY: "Please enter a valid UPI ID\nExample: name@upi"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 172)
+
+63. KEY: "Please enter the complete OTP."
+     → src/features/drawer/profilePages/deletAccount/otpdeleteuser.tsx  (line 76)
+
+64. KEY: "Proceed to Transfer"
+     → src/features/Financial/Dmt/PaySprintDmt.tsx  (line 115)
+
+65. KEY: "Processing Payment"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 285)
+
+66. KEY: "QR UPI status failed with no message."
+     → src/features/dashboard/WalletScreen.tsx  (line 345)
+
+67. KEY: "QR status is not OK, try again."
+     → src/features/dashboard/wallettttt.tsx  (line 331)
+
+68. KEY: "Re_Enter_Amount"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 407)
+
+69. KEY: "RechargeScreen.#a89b0a"
+     → src/features/Recharge/RechargeScreen.tsx  (line 949)
+
+70. KEY: "RechargeScreen.Contact Permission"
+     → src/features/Recharge/RechargeScreen.tsx  (line 396)
+
+71. KEY: "RechargeScreen.FAILED"
+     → src/features/Recharge/RechargeScreen.tsx  (line 947)
+
+72. KEY: "RechargeScreen.Failed"
+     → src/features/Recharge/RechargeScreen.tsx  (line 758)
+
+73. KEY: "RechargeScreen.Mobile"
+     → src/features/Recharge/RechargeScreen.tsx  (line 1359)
+
+74. KEY: "RechargeScreen.Operator_name"
+     → src/features/Recharge/RechargeScreen.tsx  (line 930)
+
+75. KEY: "RechargeScreen.Please Enter Mobile Number"
+     → src/features/Recharge/RechargeScreen.tsx  (line 442)
+
+76. KEY: "RechargeScreen.Please Enter a 10 Digit Mobile Number"
+     → src/features/Recharge/RechargeScreen.tsx  (line 448)
+
+77. KEY: "RechargeScreen.Please Select Your Circle"
+     → src/features/Recharge/RechargeScreen.tsx  (line 460)
+
+78. KEY: "RechargeScreen.Please Select an Operator"
+     → src/features/Recharge/RechargeScreen.tsx  (line 454)
+
+79. KEY: "RechargeScreen.Postpaid"
+     → src/features/Recharge/RechargeScreen.tsx  (line 360)
+     → src/features/Recharge/RechargeScreen.tsx  (line 977)
+     → src/features/Recharge/RechargeScreen.tsx  (line 1356)
+
+80. KEY: "RechargeScreen.Recharge successful"
+     → src/features/Recharge/RechargeScreen.tsx  (line 778)
+
+81. KEY: "RechargeScreen.Recharge_number"
+     → src/features/Recharge/RechargeScreen.tsx  (line 927)
+
+82. KEY: "RechargeScreen.SUCCESS"
+     → src/features/Recharge/RechargeScreen.tsx  (line 944)
+
+83. KEY: "RechargeScreen.Search Contact"
+     → src/features/Recharge/RechargeScreen.tsx  (line 1177)
+
+84. KEY: "RechargeScreen.Status"
+     → src/features/Recharge/RechargeScreen.tsx  (line 943)
+     → src/features/Recharge/RechargeScreen.tsx  (line 946)
+     → src/features/Recharge/RechargeScreen.tsx  (line 953)
+
+85. KEY: "RechargeScreen.View \n Plans"
+     → src/features/Recharge/RechargeScreen.tsx  (line 1137)
+
+86. KEY: "RechargeScreen.address"
+     → src/features/Recharge/RechargeScreen.tsx  (line 717)
+
+87. KEY: "RechargeScreen.city"
+     → src/features/Recharge/RechargeScreen.tsx  (line 716)
+
+88. KEY: "RechargeScreen.green"
+     → src/features/Recharge/RechargeScreen.tsx  (line 945)
+
+89. KEY: "RechargeScreen.postcode"
+     → src/features/Recharge/RechargeScreen.tsx  (line 718)
+
+90. KEY: "RechargeScreen.red"
+     → src/features/Recharge/RechargeScreen.tsx  (line 948)
+
+91. KEY: "Recipient_Details"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 238)
+
+92. KEY: "Refer.Copy Code"
+     → src/features/drawer/ReferAndEran.tsx  (line 100)
+
+93. KEY: "Refer.Invite Friends"
+     → src/features/drawer/ReferAndEran.tsx  (line 84)
+
+94. KEY: "Refer.Refer & Earn"
+     → src/features/drawer/ReferAndEran.tsx  (line 76)
+
+95. KEY: "Refer.Share App Via"
+     → src/features/drawer/ReferAndEran.tsx  (line 106)
+
+96. KEY: "Refer.Share message"
+     → src/features/drawer/ReferAndEran.tsx  (line 57)
+
+97. KEY: "Refer.Share with friends and get exciting rewards on every signup"
+     → src/features/drawer/ReferAndEran.tsx  (line 86)
+
+98. KEY: "Refer.Your Referral Code"
+     → src/features/drawer/ReferAndEran.tsx  (line 92)
+
+99. KEY: "Review_Pay"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 188)
+
+100. KEY: "SIM.Your State Update Successfully."
+     → src/features/drawer/securityPages/MandatorySin.tsx  (line 58)
+
+101. KEY: "Scanning"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 286)
+
+102. KEY: "Search operator..."
+     → src/components/ElectricityOperatorBottomSheet.tsx  (line 235)
+
+103. KEY: "Search state..."
+     → src/components/ElectricityOperatorBottomSheet.tsx  (line 235)
+
+104. KEY: "Secured by PayU"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 313)
+
+105. KEY: "Select your device model from the dropdown below."
+     → src/features/Financial/Aeps/aepsKycScan.tsx  (line 274)
+
+106. KEY: "Self UPI status failed with no message."
+     → src/features/dashboard/WalletScreen.tsx  (line 339)
+
+107. KEY: "Something went wrong."
+     → src/features/dashboard/components/Update.tsx  (line 111)
+
+108. KEY: "Something went wrong. Please try again."
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 154)
+     → src/features/dashboard/WalletScreen.tsx  (line 114)
+     → src/features/dashboard/wallettttt.tsx  (line 101)
+
+109. KEY: "Something_Went_Wrong"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 275)
+
+110. KEY: "Something_went_wrong"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 153)
+
+111. KEY: "Step"
+     → src/components/ElectricityOperatorBottomSheet.tsx  (line 202)
+     → src/components/ElectricityOperatorBottomSheet.tsx  (line 202)
+
+112. KEY: "Submit or cancel by clicking the date before 10:00 AM"
+     → src/features/RadiantApp/CmsSalarySheet/PickupSalaryCalendar.tsx  (line 76)
+
+113. KEY: "Tap_to_Scan_Again"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 303)
+
+114. KEY: "To_Bank"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 311)
+
+115. KEY: "Transactions are secured via biometric authentication"
+     → src/features/Financial/Aeps/AepsTabScreen.tsx  (line 594)
+
+116. KEY: "Type your reason here..."
+     → src/features/History/RechargeHistory.tsx  (line 265)
+     → src/features/History/RechargeHistory.tsx  (line 266)
+
+117. KEY: "UPI Payment"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 300)
+
+118. KEY: "UPI_QR_only"
+     → src/features/Financial/ScanQr/QRScanScreen.tsx  (line 310)
+
+119. KEY: "Verification_Error"
+     → src/features/Financial/VastDMT/ToAccDmt.tsx  (line 152)
+
+120. KEY: "Welcome back."
+     → src/features/login/LoginScreen.tsx  (line 1086)
+
+121. KEY: "What"
+     → src/features/dashboard/components/Update.tsx  (line 165)
+
+122. KEY: "Wrong_PIN"
+     → src/features/Financial/ScanQr/ShowUPIData.tsx  (line 142)
+
+123. KEY: "You will be redirected to Google Play Store."
+     → src/features/dashboard/components/Update.tsx  (line 203)
+
+124. KEY: "Your State Update Successfully."
+     → src/features/drawer/securityPages/ManageLogin.tsx  (line 76)
+
+125. KEY: "Your payment has been completed successfully."
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 100)
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 107)
+
+126. KEY: "cmsremainbal"
+     → src/components/AllBalance.tsx  (line 19)
+
+127. KEY: "dashboard.Account"
+     → src/features/dashboard/DashboardScreen.tsx  (line 37)
+
+128. KEY: "dashboard.Home"
+     → src/features/dashboard/DashboardScreen.tsx  (line 28)
+     → src/features/dashboard/DashboardScreen.tsx  (line 40)
+
+129. KEY: "dashboard.Report"
+     → src/features/dashboard/DashboardScreen.tsx  (line 34)
+
+130. KEY: "dashboard.Scan QR"
+     → src/features/dashboard/DashboardScreen.tsx  (line 75)
+
+131. KEY: "dashboard.Wallet"
+     → src/features/dashboard/DashboardScreen.tsx  (line 31)
+
+132. KEY: "holdandleanbal"
+     → src/components/AllBalance.tsx  (line 20)
+
+133. KEY: "or"
+     → src/features/login/LoginScreen.tsx  (line 1190)
+
+134. KEY: "status is OK."
+     → src/features/dashboard/WalletScreen.tsx  (line 145)
+
+135. KEY: "to Wallet"
+     → src/features/dashboard/components/DashboardHeader.tsx  (line 260)
+
+136. KEY: "unapproved leave costs"
+     → src/features/RadiantApp/CmsSalarySheet/PickupSalaryCalendar.tsx  (line 74)
+
+137. KEY: "via UPI App"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 362)
+
+138. KEY: "via UPI ID"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 336)
+
+139. KEY: "yourname@upi"
+     → src/features/AddMoneyOps/payu/UPIScreen.tsx  (line 327)
+
+======================================================================
+  QUICK FIX — en.json me ye add karo:
+======================================================================
+{
+  "256-bit encrypted & RBI compliant": "256-bit encrypted & RBI compliant",
+  "A newer version of the app is available for a better experience.": "A newer version of the app is available for a better experience.",
+  "Aadhar_Not_Verified": "Aadhar_Not_Verified",
+  "Aadhar_Verified": "Aadhar_Verified",
+  "Account_Holder": "Account_Holder",
+  "Amount_Mismatch": "Amount_Mismatch",
+  "Amount_minimum_100": "Amount_minimum_100",
+  "An error occurred. Please try again.": "An error occurred. Please try again.",
+  "Approved leave incurs a": "Approved leave incurs a",
+  "Are you sure you want to log out?": "Are you sure you want to log out?",
+  "Bank_Ref": "Bank_Ref",
+  "CMS Balance": "CMS Balance",
+  "Camera_permission_subtitle": "Camera_permission_subtitle",
+  "ChangePassword.ERROR": "ChangePassword.ERROR",
+  "ChangePassword.OK": "ChangePassword.OK",
+  "ChangePassword.Passwords do not match": "ChangePassword.Passwords do not match",
+  "ChangePassword.Please Enter Old Password !!!": "ChangePassword.Please Enter Old Password !!!",
+  "ChangePassword.SUCCESS": "ChangePassword.SUCCESS",
+  "Choose Language": "Choose Language",
+  "Choose Options For Upload": "Choose Options For Upload",
+  "Choose your preferred UPI app": "Choose your preferred UPI app",
+  "Click Scan Finger and place your finger on the scanner.": "Click Scan Finger and place your finger on the scanner.",
+  "Connect your Biometric Device (Mantra, Morpho, etc.) via OTG.": "Connect your Biometric Device (Mantra, Morpho, etc.) via OTG.",
+  "Copied to clipboard!  :": "Copied to clipboard!  :",
+  "Downloading": "Downloading",
+  "End_to_End_Encrypted": "End_to_End_Encrypted",
+  "Enter your UPI ID to pay directly": "Enter your UPI ID to pay directly",
+  "Enter_valid_amount": "Enter_valid_amount",
+  "Error_Try_Again": "Error_Try_Again",
+  "Failed to fetch device information.": "Failed to fetch device information.",
+  "Fast & Secure Payment": "Fast & Secure Payment",
+  "Follow these steps": "Follow these steps",
+  "Get_OTP": "Get_OTP",
+  "Go_To_Dashboard": "Go_To_Dashboard",
+  "Hi.": "Hi.",
+  "Hold & Lean": "Hold & Lean",
+  "Initializing_Camera": "Initializing_Camera",
+  "Invalid UPI ID": "Invalid UPI ID",
+  "Invalid response format": "Invalid response format",
+  "Invalid_QR": "Invalid_QR",
+  "Leave Rules": "Leave Rules",
+  "Loading...": "Loading...",
+  "Missing status in response": "Missing status in response",
+  "No results for": "No results for",
+  "Not_a_valid_UPI_QR": "Not_a_valid_UPI_QR",
+  "OTP_Send_Error": "OTP_Send_Error",
+  "Open UPI App to Pay": "Open UPI App to Pay",
+  "PIN_Length_Error": "PIN_Length_Error",
+  "PIN_must_be_4_or_6": "PIN_must_be_4_or_6",
+  "Pan_Not_Verified": "Pan_Not_Verified",
+  "Pan_Verified": "Pan_Verified",
+  "Pay via UPI App": "Pay via UPI App",
+  "Pay via UPI ID": "Pay via UPI ID",
+  "Payment failed. Please try again.": "Payment failed. Please try again.",
+  "Payment_Details": "Payment_Details",
+  "Payment_Response": "Payment_Response",
+  "Payoutkyc": "Payoutkyc",
+  "Please allow location to continue.": "Please allow location to continue.",
+  "Please complete your KYC verification to use Money Transfer services.": "Please complete your KYC verification to use Money Transfer services.",
+  "Please complete your verification to enable all AEPS features.": "Please complete your verification to enable all AEPS features.",
+  "Please do not close the app...": "Please do not close the app...",
+  "Please enter a valid UPI ID\nExample: name@upi": "Please enter a valid UPI ID\nExample: name@upi",
+  "Please enter the complete OTP.": "Please enter the complete OTP.",
+  "Proceed to Transfer": "Proceed to Transfer",
+  "Processing Payment": "Processing Payment",
+  "QR UPI status failed with no message.": "QR UPI status failed with no message.",
+  "QR status is not OK, try again.": "QR status is not OK, try again.",
+  "Re_Enter_Amount": "Re_Enter_Amount",
+  "RechargeScreen.#a89b0a": "RechargeScreen.#a89b0a",
+  "RechargeScreen.Contact Permission": "RechargeScreen.Contact Permission",
+  "RechargeScreen.FAILED": "RechargeScreen.FAILED",
+  "RechargeScreen.Failed": "RechargeScreen.Failed",
+  "RechargeScreen.Mobile": "RechargeScreen.Mobile",
+  "RechargeScreen.Operator_name": "RechargeScreen.Operator_name",
+  "RechargeScreen.Please Enter Mobile Number": "RechargeScreen.Please Enter Mobile Number",
+  "RechargeScreen.Please Enter a 10 Digit Mobile Number": "RechargeScreen.Please Enter a 10 Digit Mobile Number",
+  "RechargeScreen.Please Select Your Circle": "RechargeScreen.Please Select Your Circle",
+  "RechargeScreen.Please Select an Operator": "RechargeScreen.Please Select an Operator",
+  "RechargeScreen.Postpaid": "RechargeScreen.Postpaid",
+  "RechargeScreen.Recharge successful": "RechargeScreen.Recharge successful",
+  "RechargeScreen.Recharge_number": "RechargeScreen.Recharge_number",
+  "RechargeScreen.SUCCESS": "RechargeScreen.SUCCESS",
+  "RechargeScreen.Search Contact": "RechargeScreen.Search Contact",
+  "RechargeScreen.Status": "RechargeScreen.Status",
+  "RechargeScreen.View \n Plans": "RechargeScreen.View \n Plans",
+  "RechargeScreen.address": "RechargeScreen.address",
+  "RechargeScreen.city": "RechargeScreen.city",
+  "RechargeScreen.green": "RechargeScreen.green",
+  "RechargeScreen.postcode": "RechargeScreen.postcode",
+  "RechargeScreen.red": "RechargeScreen.red",
+  "Recipient_Details": "Recipient_Details",
+  "Refer.Copy Code": "Refer.Copy Code",
+  "Refer.Invite Friends": "Refer.Invite Friends",
+  "Refer.Refer & Earn": "Refer.Refer & Earn",
+  "Refer.Share App Via": "Refer.Share App Via",
+  "Refer.Share message": "Refer.Share message",
+  "Refer.Share with friends and get exciting rewards on every signup": "Refer.Share with friends and get exciting rewards on every signup",
+  "Refer.Your Referral Code": "Refer.Your Referral Code",
+  "Review_Pay": "Review_Pay",
+  "SIM.Your State Update Successfully.": "SIM.Your State Update Successfully.",
+  "Scanning": "Scanning",
+  "Search operator...": "Search operator...",
+  "Search state...": "Search state...",
+  "Secured by PayU": "Secured by PayU",
+  "Select your device model from the dropdown below.": "Select your device model from the dropdown below.",
+  "Self UPI status failed with no message.": "Self UPI status failed with no message.",
+  "Something went wrong.": "Something went wrong.",
+  "Something went wrong. Please try again.": "Something went wrong. Please try again.",
+  "Something_Went_Wrong": "Something_Went_Wrong",
+  "Something_went_wrong": "Something_went_wrong",
+  "Step": "Step",
+  "Submit or cancel by clicking the date before 10:00 AM": "Submit or cancel by clicking the date before 10:00 AM",
+  "Tap_to_Scan_Again": "Tap_to_Scan_Again",
+  "To_Bank": "To_Bank",
+  "Transactions are secured via biometric authentication": "Transactions are secured via biometric authentication",
+  "Type your reason here...": "Type your reason here...",
+  "UPI Payment": "UPI Payment",
+  "UPI_QR_only": "UPI_QR_only",
+  "Verification_Error": "Verification_Error",
+  "Welcome back.": "Welcome back.",
+  "What": "What",
+  "Wrong_PIN": "Wrong_PIN",
+  "You will be redirected to Google Play Store.": "You will be redirected to Google Play Store.",
+  "Your State Update Successfully.": "Your State Update Successfully.",
+  "Your payment has been completed successfully.": "Your payment has been completed successfully.",
+  "cmsremainbal": "cmsremainbal",
+  "dashboard.Account": "dashboard.Account",
+  "dashboard.Home": "dashboard.Home",
+  "dashboard.Report": "dashboard.Report",
+  "dashboard.Scan QR": "dashboard.Scan QR",
+  "dashboard.Wallet": "dashboard.Wallet",
+  "holdandleanbal": "holdandleanbal",
+  "or": "or",
+  "status is OK.": "status is OK.",
+  "to Wallet": "to Wallet",
+  "unapproved leave costs": "unapproved leave costs",
+  "via UPI App": "via UPI App",
+  "via UPI ID": "via UPI ID",
+  "yourname@upi": "yourname@upi",
+}
