@@ -140,9 +140,9 @@ const CmsScreen = () => {
 
     if (status === false) {
       // ✅ CEID = NOTFound → status2 kabhi set nahi hoga → seedha InterestVerification
-      // if (status2 === null) {
-      //   return <InterestVerification />;
-      // }
+      if (status2 === null) {
+        return <InterestVerification />;
+      }
 
       switch (status2) {
         case 'Pending':
@@ -160,8 +160,8 @@ const CmsScreen = () => {
         case 'DocSuccess':
           return <RadiantTransactionScreen />;
 
-        // default:
-        //   return <InterestVerification />;
+        default:
+          return <InterestVerification />;
       }
     }
 
