@@ -1017,7 +1017,6 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
             style={{ width: wScale(110), height: wScale(110) }} resizeMode='contain' />
         </Animated.View>
-        <ActivityIndicator color="#6C63FF" size="large" style={{ marginTop: 24 }} />
       </LinearGradient>
     );
   }

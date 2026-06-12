@@ -1,4 +1,4 @@
-package com.globalmultisolution.ContactPicker;
+package com.payon4u.ContactPicker;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

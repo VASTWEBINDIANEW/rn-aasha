@@ -441,6 +441,7 @@ if (backendTime) {
         <GlassSection
           title={translate("Financial_Services")}
           rightElement={
+
             <LottieView
               autoPlay loop
               style={styles.lotiRight}
@@ -631,6 +632,8 @@ const styles = StyleSheet.create({
   lotiRight: {
     height: hScale(46),
     width:  wScale(38),
+    position:'absolute',
+    right:wScale(10),
   },
 
   // ── New badge ──

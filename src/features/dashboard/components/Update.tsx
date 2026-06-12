@@ -42,7 +42,6 @@ const UpdateScreen = () => {
         setLatestVersion(version.currentversion);
         console.log('====================================');
         console.log(version);
-        setLogoUrl(version.Logo);
 
         console.log('====================================');
         setid(version.PackageName);
@@ -119,7 +118,7 @@ const UpdateScreen = () => {
         colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
         style={styles.container}
       >
-      
+
         {/* Background Blobs */}
         <View style={styles.blob1} />
         <View style={styles.blob2} />
@@ -202,7 +201,10 @@ const UpdateScreen = () => {
           <Text style={styles.note}>
             {translate("You will be redirected to Google Play Store.")}
           </Text>
-          
+          <Text style={styles.note}>
+            {response?.PackageName || ''}
+          </Text>
+
         </View>
       </LinearGradient>
     </SafeAreaView>

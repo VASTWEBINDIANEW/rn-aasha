@@ -17,86 +17,56 @@ import { setUnlocked } from './src/reduxUtils/store/userInfoSlice';
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { Alert, AppState } from 'react-native';
+import { AppState } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
-import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
-import firestore from '@react-native-firebase/firestore';
+
+const OTA_API_URL = 'http://native.payon4u.com/Common/api/data/Check_Android_Current_Version?vs_no=7';
+
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-  // ── State add karo AppContent ke andar ──
+
   const [otaProgress, setOtaProgress] = useState(0);
   const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
-  const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
-  const VERSION_URL =
-    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
-  console.log('OTA URL:', VERSION_URL);
-const fetchOtaDetails = async () => {
-  try {
-    const documentSnapshot = await firestore()
-      .collection('otaData')
-      .doc('otadata')
-      .collection('rechargedrishti')
-      .doc('ota')
-      .get();
 
-    if (!documentSnapshot.exists) {
-      console.log('OTA document not found');
-      return null;
+  const checkOta = async () => {
+    try {
+      const res = await fetch(OTA_API_URL + '&t=' + Date.now());
+      const data = await res.json();
+
+      console.log('OTA API Response:', data);
+
+      const latest = Number(data.otaVersion);
+      const bundleUrl = data.bundleUrl;
+
+      if (!latest || isNaN(latest) || !bundleUrl) {
+        console.log('OTA data invalid');
+        return;
+      }
+
+      const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
+
+      console.log('Installed OTA:', installed, 'Latest OTA:', latest);
+
+      if (latest > installed) {
+        console.log('🚀 New OTA update found');
+        startUpdate({
+          version: latest,
+          bundle_url: bundleUrl,
+        });
+      } else {
+        console.log('✅ Already latest OTA version');
+      }
+    } catch (error) {
+      console.log('OTA check failed:', error);
     }
+  };
 
-    return documentSnapshot.data();
-  } catch (error) {
-    console.log('Firestore Error:', error);
-    return null;
-  }
-};
-const checkOta = async () => {
-  try {
-    const data = await fetchOtaDetails();
-
-    if (!data) {
-      return;
-    }
-
-    const installed =
-      Number(await OtUpdate.getCurrentVersion()) || 0;
-
-    const latest = Number(data.version);
-
-    console.log('Installed Version:', installed);
-    console.log('Firebase Version:', latest);
-    console.log('Bundle URL:', data.url);
-
-    if (!latest || isNaN(latest)) {
-      return;
-    }
-
-    if (
-      latest > installed &&
-      data.status === true &&
-      data.url
-    ) {
-      console.log('🚀 New OTA update found');
-
-      startUpdate({
-        version: latest,
-        bundle_url: data.url,
-      });
-    } else {
-      //Alert.alert('✅ Already latest version');
-    }
-  } catch (error) {
-    console.log('OTA Check Failed:', error);
-  }
-};
-
-  // ✅ START UPDATE
   const startUpdate = async (data: any) => {
     if (isUpdating.current) {
       console.log('OTA already running');
@@ -104,7 +74,6 @@ const checkOta = async () => {
     }
 
     isUpdating.current = true;
-
     setOtaStatus('downloading');
     setOtaProgress(0);
 
@@ -124,17 +93,17 @@ const checkOta = async () => {
             setOtaStatus('success');
           },
 
-          updateFail(error) {
+          updateFail(error: any) {
             console.log('❌ OTA Failed:', error);
             setOtaStatus('failed');
+            toast.show('Update Failed', { type: 'danger' });
           },
 
-          progress(received, total) {
+          progress(received: number, total: number) {
             if (total > 0) {
-              const percent = Math.floor(
-                (received / total) * 100
-              );
+              const percent = Math.floor((received / total) * 100);
               setOtaProgress(percent);
+              console.log(`Download: ${percent}%`);
             }
           },
         }
@@ -147,15 +116,13 @@ const checkOta = async () => {
     }
   };
 
-  // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
     dispatch(setUnlocked(false));
   }, [language, authToken]);
 
-  // ✅ APP RESUME CHECK
   useEffect(() => {
-  //  checkOta(); // ✅ App open hone pe bhi check karo
-//fetchOtaDetails()
+    checkOta();
+
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
@@ -164,7 +131,6 @@ const checkOta = async () => {
         console.log('🔄 App resumed → checking OTA');
         checkOta();
       }
-
       appState.current = nextAppState;
     });
 
@@ -179,7 +145,6 @@ const checkOta = async () => {
         ref={navigationRef}
         onReady={() => RNBootSplash.hide({ fade: true })}
       >
-
         <AppContainer />
       </NavigationContainer>
     </>
@@ -205,11 +170,9 @@ function App() {
             <Provider store={store}>
               <PaperProvider>
                 <PersistGate loading={null} persistor={persistor}>
-
                   <FormProvider>
                     <AppContent />
                   </FormProvider>
-
                 </PersistGate>
               </PaperProvider>
             </Provider>

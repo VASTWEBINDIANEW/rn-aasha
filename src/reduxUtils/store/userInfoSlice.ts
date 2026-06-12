@@ -136,7 +136,7 @@ const userInfoSlice = createSlice({
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
     setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
 
-    reset: () => JSON.parse(JSON.stringify(initialState)),
+    reset: () => initialState,
   },
 });
 

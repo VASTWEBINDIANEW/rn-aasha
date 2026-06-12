@@ -1,4 +1,4 @@
-package com.globalmultisolution;
+package com.payon4u;
 
 import android.app.Activity;
 import android.content.Intent;
