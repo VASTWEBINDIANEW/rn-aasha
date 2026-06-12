@@ -60,7 +60,7 @@ console.log(version)
   return {
       version: version.otaVersion,
       url: version.bundleUrl,
-      status: version.isgoogle === 'Success', // true/false
+      status: version.isgoogle, // true/false
       currentVersion: version.currentversion,
       message: version.message,
     };

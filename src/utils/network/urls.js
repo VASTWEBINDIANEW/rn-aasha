@@ -12,6 +12,7 @@ export const APP_URLS = {
   AppName: 'Recharge Drishti',
   app_logo: 'sonicswipe.png',
   cms_logo: 'radiant.png',
+  dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
   DownloadAPK: '/Home/DownloadAPK',
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
