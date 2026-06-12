@@ -1,538 +1,346 @@
-import { translate } from "../../../utils/languageUtils/I18n";
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator, FlatList, ToastAndroid } from 'react-native';
-
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator, ToastAndroid } from 'react-native';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import useAxiosHook from '../../../utils/network/AxiosClient';
 import { APP_URLS } from '../../../utils/network/urls';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
-const DealerAddWalletAndAddAcc = () => {
-  const authToken = useSelector(state => state.userInfo.authToken);
+import { translate } from "../../../utils/languageUtils/I18n";
 
-  const {get, post} = useAxiosHook();
-  const [bankName, setBankName] = useState('');
-  const [ifscCode, setIfscCode] = useState('');
-  const [accountHolderName, setAccountHolderName] = useState('');
-  const [accountNo, setAccountNo] = useState('');
-  const [branch, setBranch] = useState('');
-  const [accountType, setAccountType] = useState('');
-  const [city, setCity] = useState('');
+const DealerAddWalletAndAddAcc = () => {
+  const authToken = useSelector((state: any) => state.userInfo.authToken);
+  const { get, post } = useAxiosHook();
+
+  const [bankForm, setBankForm] = useState({ bankName: '', ifscCode: '', accountHolderName: '', accountNo: '', branch: '', accountType: '', city: '' });
+  const [walletForm, setWalletForm] = useState({ walletHolderName: '', walletNo: '', walletName: '' });
+  
   const [wallets, setWallets] = useState([]);
   const [banks, setBanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
-  
-  const [walletHolderName, setWalletHolderName] = useState('');
-  const [walletNo, setWalletNo] = useState('');
-  const [walletName, setWalletName] = useState('');
+  const [activeForm, setActiveForm] = useState<null | 'bank' | 'wallet'>(null);
 
+  const getAddedWallets = async () => {
+    try {
+      setLoading(true);
+      const response = await get({ url: APP_URLS.getDealerAddedWalletAndBanks });
+      if (response?.Walletlis) {
+        setWallets(response.Walletlis);
+        setBanks(response.banklist || []);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const [activeForm, setActiveForm] = useState(null); 
+  useEffect(() => { getAddedWallets(); }, []);
 
   const handleBankAccountSave = async () => {
-    
-    if (!bankName || !ifscCode || !accountHolderName || !accountNo || !branch || !accountType || !city) {
-      Alert.alert('Error', 'key_pleasefil_72');
+    const { bankName, ifscCode, accountHolderName, accountNo, branch, accountType, city } = bankForm;
+    if (Object.values(bankForm).some(val => !val)) {
+      Alert.alert('Error', translate('key_pleasefil_72') || 'Please fill all details');
       return;
     }
-    setLoading2(true)
+    setLoading2(true);
     try {
       const res = await get({
         url: `${APP_URLS.Add_dealer_Bank}Banknm=${bankName}&BranchName=${branch}&ifsccode=${ifscCode}&accountno=${accountNo}&accounttype=${accountType}&accountholder=${accountHolderName}&City=${city}`,
       });
-  console.log(res);
-      if (res?.status==='Success') { 
+      if (res?.status === 'Success') {
         ToastAndroid.show('Account added successfully', ToastAndroid.SHORT);
+        setBankForm({ bankName: '', ifscCode: '', accountHolderName: '', accountNo: '', branch: '', accountType: '', city: '' });
+        setActiveForm(null);
+        getAddedWallets();
       } else {
-
-        ToastAndroid.show('Failed to add account. Please try again.', ToastAndroid.SHORT);
+        ToastAndroid.show('Failed to add account', ToastAndroid.SHORT);
       }
-      setLoading2(false)
-
-    } catch (error) {
-      console.error(error);
-      ToastAndroid.show('key_anerroro_12', ToastAndroid.SHORT);
+    } catch {
+      ToastAndroid.show('An error occurred', ToastAndroid.SHORT);
+    } finally {
+      setLoading2(false);
     }
-  
-    resetBankForm();
-    setActiveForm(null);
   };
 
   const handleWalletSave = async () => {
+    const { walletName, walletNo, walletHolderName } = walletForm;
     if (!walletHolderName || !walletNo || !walletName) {
-      Alert.alert('Error', 'Please fill all the wallet details.');
+      Alert.alert('Error', 'Please fill all details');
       return;
     }
-    setLoading2(true)
-
+    setLoading2(true);
     try {
-      const url = `${APP_URLS.Add_dealer_Wallet}walletnm=${walletName}&walletno=${walletNo}&walletholdername=${walletHolderName}`;
-      console.log(url); 
-  
-      const res = await post({ url });
-  
-      console.log(res, '*****************************');
-  
-      if (res.status=='success') {
+      const res = await post({ url: `${APP_URLS.Add_dealer_Wallet}walletnm=${walletName}&walletno=${walletNo}&walletholdername=${walletHolderName}` });
+      if (res?.status === 'success') {
         ToastAndroid.show('Wallet added successfully', ToastAndroid.SHORT);
+        setWalletForm({ walletHolderName: '', walletNo: '', walletName: '' });
+        setActiveForm(null);
+        getAddedWallets();
       } else {
-        ToastAndroid.show('Failed to add wallet. Please try again.', ToastAndroid.SHORT);
+        ToastAndroid.show('Failed to add wallet', ToastAndroid.SHORT);
       }
-      setLoading2(false)
-
-      resetWalletForm();
-      setActiveForm(null); 
-  
-    } catch (error) {
-      console.error(error);
-      ToastAndroid.show('key_anerroro_12', ToastAndroid.SHORT);
-    }
-  };
-  
-
-  const resetBankForm = () => {
-    setBankName('');
-    setIfscCode('');
-    setAccountHolderName('');
-    setAccountNo('');
-    setBranch('');
-    setAccountType('');
-    setCity('');
-  };
-
-  const resetWalletForm = () => {
-    setWalletHolderName('');
-    setWalletNo('');
-    setWalletName('');
-  };
-
-  const handleSubmit = () => {
-    if (activeForm === 'bank') {
-      handleBankAccountSave();
-    } else if (activeForm === 'wallet') {
-      console.log(activeForm);
-
-      handleWalletSave();
+    } catch {
+      ToastAndroid.show('An error occurred', ToastAndroid.SHORT);
+    } finally {
+      setLoading2(false);
     }
   };
 
-  useEffect(() => {
-
-    
-    const getAddedWallets = async () => {
-      try {
-        const response = await get({ url: APP_URLS.getDealerAddedWalletAndBanks });
-        console.log(response);
-        if (response?.Walletlis) {
-          setWallets(response.Walletlis);
-          setBanks(response.banklist);
-        } else {
-          setWallets([]);
-        }
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error', 'Failed to load wallet data');
-        setWallets([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getAddedWallets();
-  }, []);
-
-  const onDelete = async (deleteId) => {
+  const onDelete = async (deleteId: any) => {
     try {
       const url = `https://native.${APP_URLS.baseWebUrl}${APP_URLS.Delete_dealer_Wallet}`;
-      const params = { id: deleteId };
-  
-      console.log('Making request to URL:', url);
-      console.log('Request params:', params);
-  
       const response = await axios.delete(url, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${authToken}`,  
-        },
-        params: params,
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${authToken}` },
+        params: { id: deleteId },
       });
-  
-      console.log('Response received:', response);
-  
-      if (response) {
-        const data = response.data;
-        const status = data.status;
-  
-        if (status === 'success') {
-          Alert.alert(
-            'Success',
-            'DELETE success',
-            [
-              { text: 'OK', onPress: () => console.log('Success') },
-            ],
-            { cancelable: false }
-          );
-        } else {
-          Alert.alert(
-            'Error',
-            'Not Delete',
-            [
-              { text: 'OK', onPress: () => console.log('Failed to delete') },
-            ],
-            { cancelable: false }
-          );
-        }
+      if (response?.data?.status === 'success') {
+        Alert.alert('Success', 'Deleted successfully');
+        getAddedWallets();
       } else {
-        throw new Error(`Unexpected response status: ${response.status}`);
+        Alert.alert('Error', 'Could not delete');
       }
-    } catch (error) {
-      console.error('Error during DELETE request:', error);
-  
-      if (error.message === 'Network Error') {
-        ToastAndroid.show('key_networker_54', ToastAndroid.LONG);
-      } else {
-        ToastAndroid.show('Data Not Found', ToastAndroid.SHORT);
-      }
+    } catch {
+      ToastAndroid.show('Data Not Found', ToastAndroid.SHORT);
     }
   };
-  
 
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Wallet_Name")}</Text>
-        <Text style={styles.amounttex}>{item.walletname}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Wallet_Holder")}</Text>
-        <Text style={styles.amounttex}>{item.walletholdername}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Wallet_No")}</Text>
-        <Text style={styles.amounttex}>{item.walletno}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Creation_Date")}</Text>
-        <Text style={styles.amounttex}>{new Date(item.createdate).toLocaleString()}</Text>
-      </View>
-      <TouchableOpacity onPress={() => onDelete(item.walletid)} style={styles.deleteButton}>
-        <Text style={styles.deleteText}>🗑</Text>
-      </TouchableOpacity>
-    </View>
-  );
-  
-  const renderItem2 = ({ item }) => (
-    <View style={styles.card}>
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Account_Holder_Name")}</Text>
-        <Text style={styles.amounttex}>{item.holdername}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Bank_Name")}</Text>
-        <Text style={styles.amounttex}>{item.banknm}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Branch_Name")}</Text>
-        <Text style={styles.amounttex}>{item.branch_nm}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Account_Number")}</Text>
-        <Text style={styles.amounttex}>{item.acno}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("IFSC_Code")}</Text>
-        <Text style={styles.amounttex}>{item.ifsccode}</Text>
-      </View>
-      <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Account_Type")}</Text>
-        <Text style={styles.amounttex}>{item.actype}</Text>
-      </View>
-       <View style={styles.border} />
-      <View style={styles.rowview}>
-        <Text style={styles.timetex}>{translate("Creation_Date")}</Text>
-        <Text style={styles.amounttex}>{new Date(item.createdate).toLocaleString()}</Text>
-      </View>
-      <View style={styles.border} />
-      <TouchableOpacity onPress={() => onDelete(item.idno)} style={styles.deleteButton}>
-        <Text style={styles.deleteText}>🗑</Text>
-      </TouchableOpacity>
+  const renderDetailRow = (label: string, value: string) => (
+    <View style={styles.detailRow}>
+      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowValue}>{value || 'N/A'}</Text>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.main}>
-      <TouchableOpacity
-        style={styles.button}
+    <ScrollView contentContainerStyle={styles.main} showsVerticalScrollIndicator={false}>
+      
+      {/* --- BANK SECTION --- */}
+      <TouchableOpacity 
+        style={[styles.toggleBtn, activeForm === 'bank' && styles.activeToggle]} 
         onPress={() => setActiveForm(activeForm === 'bank' ? null : 'bank')}
       >
-        <Text style={styles.buttonText}>{activeForm === 'bank' ? 'Close Bank Account Form' : 'Add Bank Account + '}</Text>
+        <Text style={[styles.toggleBtnText, activeForm === 'bank' && styles.activeToggleText]}>
+          {activeForm === 'bank' ? '✕ Close Bank Form' : 'Add Bank Account +'}
+        </Text>
       </TouchableOpacity>
 
- 
-      {activeForm === 'bank' ? (
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Bank Name"
-            value={bankName}
-            onChangeText={setBankName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="IFSC Code"
-            value={ifscCode}
-            onChangeText={setIfscCode}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Account Holder Name"
-            value={accountHolderName}
-            onChangeText={setAccountHolderName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Account No"
-            keyboardType="number-pad"
-            value={accountNo}
-            onChangeText={setAccountNo}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Branch"
-            value={branch}
-            onChangeText={setBranch}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Account Type"
-            value={accountType}
-            onChangeText={setAccountType}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="City"
-            value={city}
-            onChangeText={setCity}
-          />
-
-{(activeForm === 'bank' || activeForm === 'wallet') && (
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        { loading2 ?  <ActivityIndicator color={'white'} />:<Text style={styles.submitButtonText}>Submit</Text>}
-        </TouchableOpacity>
+      {activeForm === 'bank' && (
+        <View style={styles.formCard}>
+          {['Bank Name', 'IFSC Code', 'Account Holder Name', 'Account No', 'Branch', 'Account Type', 'City'].map((placeholder, idx) => {
+            const keys = ['bankName', 'ifscCode', 'accountHolderName', 'accountNo', 'branch', 'accountType', 'city'];
+            return (
+              <TextInput
+                key={placeholder}
+                style={styles.input}
+                placeholder={placeholder}
+                placeholderTextColor="#94A3B8"
+                value={(bankForm as any)[keys[idx]]}
+                keyboardType={idx === 3 ? 'number-pad' : 'default'}
+                onChangeText={(text) => setBankForm({ ...bankForm, [keys[idx]]: text })}
+              />
+            );
+          })}
+          <TouchableOpacity style={styles.submitBtn} onPress={handleBankAccountSave} disabled={loading2}>
+            {loading2 ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>Submit Bank Details</Text>}
+          </TouchableOpacity>
+        </View>
       )}
 
+      {/* --- WALLET SECTION --- */}
+      <TouchableOpacity 
+        style={[styles.toggleBtn, activeForm === 'wallet' && styles.activeToggle]} 
+        onPress={() => setActiveForm(activeForm === 'wallet' ? null : 'wallet')}
+      >
+        <Text style={[styles.toggleBtnText, activeForm === 'wallet' && styles.activeToggleText]}>
+          {activeForm === 'wallet' ? '✕ Close Wallet Form' : 'Add Wallet +'}
+        </Text>
+      </TouchableOpacity>
+
+      {activeForm === 'wallet' && (
+        <View style={styles.formCard}>
+          {['Wallet Holder Name', 'Wallet No', 'Wallet Name'].map((placeholder, idx) => {
+            const keys = ['walletHolderName', 'walletNo', 'walletName'];
+            return (
+              <TextInput
+                key={placeholder}
+                style={styles.input}
+                placeholder={placeholder}
+                placeholderTextColor="#94A3B8"
+                value={(walletForm as any)[keys[idx]]}
+                keyboardType={idx === 1 ? 'number-pad' : 'default'}
+                onChangeText={(text) => setWalletForm({ ...walletForm, [keys[idx]]: text })}
+              />
+            );
+          })}
+          <TouchableOpacity style={styles.submitBtn} onPress={handleWalletSave} disabled={loading2}>
+            {loading2 ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>Submit Wallet Details</Text>}
+          </TouchableOpacity>
         </View>
+      )}
 
-
-
-      ): (<View>
-
-<Text>{translate("Available_Banks")}</Text>
-
-{loading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
-      ) : (
-        <View style={styles.container}>
-          {banks.length === 0 ? (
-            <Text>{translate("No_Banks_Available")}</Text>
+      {/* --- DISPLAY LISTS --- */}
+      {!activeForm && (
+        <View style={styles.listSection}>
+          {loading ? (
+            <ActivityIndicator size="large" color="#4F46E5" style={{ marginTop: 40 }} />
           ) : (
-            <FlatList
-              data={banks}
-              renderItem={renderItem2}
-              keyExtractor={(item, index) => item.walletid ? item.walletid.toString() : index.toString()} // Key extractor fix
-            />
+            <>
+              {/* Banks List */}
+              <Text style={styles.sectionHeading}>{translate("Available_Banks")}</Text>
+              {banks.length === 0 ? <Text style={styles.emptyText}>{translate("No_Banks_Available")}</Text> : 
+                banks.map((item: any, index) => (
+                  <View key={item.idno || index} style={styles.dataCard}>
+                    {renderDetailRow(translate("Account_Holder_Name"), item.holdername)}
+                    {renderDetailRow(translate("Bank_Name"), item.banknm)}
+                    {renderDetailRow(translate("Branch_Name"), item.branch_nm)}
+                    {renderDetailRow(translate("Account_Number"), item.acno)}
+                    {renderDetailRow(translate("IFSC_Code"), item.ifsccode)}
+                    {renderDetailRow(translate("Account_Type"), item.actype)}
+                    <TouchableOpacity onPress={() => onDelete(item.idno)} style={styles.deleteBtn}>
+                      <Text style={styles.deleteBtnText}>Remove Account</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              }
+
+              {/* Wallets List */}
+              <Text style={[styles.sectionHeading, { marginTop: hScale(24) }]}>{translate("Available_Wallets")}</Text>
+              {wallets.length === 0 ? <Text style={styles.emptyText}>{translate("No_Wallets_Available")}</Text> : 
+                wallets.map((item: any, index) => (
+                  <View key={item.walletid || index} style={styles.dataCard}>
+                    {renderDetailRow(translate("Wallet_Name"), item.walletname)}
+                    {renderDetailRow(translate("Wallet_Holder"), item.walletholdername)}
+                    {renderDetailRow(translate("Wallet_No"), item.walletno)}
+                    <TouchableOpacity onPress={() => onDelete(item.walletid)} style={styles.deleteBtn}>
+                      <Text style={styles.deleteBtnText}>Remove Wallet</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              }
+            </>
           )}
         </View>
       )}
-
-      </View>)}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setActiveForm(activeForm === 'wallet' ? null : 'wallet')}
-      >
-        <Text style={styles.buttonText}>{activeForm === 'wallet' ? 'Close Wallet Form' : 'Add Wallet + '}</Text>
-      </TouchableOpacity>
-
-      {activeForm === 'wallet' ?(
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Wallet Holder Name"
-            value={walletHolderName}
-            onChangeText={setWalletHolderName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Wallet No"
-            value={walletNo}
-            keyboardType="number-pad"
-            onChangeText={setWalletNo}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Wallet Name"
-            value={walletName}
-            onChangeText={setWalletName}
-          />
-          {(activeForm === 'bank' || activeForm === 'wallet') && (
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        { loading2 ?  <ActivityIndicator color={'white'} />:<Text style={styles.submitButtonText}>Submit</Text>}
-        </TouchableOpacity>
-      )}
-        </View>
-      ) :(<View><Text>{translate("Available_Wallets")}</Text>
-
-        {loading ? (
-          <ActivityIndicator size="large" color="#4CAF50" />
-        ) : (
-          <View style={styles.container}>
-            {wallets.length === 0 ? (
-              <Text>{translate("No_Wallets_Available")}</Text>
-            ) : (
-              <FlatList
-                data={wallets}
-                renderItem={renderItem}
-                keyExtractor={(item, index) => item.walletid ? item.walletid.toString() : index.toString()} // Key extractor fix
-              />
-            )}
-          </View>
-        )}</View>)}
-
-   
-
-      <View style={{ height: hScale(20) }} />
-      
-
-
-
-
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   main: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
-    paddingTop: hScale(20),
-    paddingBottom: hScale(100),
-  },  
-  
-  container:{
-    flex:1,
-    padding:hScale(15)
+    padding: wScale(16),
+    backgroundColor: '#F8FAFC',
+    paddingBottom: hScale(60),
   },
-  card: {
-          marginBottom: hScale(10),
-          borderWidth: wScale(0.7),
-          borderRadius: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          paddingHorizontal: wScale(10),
-          paddingVertical: hScale(8),
-      },
-      rowview: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-      },
-      border: {
-          borderBottomWidth: wScale(0.7),
-          borderColor: '#000',
-          marginVertical: hScale(4),
-      },
-      amounttex: {
-          fontSize: wScale(15),
-          color: '#000',
-          fontWeight: 'bold',
-      },
-      timetex: {
-          fontSize: 14,
-          color: '#000',
-      },
-      textrit: {
-          textAlign: 'right',
-      },
-  button: {
-    backgroundColor: '#3498db',
-    paddingVertical: hScale(12),
-    marginHorizontal: hScale(20),
-    marginTop: hScale(20),
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  formContainer: {
-    backgroundColor: '#fff',
-    marginHorizontal: hScale(20),
-    padding: hScale(20),
-    marginTop: hScale(20),
+  toggleBtn: {
+    backgroundColor: '#FFF',
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    paddingVertical: hScale(14),
     borderRadius: 12,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    alignItems: 'center',
+    marginBottom: hScale(12),
+    shadowColor: '#0F172A',
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  activeToggle: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#94A3B8',
+  },
+  toggleBtnText: {
+    color: '#0F172A',
+    fontSize: wScale(14),
+    fontWeight: '600',
+  },
+  activeToggleText: {
+    color: '#475569',
+  },
+  formCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: wScale(16),
+    marginBottom: hScale(20),
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   input: {
-    height: hScale(50),
-    borderColor: '#ccc',
+    height: hScale(46),
+    borderColor: '#E2E8F0',
     borderWidth: 1,
     borderRadius: 10,
-    marginBottom: hScale(15),
-    paddingHorizontal: hScale(12),
-    fontSize: 16,
-    backgroundColor: '#f8f9fa',
+    marginBottom: hScale(12),
+    paddingHorizontal: wScale(14),
+    fontSize: wScale(14),
+    color: '#0F172A',
+    backgroundColor: '#F8FAFC',
   },
-  submitButton: {
-    backgroundColor: '#2ecc71',
-    paddingVertical: hScale(15),
-    marginHorizontal: hScale(20),
-    marginTop: hScale(20),
+  submitBtn: {
+    backgroundColor: '#4F46E5', // Indigo color for primary actions
+    paddingVertical: hScale(12),
     borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    marginTop: hScale(6),
   },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  submitBtnText: {
+    color: '#FFF',
+    fontSize: wScale(14),
+    fontWeight: '600',
   },
-  deleteButton: {
-    padding: 10,
-    backgroundColor: '#FF4C4C', 
+  listSection: {
+    marginTop: hScale(10),
+  },
+  sectionHeading: {
+    fontSize: wScale(15),
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: hScale(12),
+    letterSpacing: -0.2,
+  },
+  emptyText: {
+    fontSize: wScale(13),
+    color: '#64748B',
+    textAlign: 'center',
+    paddingVertical: hScale(16),
+  },
+  dataCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 14,
+    padding: wScale(14),
+    marginBottom: hScale(14),
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: hScale(6),
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  rowLabel: {
+    fontSize: wScale(12.5),
+    color: '#64748B',
+    fontWeight: '500',
+  },
+  rowValue: {
+    fontSize: wScale(13),
+    color: '#0F172A',
+    fontWeight: '600',
+  },
+  deleteBtn: {
+    backgroundColor: '#FEF2F2',
+    paddingVertical: hScale(8),
     borderRadius: 8,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 10,
+    marginTop: hScale(12),
   },
-  deleteText: {
-    fontSize: 20,
-    color: '#FFFFFF', 
+  deleteBtnText: {
+    color: '#EF4444',
+    fontSize: wScale(12.5),
+    fontWeight: '600',
   },
-
 });
 
 export default DealerAddWalletAndAddAcc;
