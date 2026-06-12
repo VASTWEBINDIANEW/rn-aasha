@@ -72,8 +72,8 @@ import { getAssetSource } from '../../utils/network/NetWorkImages';
 const LoginScreen = () => {
   const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl} = useSelector((state: RootState) => state.userInfo);
   const [modalVisible, setModalVisible] = useState(false)
-  const [userEmail, setUserEmail] = useState(signUpId || '9830270449');
-  const [userPassword, setUserPassword] = useState(signUpPassword || '18853480');
+  const [userEmail, setUserEmail] = useState(signUpId || '');
+  const [userPassword, setUserPassword] = useState(signUpPassword || '');
   const [mobileNumber, setMobileNumber] = useState('7414088555');
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
