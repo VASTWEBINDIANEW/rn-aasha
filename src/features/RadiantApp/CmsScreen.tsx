@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';  // ← Alert add kiya
 import { useSelector, useDispatch } from 'react-redux';
 
 import RadiantTransactionScreen from './RadiantTransactionScreen';
@@ -25,7 +25,6 @@ import ApprovalStatusScreen from './Radiantregister/ApprovalStatusScreen';
 import CmsNewPin from './RadiantTrxn/CmsNewPin';
 
 const CmsScreen = () => {
-  const { rceIdStatus } = useSelector((state: RootState) => state.userInfo);
 
   const [status, setStatus] = useState<boolean | null>(null);
   const [status2, setStatus2] = useState<string | null>(null);
@@ -44,18 +43,16 @@ const CmsScreen = () => {
       dispatch(clearEntryScreen(null));
 
       try {
-        
         const res1 = await post({ url: APP_URLS.RCEID });
-console.log('📡 URL =', APP_URLS.RCEID);
-  if (typeof res1 === 'string') {
-    console.log('HTML RESPONSE RECEIVED');
-    return;
-  }
+        console.log('📡 URL =', APP_URLS.RCEID);
 
-        console.log(
-          '✅ RCEID RESPONSE:',
-          JSON.stringify(res1, null, 2)
-        );
+        if (typeof res1 === 'string') {
+          console.log('HTML RESPONSE RECEIVED');
+          setLoading(false);
+          return;
+        }
+
+        console.log('✅ RCEID RESPONSE:', JSON.stringify(res1, null, 2));
 
         const s1 = res1?.Content?.ADDINFO?.sts ?? null;
         const t1 = res1?.Content?.ADDINFO?.Type ?? null;
@@ -67,8 +64,25 @@ console.log('📡 URL =', APP_URLS.RCEID);
         dispatch(setRctype(t1));
         dispatch(setRceID(rceID));
 
+        if (s1 === false) {
+  if (rceID === 'NOTFound') {
+    console.log('🔴 CEID = NOTFound → InterestVerification');
+    setLoading(false);
+    return;
+  }
+
+  // ⚠️ NOTFound nahi aaya — Alert dikhao
+  if (rceID !== null && rceID !== '' && rceID !== 'NOTFound') {
+    console.log('⚠️ CEID unexpected value:', rceID);
+    Alert.alert('CEID Info', `CEID: ${rceID}`);
+  }
+
+  setLoading(false);
+  return;
+}
+
         // =======================
-        // 🔹 API 3: Interest Check
+        // 🔹 API 3: Interest Check (sirf tab jab s1 === true ya CEID normal ho)
         // =======================
         if (s1 === false) {
           console.log('📡 Calling API: RadiantCEIntersetCheck');
@@ -77,10 +91,7 @@ console.log('📡 URL =', APP_URLS.RCEID);
             url: APP_URLS.RadiantCEIntersetCheck,
           });
 
-          console.log(
-            '✅ InterestCheck RESPONSE:',
-            JSON.stringify(res2, null, 2)
-          );
+          console.log('✅ InterestCheck RESPONSE:', JSON.stringify(res2, null, 2));
 
           const s2 = res2?.Content?.ADDINFO?.sts ?? null;
           setStatus2(s2);
@@ -97,10 +108,7 @@ console.log('📡 URL =', APP_URLS.RCEID);
               url: APP_URLS.CheckPendingForm,
             });
 
-            console.log(
-              '✅ CheckPendingForm RESPONSE:',
-              JSON.stringify(res3, null, 2)
-            );
+            console.log('✅ CheckPendingForm RESPONSE:', JSON.stringify(res3, null, 2));
 
             const checkStatus = res3?.status ?? null;
             setCheckInfo(checkStatus);
@@ -108,6 +116,7 @@ console.log('📡 URL =', APP_URLS.RCEID);
             console.log('📊 checkInfo:', checkStatus);
           }
         }
+
       } catch (error) {
         console.error('❌ ERROR:', error);
       }
@@ -119,16 +128,22 @@ console.log('📡 URL =', APP_URLS.RCEID);
     loadStatus();
   }, [dispatch]);
 
- 
-  if (loading || status === null || (status === false && status2 === null)) {
+
+  if (loading || status === null) {
     return <RadiantWellCome />;
   }
+
   const renderScreen = () => {
     if (status === true) {
       return <RadiantTransactionScreen />;
     }
 
     if (status === false) {
+      // ✅ CEID = NOTFound → status2 kabhi set nahi hoga → seedha InterestVerification
+      if (status2 === null) {
+        return <InterestVerification />;
+      }
+
       switch (status2) {
         case 'Pending':
         case 'DocPending':
@@ -153,10 +168,12 @@ console.log('📡 URL =', APP_URLS.RCEID);
     return <RadiantWellCome />;
   };
 
-  return <View style={styles.container}>
-    {renderScreen()} 
-    {/* <SecurityChequeScreen/> */}
-     </View>;
+  return (
+    <View style={styles.container}>
+      {renderScreen()}
+      {/* <SecurityChequeScreen/> */}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

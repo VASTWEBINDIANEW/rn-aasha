@@ -1,4 +1,4 @@
-package com.globalmultisolution.ContactPicker;
+package com.payon4u.ContactPicker;
 
 import android.app.Activity;
 import android.content.Intent;

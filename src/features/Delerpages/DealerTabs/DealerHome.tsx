@@ -96,14 +96,9 @@ useEffect(() => {
     >
       <StatusBar backgroundColor={colorConfig.primaryColor} />
 
-      <View style={[styles.Headers, 
-        // { backgroundColor: 'rgba(0, 0, 0, 0.2)' }
-        ]}>
+     
           <DashboardHeader refreshPress={true} />
-        {/* <TouchableOpacity onPress={handleLogout}>
-          <Feather name="power" size={30} color={"#fff"} />
-        </TouchableOpacity> */}
-      </View>
+      
 
       <ScrollView style={styles.container}>
 

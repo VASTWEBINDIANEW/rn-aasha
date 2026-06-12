@@ -4,6 +4,8 @@ import { hScale, wScale } from '../../../utils/styles/dimensions'
 import * as Animatable from 'react-native-animatable';
 import { APP_URLS, IMAGE_BASE_URL } from '../../../utils/network/urls';
 import useAxiosHook from '../../../utils/network/AxiosClient';
+import { getAssetSource } from '../../../utils/network/NetWorkImages';
+import FastImage from 'react-native-fast-image';
 const RadiantWellCome = () => {
     const fullText = "Radiant Cash Management Services Limited";
     const [displayedText, setDisplayedText] = useState('');
@@ -59,8 +61,9 @@ const RadiantWellCome = () => {
     return (
         <View style={styles.main}>
             <View style={styles.container}>
-                <Animated.Image
-                    source={{uri:`${IMAGE_BASE_URL}${APP_URLS.cms_logo}`}}
+                <FastImage
+                    // source={{uri:`${IMAGE_BASE_URL}${APP_URLS.cms_logo}`}}
+                     source={getAssetSource('Radiant2.jpg')}
                     style={[styles.logo,
                         // { transform: [{ scale: scaleAnim }] }
                     ]}

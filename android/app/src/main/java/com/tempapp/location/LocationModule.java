@@ -1,4 +1,4 @@
-package com.globalmultisolution.location;
+package com.payon4u.location;
 
 import android.Manifest;
 import android.app.Activity;

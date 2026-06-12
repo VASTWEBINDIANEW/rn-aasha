@@ -1,4 +1,4 @@
-// package com.globalmultisolution
+// package com.payon4u
 
 // import android.Manifest
 // import android.app.Activity
@@ -89,7 +89,7 @@
 //         }
 //     }
 // }
-package com.globalmultisolution
+package com.payon4u
 
 import android.Manifest
 import android.app.Activity

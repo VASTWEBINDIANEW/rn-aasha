@@ -1,4 +1,4 @@
-package com.globalmultisolution
+package com.payon4u
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -14,11 +14,11 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.modules.network.ReactCookieJarContainer
 
-import com.globalmultisolution.AepsPackage
-import com.globalmultisolution.upi.UpiPackage
-import com.globalmultisolution.location.LocationPackage
-import com.globalmultisolution.security.SecurityPackage
-import com.globalmultisolution.ContactPicker.ContactPickerPackage
+import com.payon4u.AepsPackage
+import com.payon4u.upi.UpiPackage
+import com.payon4u.location.LocationPackage
+import com.payon4u.security.SecurityPackage
+import com.payon4u.ContactPicker.ContactPickerPackage
 import com.otahotupdate.OtaHotUpdate
 
 class MainApplication : Application(), ReactApplication {

@@ -232,7 +232,7 @@ const { ContactPicker } = NativeModules;
 console.log("operator list", response);
    
       const res = response.myprop2Items;
-      console.log(res);
+      console.log(res,'-908907890908908909089890');
       setOperatorlist(res);
       if (ispost) {
         setSelectedOption(translate("RechargeScreen.Prepaid"));

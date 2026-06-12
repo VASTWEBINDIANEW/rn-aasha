@@ -34,7 +34,7 @@ import {
 } from 'react-native-alert-notification';
 import messaging from '@react-native-firebase/messaging';
 
-import { APP_URLS, IMAGE_BASE_URL, logoUrl } from '../../utils/network/urls';
+import { APP_URLS,  } from '../../utils/network/urls';
 import {
   setAuthToken,
   setColorConfig,
@@ -1219,7 +1219,6 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
 
             style={{ width: wScale(110), height: wScale(110) }} resizeMode='contain' />
         </Animated.View>
-        <ActivityIndicator color="#6C63FF" size="large" style={{ marginTop: 24 }} />
       </LinearGradient>
     );
   }

@@ -18,9 +18,9 @@ import { CalendarDropdown } from "../../../components/CalendarDropdown/CalendarD
 import MovingDotBorderText from "../../../components/AnimatedBorderView";
 import NoDatafound from "../../drawer/svgimgcomponents/Nodatafound";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import CmsPayoutStructure from "../RadiantNewClient/CmsPayoutStructure";
 import LinearGradient from "react-native-linear-gradient";
 import Table from "../../../components/TableData/Table";
+// import CmsPayoutStructure from "../RadiantNewClient/CmsPayoutStructure";
 
 export default function CrePayout() {
 
@@ -250,9 +250,9 @@ export default function CrePayout() {
 
                         </TouchableOpacity>
                     </MovingDotBorderText>
-
+{/* 
                     {tableShow && <CmsPayoutStructure />
-                    }
+                    } */}
 
                 </View>
 

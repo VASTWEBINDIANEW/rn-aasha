@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, Modal, } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, Modal, Keyboard, } from 'react-native';
 import FlotingInput from '../../drawer/securityPages/FlotingInput';
 import AlertSvg from '../../drawer/svgimgcomponents/AlertSvg';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
@@ -123,7 +123,7 @@ const CmsPrePay = ({ route }) => {
 
     const fatchData = async () => {
         setLoading(true);
-
+Keyboard.dismiss()
         try {
             const url = `${APP_URLS.CashPickupRemainBalNEW}?Amount=${amount}&RCEID=${rceID}&Shopid=${shopId}`;
             console.log("API URL 👉🟰🟰🟰🟰🟰🟰", url);
@@ -134,7 +134,7 @@ const CmsPrePay = ({ route }) => {
             setAmountneed(response.amountneeded);
             setAdminiStatus(response);  // store full response
             if (response?.apiremainstatus && response?.sts && response?.allowzero) {
-                navigation.navigate('CmsCoustomerInfo', {item, setAmount, setRAmount });
+                navigation.navigate('CmsCoustomerInfo', { item, setAmount, setRAmount });
 
             }
 
@@ -174,7 +174,7 @@ const CmsPrePay = ({ route }) => {
             return;
         }
         dispatch(setCmsAddMFrom('CmsPrePay'))
-        navigation.navigate("AddMoneyOptions", { amount:amountneed, paymentMode: 'UPI', from: 'PrePay' });
+        navigation.navigate("AddMoneyOptions", { amount: amountneed, paymentMode: 'UPI', from: 'PrePay' });
 
     };
     useEffect(() => {
@@ -412,7 +412,9 @@ const CmsPrePay = ({ route }) => {
 
 
                                     <Text style={styles.zeroText}>
+
                                         According to company rules and regulations, a retail executive can generate a maximum of five zero-value pickup slips from a particular store each month.
+                                        {adminiStatus?.msgshow}
                                     </Text>
                                 </View>
                             </View>

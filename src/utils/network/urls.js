@@ -1,15 +1,20 @@
 export const APP_URLS = {
   playUrl: 'http://play.google.com/store/apps/details?id=',
   RCEID: 'api/Radiant/RCEID',
-  appPackage: 'com.rechargedrishti',
+  appPackage: 'com.payon4u',
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
   baseapiurl: 'http://native.payon4u.com/',
   // baseWebUrl: 'vastwebindia.com/',
   baseWebUrl: 'payon4u.com/',
+<<<<<<< HEAD
   daybook:'Retailer/api/data/Retailerdaybook?',
   AppName: 'Recharge Drishti',
+=======
+
+  AppName: 'Payon4u',
+>>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
   app_logo: 'sonicswipe.png',
   cms_logo: 'radiant.png',
   dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
@@ -364,16 +369,8 @@ export const APP_URLS = {
   AccountVerify: 'api/Radiant/AccountVerify',
   RadiantFormALLStatus: 'api/Radiant/RadiantFormALLStatus'
 };
-export const IMAGE_BASE_URL = 'https://cdn.jsdelivr.net/gh/Vwi-app/vwiImages@main/';
+export const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/digitalindiapay/';
+export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/assets/';  // ← add karo
 
 const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
 export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
-
-
-
-
-// export const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/digitalindiapay/';
-export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/assets/';  // ← add karo
-
-// const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
-// export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
