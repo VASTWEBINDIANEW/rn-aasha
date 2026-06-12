@@ -86,57 +86,64 @@ const DashboardHeader = ({ refreshPress }) => {
   const dispatch = useDispatch();
 
   // ─── Fetch balance & user info ────────────────────────────────────────────
-  const getData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const userInfo = await get({ url: APP_URLS.getUserInfo });
-      const data = userInfo.data;
+const getData = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const userInfo = await get({ url: APP_URLS.getUserInfo });
+    const data = userInfo.data;
 
-      if (!IsDealer) {
-        const response = await get({ url: APP_URLS.balanceInfo });
-        setBalanceInfo(response.data[0]);
-      } else {
-        const decryptedData: ExtendedBalanceType = {
-          adminfarmname: decryptData(data.kkkk, data.vvvv, data.adminfarmname),
-          posremain: decryptData(data.kkkk, data.vvvv, data.posremain),
-          remainbal: decryptData(data.kkkk, data.vvvv, data.remainbal),
-          frmanems: decryptData(data.kkkk, data.vvvv, data.frmanems),
-          cmsremainbal: decryptData(data.kkkk, data.vvvv, data.cmsremainbal),
-          holdandleanbal: decryptData(data.kkkk, data.vvvv, data.holdandleanbal),
-        };
-        setfirmName(decryptedData.adminfarmname as string);
-        setBalanceInfo(decryptedData);
-
-      }
-
-      const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
-      setfirmName(adminFarmName);
-
-      // RCE ID checks
-      const res = await post({ url: APP_URLS.RCEID }).catch(() => null);
-      if (res?.Content?.ADDINFO?.sts === false) {
-        const res2 = await post({ url: APP_URLS.RadiantCEIntersetCheck }).catch(() => null);
-        if (res2 && res2 !== 'Invalid response..') {
-          dispatch(setRceIdStatus({
-            status: res.Content.ADDINFO.sts,
-            status2: res2.Content.ADDINFO.sts,
-          }));
-        }
-      }
-
-      await AsyncStorage.setItem('adminFarmData', JSON.stringify({
-        adminFarmName: adminFarmName,
-        frmanems: decryptData(data.vvvv, data.kkkk, data.frmanems),
-        photoss: data.photoss ? decryptData(data.vvvv, data.kkkk, data.photoss) : '',
-      }));
-    } catch (error: any) {
-      if (error.message !== 'Network Error') {
-        console.error('getData error:', error);
-      }
-    } finally {
-      setIsLoading(false);
+    if (!IsDealer) {
+      const response = await get({ url: APP_URLS.balanceInfo });
+      setBalanceInfo(response.data[0]);
+    } else {
+      // Yahan humne conditional checking laga di hai taaki bina data ke decrypt call na ho
+      const decryptedData: ExtendedBalanceType = {
+        adminfarmname: decryptData(data.kkkk, data.vvvv, data.adminfarmname),
+        posremain: decryptData(data.kkkk, data.vvvv, data.posremain),
+        remainbal: decryptData(data.kkkk, data.vvvv, data.remainbal),
+        frmanems: decryptData(data.kkkk, data.vvvv, data.frmanems),
+        
+        // Agar data exist karega tabhi decrypt hoga, nahi toh render nahi hoga (undefined rahega)
+        ...(data.cmsremainbal && {
+          cmsremainbal: decryptData(data.kkkk, data.vvvv, data.cmsremainbal)
+        }),
+        ...(data.holdandleanbal && {
+          holdandleanbal: decryptData(data.kkkk, data.vvvv, data.holdandleanbal)
+        }),
+      };
+      
+      setfirmName(decryptedData.adminfarmname as string);
+      setBalanceInfo(decryptedData);
     }
-  }, [get]);
+
+    const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
+    setfirmName(adminFarmName);
+
+    // RCE ID checks
+    const res = await post({ url: APP_URLS.RCEID }).catch(() => null);
+    if (res?.Content?.ADDINFO?.sts === false) {
+      const res2 = await post({ url: APP_URLS.RadiantCEIntersetCheck }).catch(() => null);
+      if (res2 && res2 !== 'Invalid response..') {
+        dispatch(setRceIdStatus({
+          status: res.Content.ADDINFO.sts,
+          status2: res2.Content.ADDINFO.sts,
+        }));
+      }
+    }
+
+    await AsyncStorage.setItem('adminFarmData', JSON.stringify({
+      adminFarmName: adminFarmName,
+      frmanems: decryptData(data.vvvv, data.kkkk, data.frmanems),
+      photoss: data.photoss ? decryptData(data.vvvv, data.kkkk, data.photoss) : '',
+    }));
+  } catch (error: any) {
+    if (error.message !== 'Network Error') {
+      console.error('getData error:', error);
+    }
+  } finally {
+    setIsLoading(false);
+  }
+}, [get]);
 
   // ─── Load notifications from storage ─────────────────────────────────────
   useEffect(() => {
@@ -189,13 +196,40 @@ const DashboardHeader = ({ refreshPress }) => {
     alert(`${latitude.length}\n${longitude.length}`);
   }, [latitude, longitude]);
 
-  // ─── Balance card config ──────────────────────────────────────────────────
-  const balanceCards: BalanceCardProps[] = [
-    { label: translate('Main Balance'), value: balanceInfo?.remainbal, accentColor: '#81C784', align: 'left', delay: 0 },
-    { label: translate('Pos Balance'), value: balanceInfo?.posremain, accentColor: colorConfig.primaryColor, align: 'center', delay: 80 },
-    { label: translate('CMS Balance'), value: balanceInfo?.cmsremainbal, accentColor: '#FFB74D', align: 'center', delay: 160 },
-    { label: translate('Hold & Lean'), value: balanceInfo?.holdandleanbal, accentColor: '#C90909', align: 'right', delay: 240 },
-  ];
+// ─── Balance card config ──────────────────────────────────────────────────
+const balanceCards: BalanceCardProps[] = [
+  { 
+    label: translate('Main Balance'), 
+    value: balanceInfo?.remainbal, 
+    accentColor: '#81C784', 
+    align: 'left', 
+    delay: 0 
+  },
+  { 
+    label: translate('Pos Balance'), 
+    value: balanceInfo?.posremain, 
+    accentColor: colorConfig.primaryColor, 
+    align: 'center', 
+    delay: 80 
+  },
+  // Agar IsDealer false hoga, sirf tabhi yeh niche ke dono cards list me aayenge
+  ...(!IsDealer ? [
+    { 
+      label: translate('CMS Balance'), 
+      value: balanceInfo?.cmsremainbal, 
+      accentColor: '#FFB74D', 
+      align: 'center', 
+      delay: 160 
+    },
+    { 
+      label: translate('Hold & Lean'), 
+      value: balanceInfo?.holdandleanbal, 
+      accentColor: '#C90909', 
+      align: 'right', 
+      delay: 240 
+    }
+  ] : [])
+];
   const notifCount = notifications.length;
 
   return (
@@ -248,7 +282,7 @@ const DashboardHeader = ({ refreshPress }) => {
               </TouchableOpacity>
             )}
 
-           <View>
+      {  !IsDealer &&   <View>
                <TouchableOpacity  
               style={styles.notiBell}
 
@@ -259,21 +293,21 @@ const DashboardHeader = ({ refreshPress }) => {
             <Text style={{fontSize:wScale(9),color:'#fff',fontWeight:'700',textAlign:'center'}}>
               {translate('to Wallet')}
             </Text>
-</View>
-            <TouchableOpacity
+</View>}
+          {!IsDealer &&  <TouchableOpacity
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "RecentTx" })}            >
               <RecentTrSvg size={25} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity>}
+         {!IsDealer &&   <TouchableOpacity
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "QRScanScreen" })}            >
               <QrcodSvg size={25} color="#fff" />
 
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity>}
+         { !IsDealer &&  <TouchableOpacity
               style={styles.notiRow}
               onPress={() => navigation.navigate('Notifications')}
             >
@@ -281,7 +315,7 @@ const DashboardHeader = ({ refreshPress }) => {
               <View style={styles.notiBadge}>
                 <Text style={styles.notiBadgeText}>{notifCount}</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </View>
       </View>

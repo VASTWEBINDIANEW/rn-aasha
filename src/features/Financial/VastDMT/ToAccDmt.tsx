@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
@@ -20,7 +21,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxUtils/store';
 import AppBarSecond from '../../drawer/headerAppbar/AppBarSecond';
 import LinearGradient from 'react-native-linear-gradient';
-import DynamicButton from '../../drawer/button/DynamicButton';
 import { useNavigation } from '@react-navigation/native';
 import OTPModal from '../../../components/OTPModal';
 import { onReceiveNotification2 } from '../../../utils/NotificationService';
@@ -38,44 +38,46 @@ const showToast = (msg: string) => {
 };
 
 // ─────────────────────────────────────────────────
-// ID Type Selector button
+// ID Type Selector (Dynamic Theme Colors)
 // ─────────────────────────────────────────────────
 type IdBtnProps = {
     label: string;
     active: boolean;
     onPress: () => void;
     primaryColor: string;
-    labelColor: string;
+    secondaryColor: string;
 };
-const IdTypeButton: React.FC<IdBtnProps> = ({ label, active, onPress, primaryColor, labelColor }) => (
+const IdTypeButton: React.FC<IdBtnProps> = ({ label, active, onPress, primaryColor, secondaryColor }) => (
     <TouchableOpacity
         activeOpacity={0.8}
         onPress={onPress}
         style={[
-            styles.idBtn,
-            active
-                ? { backgroundColor: primaryColor, borderColor: primaryColor }
-                : { backgroundColor: '#fff', borderColor: '#ccc' },
+            styles.segmentBtn,
+            active 
+                ? { backgroundColor: `${primaryColor}15`, borderColor: primaryColor, borderWidth: 1, elevation: 0 }
+                : { backgroundColor: 'transparent', borderColor: 'transparent', borderWidth: 1 }
         ]}
     >
-        <Text style={[styles.idBtnText, { color: active ? labelColor : '#555' }]}>{label}</Text>
+        <Text style={[styles.segmentBtnText, { color: active ? primaryColor : secondaryColor, opacity: active ? 1 : 0.7 }]}>
+            {label}
+        </Text>
     </TouchableOpacity>
 );
 
 // ─────────────────────────────────────────────────
-// Summary Row
+// Summary Row (Dynamic Theme Colors)
 // ─────────────────────────────────────────────────
-const SummaryRow: React.FC<{ leftLabel: string; leftValue: string; rightLabel: string; rightValue: string }> = ({
-    leftLabel, leftValue, rightLabel, rightValue,
+const SummaryRow: React.FC<{ leftLabel: string; leftValue: string; rightLabel: string; rightValue: string; primaryColor: string; secondaryColor: string }> = ({
+    leftLabel, leftValue, rightLabel, rightValue, primaryColor, secondaryColor
 }) => (
     <View style={styles.summaryRow}>
         <View style={styles.summaryCell}>
-            <Text style={styles.summaryLabel}>{leftLabel}</Text>
-            <Text style={styles.summaryValue} numberOfLines={1} ellipsizeMode="tail">{leftValue}</Text>
+            <Text style={[styles.summaryLabel, { color: secondaryColor }]}>{leftLabel}</Text>
+            <Text style={[styles.summaryValue, { color: primaryColor }]} numberOfLines={1} ellipsizeMode="tail">{leftValue}</Text>
         </View>
         <View style={[styles.summaryCell, styles.summaryCellRight]}>
-            <Text style={[styles.summaryLabel, { textAlign: 'right' }]}>{rightLabel}</Text>
-            <Text style={[styles.summaryValue, { textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="head">{rightValue}</Text>
+            <Text style={[styles.summaryLabel, { color: secondaryColor, textAlign: 'right' }]}>{rightLabel}</Text>
+            <Text style={[styles.summaryValue, { color: primaryColor, textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="head">{rightValue}</Text>
         </View>
     </View>
 );
@@ -107,6 +109,9 @@ const toBankScreen = ({ route }: any) => {
 
     const { dmttype, unqid } = route.params;
     const { latitude, longitude } = Loc_Data;
+
+    // Theme Colors Extraction
+    const { primaryColor, secondaryColor } = colorConfig;
 
     // ── Helpers ──────────────────────────────────────
     const selectIdType = (type: 'aadhaar' | 'pan' | 'none') => {
@@ -166,7 +171,6 @@ const toBankScreen = ({ route }: any) => {
             const url = `${APP_URLS.getImpsOtp}senderno=${senderNo}&uniqueid=${uid}&amount=${amount}&accountno=${ACCno}`;
             const res = await post({ url });
 
-            // Parse ADDINFO safely
             const addInfoStr = (res?.ADDINFO ?? '').replace(/'/g, '"');
             const add = JSON.parse(addInfoStr);
 
@@ -244,7 +248,6 @@ const toBankScreen = ({ route }: any) => {
                 uniqueid: uid,
             };
 
-            // Decode all values before sending
             const data: Record<string, string> = {};
             for (const key in payload) {
                 data[key] = decodeURIComponent(payload[key]);
@@ -284,145 +287,151 @@ const toBankScreen = ({ route }: any) => {
         }
     }, [userId, route.params, transpin, amount, reamount, aadhar, pancard, mobileOtp, post, latitude, longitude]);
 
-    // ── Button handler ────────────────────────────────
     const handleTransfer = () => {
         if (!isFormValid() || isLoading) return;
         setIsLoading(true);
 
         if (route.params?.Payoutkyc) {
-            // Payoutkyc flow: get OTP first, then ONpay is triggered from modal
             getOtp();
         } else {
             ONpay(route.params?.unqid ?? unqid);
         }
     };
 
-    // ── Lifecycle ─────────────────────────────────────
     useEffect(() => {
         checkDmtStatus();
     }, []);
 
-    // ── UI ─────────────────────────────────────────────
     const amountMatch = amount === '' || reamount === '' || amount === reamount;
-    const { primaryColor, secondaryColor, primaryButtonColor, labelColor } = colorConfig;
 
     return (
-        <View style={styles.main}>
+        // Main Background uses a very light tint of primaryColor
+        <View style={[styles.main, { backgroundColor: `${primaryColor}08` }]}>
             <AppBarSecond title={translate('To_Bank')} />
+            
+            {/* Background Gradient Header */}
+            <LinearGradient 
+                colors={[primaryColor, secondaryColor]} 
+                style={styles.headerBackground} 
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            />
 
             <KeyboardAwareScrollView
                 enableOnAndroid
-                extraScrollHeight={100}
+                extraScrollHeight={60}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1 }}
             >
                 {/* ── Summary Card ── */}
-                <LinearGradient colors={[primaryColor, secondaryColor]} style={styles.gradientWrapper}>
-                    <View style={styles.summaryCard}>
-                        {/* Row 1 */}
-                        <SummaryRow
-                            leftLabel={translate('Mode')}
-                            leftValue={route.params?.mode ?? '-'}
-                            rightLabel={translate('IFS_Code')}
-                            rightValue={route.params?.ifsc ?? '-'}
-                        />
-                        <View style={styles.divider} />
-
-                        {/* Row 2 */}
-                        <SummaryRow
-                            leftLabel={translate('Bank')}
-                            leftValue={route.params?.bankname ?? '-'}
-                            rightLabel={
-                                APP_URLS.AppName !== 'World Pay One'
-                                    ? translate('Payoutkyc')
-                                    : translate('Account_Holder')
-                            }
-                            rightValue={
-                                APP_URLS.AppName !== 'World Pay One'
-                                    ? route.params?.Payoutkyc ? translate('Yes') : translate('No')
-                                    : route.params?.accHolder ?? '-'
-                            }
-                        />
-                        <View style={styles.divider} />
-
-                        {/* Row 3 */}
-                        <SummaryRow
-                            leftLabel={translate('Ac')}
-                            leftValue={route.params?.ACCno ?? '-'}
-                            rightLabel={translate('Unique_Id')}
-                            rightValue={route.params?.unqid ?? '-'}
-                        />
-                    </View>
-                </LinearGradient>
+                <View style={[styles.summaryCard, { borderColor: `${primaryColor}20`, borderWidth: 1 }]}>
+                    <SummaryRow
+                        leftLabel={translate('Mode')}
+                        leftValue={route.params?.mode ?? '-'}
+                        rightLabel={translate('IFS_Code')}
+                        rightValue={route.params?.ifsc ?? '-'}
+                        primaryColor={primaryColor}
+                        secondaryColor={secondaryColor}
+                    />
+                    <View style={[styles.divider, { backgroundColor: `${primaryColor}15` }]} />
+                    <SummaryRow
+                        leftLabel={translate('Bank')}
+                        leftValue={route.params?.bankname ?? '-'}
+                        rightLabel={
+                            APP_URLS.AppName !== 'World Pay One'
+                                ? translate('Payoutkyc')
+                                : translate('Account_Holder')
+                        }
+                        rightValue={
+                            APP_URLS.AppName !== 'World Pay One'
+                                ? route.params?.Payoutkyc ? translate('Yes') : translate('No')
+                                : route.params?.accHolder ?? '-'
+                        }
+                        primaryColor={primaryColor}
+                        secondaryColor={secondaryColor}
+                    />
+                    <View style={[styles.divider, { backgroundColor: `${primaryColor}15` }]} />
+                    <SummaryRow
+                        leftLabel={translate('Ac')}
+                        leftValue={route.params?.ACCno ?? '-'}
+                        rightLabel={translate('Unique_Id')}
+                        rightValue={route.params?.unqid ?? '-'}
+                        primaryColor={primaryColor}
+                        secondaryColor={secondaryColor}
+                    />
+                </View>
 
                 {/* ── Form Card ── */}
-                <View style={styles.formCard}>
+                <View style={[styles.formCard, { borderColor: `${primaryColor}20`, borderWidth: 1 }]}>
 
                     {/* KYC ID Type Selector */}
                     {route.params?.kyc !== false && (
                         <View style={styles.idSection}>
-                            <Text style={styles.sectionTitle}>{translate('Select_ID_Type')}</Text>
-                            <View style={styles.idRow}>
+                            <Text style={[styles.sectionTitle, { color: secondaryColor }]}>
+                                {translate('Select_ID_Type')}
+                            </Text>
+                            <View style={[styles.segmentedControl, { backgroundColor: `${secondaryColor}10` }]}>
                                 <IdTypeButton
                                     label={translate('None')}
                                     active={!aadharvis && !panvisi}
                                     onPress={() => selectIdType('none')}
-                                    primaryColor={primaryButtonColor}
-                                    labelColor={labelColor}
+                                    primaryColor={primaryColor}
+                                    secondaryColor={secondaryColor}
                                 />
                                 <IdTypeButton
                                     label={translate('Aadhaar')}
                                     active={aadharvis}
                                     onPress={() => selectIdType('aadhaar')}
-                                    primaryColor={primaryButtonColor}
-                                    labelColor={labelColor}
+                                    primaryColor={primaryColor}
+                                    secondaryColor={secondaryColor}
                                 />
                                 <IdTypeButton
                                     label={translate('PAN_Card')}
                                     active={panvisi}
                                     onPress={() => selectIdType('pan')}
-                                    primaryColor={primaryButtonColor}
-                                    labelColor={labelColor}
+                                    primaryColor={primaryColor}
+                                    secondaryColor={secondaryColor}
                                 />
                             </View>
                         </View>
                     )}
 
-                    {/* Amount */}
-                    <View style={styles.inputGroup}>
-                        <FlotingInput
-                            label={translate('Enter Amount')}
-                            inputstyle={styles.inputBase}
-                            value={amount}
-                            onChangeTextCallback={setAmount}
-                            keyboardType="number-pad"
-                            maxLength={8}
-                            editable
-                        />
+                    {/* Amount & Re-Amount (Side by Side) */}
+                    <View style={styles.rowInputs}>
+                        <View style={styles.flexInput}>
+                            <FlotingInput
+                                label={translate('Enter Amount')}
+                                inputstyle={styles.inputBase}
+                                value={amount}
+                                onChangeTextCallback={setAmount}
+                                keyboardType="number-pad"
+                                maxLength={8}
+                                editable
+                            />
+                        </View>
+                        <View style={styles.flexInput}>
+                            <FlotingInput
+                                label={translate('Re_Enter_Amount')}
+                                inputstyle={[
+                                    styles.inputBase,
+                                    !amountMatch && styles.inputError,
+                                ]}
+                                value={reamount}
+                                onChangeTextCallback={setReamount}
+                                keyboardType="number-pad"
+                                maxLength={8}
+                                editable
+                            />
+                        </View>
                     </View>
+                    
+                    {!amountMatch && (
+                        <Text style={styles.errorText}>⚠ {translate('Amount_Mismatch')}</Text>
+                    )}
 
-                    {/* Re-enter Amount */}
-                    <View style={styles.inputGroup}>
-                        <FlotingInput
-                            label={translate('Re_Enter_Amount')}
-                            inputstyle={[
-                                styles.inputBase,
-                                !amountMatch && styles.inputError,
-                            ]}
-                            value={reamount}
-                            onChangeTextCallback={setReamount}
-                            keyboardType="number-pad"
-                            maxLength={8}
-                            editable
-                        />
-                        {!amountMatch && (
-                            <Text style={styles.errorText}>{translate('Amount_Mismatch')}</Text>
-                        )}
-                    </View>
-
-                    {/* Aadhaar */}
+                    {/* Aadhaar or PAN Input */}
                     {aadharvis && (
-                        <View style={styles.inputGroup}>
+                        <View style={styles.singleInputGroup}>
                             <FlotingInput
                                 label={translate('Enter Aadhar Number')}
                                 inputstyle={styles.inputBase}
@@ -437,9 +446,8 @@ const toBankScreen = ({ route }: any) => {
                         </View>
                     )}
 
-                    {/* PAN */}
                     {panvisi && (
-                        <View style={styles.inputGroup}>
+                        <View style={styles.singleInputGroup}>
                             <FlotingInput
                                 label={translate('Enter Pan Number')}
                                 inputstyle={styles.inputBase}
@@ -454,45 +462,50 @@ const toBankScreen = ({ route }: any) => {
                         </View>
                     )}
 
-                    {/* Service Fee */}
-                    <View style={styles.inputGroup}>
-                        <FlotingInput
-                            label={translate('Enter Service Fee')}
-                            inputstyle={styles.inputBase}
-                            value={servicefee}
-                            onChangeTextCallback={setServiceFee}
-                            keyboardType="number-pad"
-                            maxLength={3}
-                            editable
-                        />
+                    {/* Service Fee & Trans PIN (Side by Side) */}
+                    <View style={styles.rowInputs}>
+                        <View style={styles.flexInput}>
+                            <FlotingInput
+                                label={translate('Service Fee')}
+                                inputstyle={styles.inputBase}
+                                value={servicefee}
+                                onChangeTextCallback={setServiceFee}
+                                keyboardType="number-pad"
+                                maxLength={3}
+                                editable
+                            />
+                        </View>
+                        <View style={styles.flexInput}>
+                            <FlotingInput
+                                label={translate('Trans PIN')}
+                                inputstyle={styles.inputBase}
+                                value={transpin}
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                secureTextEntry
+                                editable={amount !== '' && reamount !== '' && amountMatch}
+                                onChangeTextCallback={setTranspin}
+                            />
+                        </View>
                     </View>
 
-                    {/* Transaction PIN */}
-                    <View style={styles.inputGroup}>
-                        <FlotingInput
-                            label={translate('Enter Transaction PIN')}
-                            inputstyle={styles.inputBase}
-                            value={transpin}
-                            keyboardType="number-pad"
-                            maxLength={6}
-                            secureTextEntry
-                            editable={amount !== '' && reamount !== '' && amountMatch}
-                            onChangeTextCallback={setTranspin}
-                        />
-                        {transpin.length > 0 && (transpin.length < 4 || transpin.length > 6) && (
-                            <Text style={styles.errorText}>{translate('PIN_Length_Error')}</Text>
-                        )}
-                    </View>
+                    {transpin.length > 0 && (transpin.length < 4 || transpin.length > 6) && (
+                        <Text style={styles.errorText}>⚠ {translate('PIN_Length_Error')}</Text>
+                    )}
 
-                    {/* Transfer / Get OTP Button */}
+                    {/* Transfer Button */}
                     <TouchableOpacity
                         activeOpacity={0.85}
                         onPress={handleTransfer}
-                        disabled={isLoading}
-                        style={styles.btnWrapper}
+                        disabled={isLoading || !isFormValid()}
+                        style={[
+                            styles.btnWrapper, 
+                            { shadowColor: primaryColor },
+                            (!isFormValid() && !isLoading) && { opacity: 0.5 }
+                        ]}
                     >
                         <LinearGradient
-                            colors={isLoading ? ['#aaa', '#ccc'] : [primaryColor, secondaryColor]}
+                            colors={isLoading ? ['#9CA3AF', '#D1D5DB'] : [primaryColor, secondaryColor]}
                             style={styles.gradientBtn}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
@@ -506,8 +519,6 @@ const toBankScreen = ({ route }: any) => {
                             )}
                         </LinearGradient>
                     </TouchableOpacity>
-
-                    <View style={{ height: hScale(40) }} />
                 </View>
             </KeyboardAwareScrollView>
 
@@ -534,132 +545,146 @@ const toBankScreen = ({ route }: any) => {
 const styles = StyleSheet.create({
     main: {
         flex: 1,
-        backgroundColor: '#F5F6FA',
+    },
+    headerBackground: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: hScale(95),
+        borderBottomLeftRadius: wScale(24),
+        borderBottomRightRadius: wScale(24),
     },
 
-    // ── Gradient header ──
-    gradientWrapper: {
-        paddingHorizontal: wScale(12),
-        paddingVertical: hScale(12),
-    },
+    // ── Summary card ──
     summaryCard: {
-        backgroundColor: 'rgba(255,255,255,0.92)',
+        backgroundColor: '#FFFFFF',
         borderRadius: wScale(14),
+        marginHorizontal: wScale(14),
+        marginTop: hScale(10),
         paddingHorizontal: wScale(14),
-        paddingVertical: hScale(10),
-        // Shadow
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        elevation: 4,
+        paddingVertical: hScale(8),
+      
+       
     },
     summaryRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: hScale(8),
+        paddingVertical: hScale(4),
     },
     summaryCell: {
         flex: 1,
     },
     summaryCellRight: {
         alignItems: 'flex-end',
-        marginLeft: wScale(10),
+        marginLeft: wScale(8),
     },
     summaryLabel: {
-        fontSize: wScale(11),
-        color: '#888',
+        fontSize: wScale(10),
         fontWeight: '600',
-        letterSpacing: 0.4,
         textTransform: 'uppercase',
-        marginBottom: hScale(2),
+        letterSpacing: 0.5,
+        opacity: 0.8,
     },
     summaryValue: {
-        fontSize: wScale(13),
-        color: '#222',
+        fontSize: wScale(12),
         fontWeight: '700',
+        marginTop: 1,
     },
     divider: {
         height: 1,
-        backgroundColor: '#E8EAF0',
+        marginVertical: hScale(2),
     },
 
     // ── Form card ──
     formCard: {
         backgroundColor: '#fff',
-        borderRadius: wScale(16),
-        marginHorizontal: wScale(12),
-        marginTop: hScale(14),
-        marginBottom: hScale(10),
-        paddingHorizontal: wScale(16),
-        paddingTop: hScale(16),
-        // Shadow
-        shadowColor: '#000',
+        borderRadius: wScale(14),
+        marginHorizontal: wScale(14),
+        marginTop: hScale(12),
+        paddingHorizontal: wScale(14),
+        paddingTop: hScale(14),
+        paddingBottom: hScale(16),
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.07,
-        shadowRadius: 8,
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
         elevation: 3,
     },
 
-    // ── ID selector ──
+    // ── ID selector (Segmented Control) ──
     idSection: {
-        marginBottom: hScale(16),
-    },
-    sectionTitle: {
-        fontSize: wScale(14),
-        fontWeight: '700',
-        color: '#333',
         marginBottom: hScale(10),
     },
-    idRow: {
-        flexDirection: 'row',
-        gap: wScale(8),
-    },
-    idBtn: {
-        flex: 1,
-        paddingVertical: hScale(8),
-        borderRadius: wScale(8),
-        borderWidth: 1.5,
-        alignItems: 'center',
-    },
-    idBtnText: {
+    sectionTitle: {
         fontSize: wScale(12),
-        fontWeight: '600',
+        fontWeight: '700',
+        marginBottom: hScale(8),
+        marginLeft: wScale(4),
+    },
+    segmentedControl: {
+        flexDirection: 'row',
+        borderRadius: wScale(8),
+        padding: wScale(3),
+    },
+    segmentBtn: {
+        flex: 1,
+        paddingVertical: hScale(6),
+        borderRadius: wScale(6),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    segmentBtnText: {
+        fontSize: wScale(11),
+        fontWeight: '700',
     },
 
     // ── Inputs ──
-    inputGroup: {
-        marginBottom: hScale(4),
+    rowInputs: {
+        flexDirection: 'row',
+        gap: wScale(10),
+        marginBottom: hScale(6),
+    },
+    flexInput: {
+        flex: 1,
+    },
+    singleInputGroup: {
+        marginBottom: hScale(6),
     },
     inputBase: {
         borderRadius: wScale(8),
     },
     inputError: {
-        borderColor: '#E53935',
+        borderColor: '#DC2626',
+        borderWidth: 1,
     },
     errorText: {
-        fontSize: wScale(11),
-        color: '#E53935',
-        marginTop: hScale(2),
-        marginLeft: wScale(4),
+        fontSize: wScale(10),
+        color: '#DC2626',
+        marginTop: -hScale(4),
         marginBottom: hScale(6),
+        marginLeft: wScale(4),
+        fontWeight: '500',
     },
 
     // ── Transfer Button ──
     btnWrapper: {
-        marginTop: hScale(20),
-        borderRadius: wScale(12),
+        marginTop: hScale(8),
+        borderRadius: wScale(10),
         overflow: 'hidden',
+        elevation: 4,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
     },
     gradientBtn: {
-        paddingVertical: hScale(16),
+        paddingVertical: hScale(12),
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: wScale(12),
+        borderRadius: wScale(10),
     },
     btnText: {
         color: '#fff',
-        fontSize: wScale(16),
+        fontSize: wScale(14),
         fontWeight: '700',
         letterSpacing: 0.5,
     },

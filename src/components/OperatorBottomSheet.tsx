@@ -183,7 +183,6 @@ const OperatorBottomSheet: React.FC<Props> = ({
   const { colorConfig } = useSelector((state: RootState) => state.userInfo);
   const primaryColor = colorConfig.primaryColor;
   const bgColor = `${primaryColor}18`;
-
   const [selectbool, setSelectbool] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<TextInput>(null);
@@ -202,6 +201,8 @@ const OperatorBottomSheet: React.FC<Props> = ({
   });
 
   const handleItemTap = (item: any) => {
+
+    console.log(selectbool ,"Item tapped:", item);
     Keyboard.dismiss();
     if (!showState) {
       selectOperator(item["Operatorname"]);
@@ -218,8 +219,9 @@ const OperatorBottomSheet: React.FC<Props> = ({
       handleItemPress?.(item);
       setSelectbool(false);
     } else {
+
       setCircle(item["State Name"]);
-      setState(item["Sate Name"]);
+      setState(item["State Name"]);
       setModalVisible(false);
     }
   };

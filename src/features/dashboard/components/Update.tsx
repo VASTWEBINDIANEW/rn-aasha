@@ -69,7 +69,7 @@ const UpdateScreen = () => {
         return;
       }
 
-      if (response.isgoogle) {
+      if (false) {
         const url = `${APP_URLS.playUrl}${id}`;
         await Linking.openURL(url);
       } else {
@@ -194,11 +194,11 @@ const UpdateScreen = () => {
             </Text>
           )}
 
-          {/* <DynamicButton
+          <DynamicButton
             onlong={getInstallTime}
             title={isDownloading ? `${translate("Downloading")}... ${downloadProgress}%` : translate("Update Now")}
             onPress={handleUpdate}
-          /> */}
+          />
           <Text style={styles.note}>
             {translate("You will be redirected to Google Play Store.")}
           </Text>

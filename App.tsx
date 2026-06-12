@@ -22,9 +22,11 @@ import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/
 import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
 import firestore from '@react-native-firebase/firestore';
+import useAxiosHook from './src/utils/network/AxiosClient';
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
+  const {get} = useAxiosHook()
   // ── State add karo AppContent ke andar ──
   const [otaProgress, setOtaProgress] = useState(0);
   const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
@@ -38,19 +40,30 @@ const AppContent = () => {
   console.log('OTA URL:', VERSION_URL);
 const fetchOtaDetails = async () => {
   try {
-    const documentSnapshot = await firestore()
-      .collection('otaData')
-      .doc('otadata')
-      .collection('rechargedrishti')
-      .doc('ota')
-      .get();
+    // const documentSnapshot = await firestore()
+    //   .collection('otaData')
+    //   .doc('otadata')
+    //   .collection('payon4u')
+    //   .doc('ota')
+    //   .get();
 
-    if (!documentSnapshot.exists) {
-      console.log('OTA document not found');
-      return null;
-    }
+    // if (!documentSnapshot.exists) {
+    //   console.log('OTA document not found');
+    //   return null;
+    // }
 
-    return documentSnapshot.data();
+    // return documentSnapshot.data();
+
+          const version = await get({ url: APP_URLS.current_version });
+console.log(version)
+
+  return {
+      version: version.otaVersion,
+      url: version.bundleUrl,
+      status: version.isgoogle === 'Success', // true/false
+      currentVersion: version.currentversion,
+      message: version.message,
+    };
   } catch (error) {
     console.log('Firestore Error:', error);
     return null;
@@ -59,7 +72,7 @@ const fetchOtaDetails = async () => {
 const checkOta = async () => {
   try {
     const data = await fetchOtaDetails();
-
+console.log(data,'@@@@@@@@@@@@')
     if (!data) {
       return;
     }
@@ -153,24 +166,27 @@ const checkOta = async () => {
   }, [language, authToken]);
 
   // ✅ APP RESUME CHECK
-  useEffect(() => {
-    checkOta(); // ✅ App open hone pe bhi check karo
-fetchOtaDetails()
-    const subscription = AppState.addEventListener('change', nextAppState => {
+useEffect(() => {
+  console.log('🚀 App Started → checking OTA');
+  checkOta();
+
+  const subscription = AppState.addEventListener(
+    'change',
+    nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        console.log('🔄 App resumed → checking OTA');
+        console.log('🔄 App Resumed → checking OTA');
         checkOta();
       }
 
       appState.current = nextAppState;
-    });
+    },
+  );
 
-    return () => subscription.remove();
-  }, []);
-
+  return () => subscription.remove();
+}, []);
   return (
     <>
       <OtaUpdateModal status={otaStatus} progress={otaProgress} />

@@ -72,8 +72,8 @@ import { getAssetSource } from '../../utils/network/NetWorkImages';
 const LoginScreen = () => {
   const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl} = useSelector((state: RootState) => state.userInfo);
   const [modalVisible, setModalVisible] = useState(false)
-  const [userEmail, setUserEmail] = useState(signUpId || '');
-  const [userPassword, setUserPassword] = useState(signUpPassword || '');
+  const [userEmail, setUserEmail] = useState(signUpId || '9830270449');
+  const [userPassword, setUserPassword] = useState(signUpPassword || '18853480');
   const [mobileNumber, setMobileNumber] = useState('7414088555');
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
@@ -345,280 +345,482 @@ const LoginScreen = () => {
 
   /* ================== LOGIN FUNCTION ================== */
 
-  const onPressLogin = useCallback(async (otp) => {
+//   const onPressLogin = useCallback(async (otp) => {
 
-    initDebug(); // 🔥 हर बार reset
+//     initDebug(); // 🔥 हर बार reset
 
-    Keyboard.dismiss();
-    setIsLoading(true);
+//     Keyboard.dismiss();
+//     setIsLoading(true);
 
-    let role = '';
-    let msg = '';
+//     let role = '';
+//     let msg = '';
 
-    try {
+//     try {
 
-      /* ---------------- INIT ---------------- */
-      addDebugStep('INIT', { message: 'Login started' });
+//       /* ---------------- INIT ---------------- */
+//       // addDebugStep('INIT', { message: 'Login started' });
 
-      setShowOtpModal(false);
-      addDebugStep('OTP_MODAL_CLOSED');
+//       setShowOtpModal(false);
+//       // addDebugStep('OTP_MODAL_CLOSED');
 
-      /* ---------------- NETWORK ---------------- */
-      let net = 'unknown';
+//       /* ---------------- NETWORK ---------------- */
+//       let net = 'unknown';
 
-      try {
-        net = (await getCarrier()) || 'wifi/net';
+//       try {
+//         net = (await getCarrier()) || 'wifi/net';
 
-        addDebugStep('NETWORK_DETECTED', {
-          data: { net }
-        });
+//         // addDebugStep('NETWORK_DETECTED', {
+//         //   data: { net }
+//         // });
 
-      } catch (e) {
-        addDebugStep('NETWORK_FAILED', {
-          status: 'ERROR',
-          message: 'Network detect failed',
-          error: e?.message
-        });
-      }
+//       } catch (e) {
+//         // addDebugStep('NETWORK_FAILED', {
+//         //   status: 'ERROR',
+//         //   message: 'Network detect failed',
+//         //   error: e?.message
+//         // });
+//       }
 
-      /* ---------------- ENCRYPTION ---------------- */
-      const encryption = encrypt([
-        userEmail,
-        userPassword,
-        otp,
-        mobileNumber,
-        deviceInfo?.buildId,
-        deviceInfo?.uniqueId,
-        Loc_Data?.latitude,
-        Loc_Data?.longitude,
-        deviceInfo?.modelNumber,
-        deviceInfo?.brand,
-        deviceInfo?.ipAddress,
-        deviceInfo?.address,
-        deviceInfo?.city,
-        deviceInfo?.postalCode,
-        net
-      ]);
+//       /* ---------------- ENCRYPTION ---------------- */
+//       const encryption = encrypt([
+//         userEmail,
+//         userPassword,
+//         otp,
+//         mobileNumber,
+//         deviceInfo?.buildId,
+//         deviceInfo?.uniqueId,
+//         Loc_Data?.latitude,
+//         Loc_Data?.longitude,
+//         deviceInfo?.modelNumber,
+//         deviceInfo?.brand,
+//         deviceInfo?.ipAddress,
+//         deviceInfo?.address,
+//         deviceInfo?.city,
+//         deviceInfo?.postalCode,
+//         net
+//       ]);
 
-      if (!encryption?.encryptedData || encryption.encryptedData.length < 15) {
+//       if (!encryption?.encryptedData || encryption.encryptedData.length < 15) {
 
-        addDebugStep('ENCRYPTION_FAILED', {
-          status: 'ERROR',
-          message: 'Encryption failed',
-          data: encryption
-        });
+//         // addDebugStep('ENCRYPTION_FAILED', {
+//         //   status: 'ERROR',
+//         //   message: 'Encryption failed',
+//         //   data: encryption
+//         // });
 
-        throw new Error('Encryption failed');
-      }
+//         throw new Error('Encryption failed');
+//       }
 
-      addDebugStep('ENCRYPTION_SUCCESS');
+//       // addDebugStep('ENCRYPTION_SUCCESS');
 
-      /* ---------------- PAYLOAD ---------------- */
-      const loginData = {
-        UserName: encryption.encryptedData[0],
-        Password: encryption.encryptedData[1],
-        'X-OTP': encryption.encryptedData[2],
-        Mobile: encryption.encryptedData[3],
-        Imei: encryption.encryptedData[4],
-        Devicetoken: encryption.encryptedData[5],
-        Latitude: encryption.encryptedData[6],
-        Longitude: encryption.encryptedData[7],
-        ModelNo: encryption.encryptedData[8],
-        BrandName: encryption.encryptedData[9],
-        IPAddress: encryption.encryptedData[10],
-        City: encryption.encryptedData[11],
-        Address: encryption.encryptedData[12],
-        PostalCode: encryption.encryptedData[13],
-        InternetTYPE: encryption.encryptedData[14],
-        grant_type: 'password',
-      };
+//       /* ---------------- PAYLOAD ---------------- */
+//       const loginData = {
+//         UserName: encryption.encryptedData[0],
+//         Password: encryption.encryptedData[1],
+//         'X-OTP': encryption.encryptedData[2],
+//         Mobile: encryption.encryptedData[3],
+//         Imei: encryption.encryptedData[4],
+//         Devicetoken: encryption.encryptedData[5],
+//         Latitude: encryption.encryptedData[6],
+//         Longitude: encryption.encryptedData[7],
+//         ModelNo: encryption.encryptedData[8],
+//         BrandName: encryption.encryptedData[9],
+//         IPAddress: encryption.encryptedData[10],
+//         City: encryption.encryptedData[11],
+//         Address: encryption.encryptedData[12],
+//         PostalCode: encryption.encryptedData[13],
+//         InternetTYPE: encryption.encryptedData[14],
+//         grant_type: 'password',
+//       };
 
-      addDebugStep('PAYLOAD_READY', {
-        data: { keys: Object.keys(loginData) }
-      });
+//       // addDebugStep('PAYLOAD_READY', {
+//       //   data: { keys: Object.keys(loginData) }
+//       // });
 
-      /* ---------------- API CALL ---------------- */
-      addDebugStep('API_CALL_STARTED');
+//       /* ---------------- API CALL ---------------- */
+//       // addDebugStep('API_CALL_STARTED');
 
-      const responseRaw = await post({
-        url: APP_URLS.getToken,
-        data: loginData,
-        config: {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: 'bearer',
-            value1: encryption.keyEncode,
-            value2: encryption.ivEncode,
-          },
-        },
-      });
+//       const responseRaw = await post({
+//         url: APP_URLS.getToken,
+//         data: loginData,
+//         config: {
+//           headers: {
+//             'Content-Type': 'application/x-www-form-urlencoded',
+//             Authorization: 'bearer',
+//             value1: encryption.keyEncode,
+//             value2: encryption.ivEncode,
+//           },
+//         },
+//       });
 
-      const response = responseRaw?.data ?? responseRaw ?? {};
-console.log(response);
+//       const response = responseRaw?.data ?? responseRaw ?? {};
+// console.log(response);
 
-      addDebugStep('API_RESPONSE', {
-        data: response
-      });
+//       // addDebugStep('API_RESPONSE', {
+//       //   data: response
+//       // });
 
-      /* ---------------- SUCCESS ---------------- */
-      if (response?.access_token) {
+//       /* ---------------- SUCCESS ---------------- */
+//       if (response?.access_token) {
 
-        role = response.role;
-        msg = `Login success: ${role}`;
+//         role = response.role;
+//         msg = `Login success: ${role}`;
 
-        addDebugStep('LOGIN_SUCCESS', {
-          message: msg,
-          data: { role, userId: response.userId }
-        });
+//         // addDebugStep('LOGIN_SUCCESS', {
+//         //   message: msg,
+//         //   data: { role, userId: response.userId }
+//         // });
 
-        dispatch(setIsDealer(response.role === 'Dealer'));
+//         dispatch(setIsDealer(response.role === 'Dealer'));
 
-        if (response.VideoKYC === 'VideoKYCPENDING') {
+//         if (response.VideoKYC === 'VideoKYCPENDING') {
 
-          addDebugStep('VIDEO_KYC_PENDING', {
-            status: 'INFO'
-          });
+//           // addDebugStep('VIDEO_KYC_PENDING', {
+//           //   status: 'INFO'
+//           // });
 
-          // Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-          // return;
-        }
+//           // Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+//           // return;
+//         }
 
-        authenticate(response);
-        dispatch(setUserId(response?.userId));
-        dispatch(setRefreshToken(response?.refresh_token));
+//         authenticate(response);
+//         dispatch(setUserId(response?.userId));
+//         dispatch(setRefreshToken(response?.refresh_token));
 
-        userData(response[".expires"]);
-      }
+//         userData(response[".expires"]);
+//       }
 
-      /* ---------------- API ERROR ---------------- */
-      else if (response?.error || response?.message) {
+//       /* ---------------- API ERROR ---------------- */
+//       else if (response?.error || response?.message) {
 
-        const errorDescription =
-          response?.error_description ||
-          response?.message ||
-          response?.error ||
-          'Something went wrong';
+//         const errorDescription =
+//           response?.error_description ||
+//           response?.message ||
+//           response?.error ||
+//           'Something went wrong';
 
-        msg = errorDescription;
+//         msg = errorDescription;
 
-        addDebugStep('API_ERROR', {
-          status: 'ERROR',
-          message: errorDescription,
-          data: response
-        });
+//         // addDebugStep('API_ERROR', {
+//         //   status: 'ERROR',
+//         //   message: errorDescription,
+//         //   data: response
+//         // });
 
-        Alert.alert('Login Error', errorDescription);
+//         Alert.alert('Login Error', errorDescription);
 
-        if (response?.error === 'SENDOTP') {
+//         if (response?.error === 'SENDOTP') {
 
-          addDebugStep('OTP_RESEND', {
-            status: 'INFO'
-          });
+//           // addDebugStep('OTP_RESEND', {
+//           //   status: 'INFO'
+//           // });
 
-          setShowOtpModal(true);
-        }
-      }
+//           setShowOtpModal(true);
+//         }
+//       }
 
-      /* ---------------- UNKNOWN ---------------- */
-      else {
+//       /* ---------------- UNKNOWN ---------------- */
+//       else {
 
-        addDebugStep('UNKNOWN_RESPONSE', {
-          status: 'ERROR',
-          data: response
-        });
+//         // addDebugStep('UNKNOWN_RESPONSE', {
+//         //   status: 'ERROR',
+//         //   data: response
+//         // });
 
-        msg = 'Unexpected response';
-      }
+//         msg = 'Unexpected response';
+//       }
 
-   } catch (error) {
+//    } catch (error) {
 
-  const apiError =
-    error?.response?.data ||
-    error?.data ||
-    error;
+//   const apiError =
+//     error?.response?.data ||
+//     error?.data ||
+//     error;
 
-  const errorDescription =
-    apiError?.error_description ||
-    apiError?.message ||
-    apiError?.error ||
-    error?.message ||
-    'Network failed';
+//   const errorDescription =
+//     apiError?.error_description ||
+//     apiError?.message ||
+//     apiError?.error ||
+//     error?.message ||
+//     'Network failed';
 
-  msg = errorDescription;
+//   msg = errorDescription;
 
-  addDebugStep('CATCH_ERROR', {
-    status: 'ERROR',
-    message: errorDescription,
-    data: apiError
-  });
+//   addDebugStep('CATCH_ERROR', {
+//     status: 'ERROR',
+//     message: errorDescription,
+//     data: apiError
+//   });
 
-  console.log('FULL ERROR =>', JSON.stringify(apiError, null, 2));
+//   console.log('FULL ERROR =>', JSON.stringify(apiError, null, 2));
 
-  // 🔥 OTP CASE
-  if (apiError?.error === 'SENDOTP') {
+//   // 🔥 OTP CASE
+//   if (apiError?.error === 'SENDOTP') {
 
-    addDebugStep('OTP_RESEND', {
-      status: 'INFO',
-      message: 'Opening OTP Modal'
-    });
+//     addDebugStep('OTP_RESEND', {
+//       status: 'INFO',
+//       message: 'Opening OTP Modal'
+//     });
 
-    // modal force reopen
+//     // modal force reopen
+//     setShowOtpModal(false);
+
+//     setTimeout(() => {
+//       setShowOtpModal(true);
+//     }, 100);
+
+//     // Alert.alert(
+//     //   'OTP Sent',
+//     //   apiError?.error_description || 'OTP Send To Your Registered Email'
+//     // );
+// ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Email', ToastAndroid.LONG);
+//   } else {
+
+//     Alert.alert('Error', errorDescription);
+//   }
+
+//   // 🔥 Backup save
+//   const debug = getDebugJson();
+//   await saveDebugToStorage(debug);
+
+// } finally {
+
+//   addDebugStep('FINAL', {
+//     message: 'Flow completed',
+//     data: { role, msg }
+//   });
+
+//   const debug = getDebugJson();
+
+//   console.log(
+//     '🧪 FULL DEBUG JSON 👉',
+//     JSON.stringify(debug, null, 2)
+//   );
+
+//   await saveDebugToStorage(debug);
+
+//   onReceiveNotification2({
+//     notification: {
+//       title: role || 'Login',
+//       body: msg || 'Done',
+//     },
+//   });
+
+//   setIsLoading(false);
+// }
+
+//   }, [
+//     dispatch,
+//     post,
+//     userEmail,
+//     userPassword,
+//     mobileNumber,
+//     Loc_Data,
+//     deviceInfo
+//   ]);
+  
+
+const onPressLogin = useCallback(async (otp) => {
+
+  initDebug();
+  Keyboard.dismiss();
+  setIsLoading(true);
+
+  let role = '';
+  let msg = '';
+
+  try {
+
     setShowOtpModal(false);
 
-    setTimeout(() => {
-      setShowOtpModal(true);
-    }, 100);
+    /* ---------------- NETWORK ---------------- */
+    let net = 'unknown';
+    try {
+      net = (await getCarrier()) || 'wifi/net';
+    } catch (e) {}
 
-    // Alert.alert(
-    //   'OTP Sent',
-    //   apiError?.error_description || 'OTP Send To Your Registered Email'
-    // );
-ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Email', ToastAndroid.LONG);
-  } else {
+    /* ---------------- ENCRYPTION ---------------- */
+    const encryption = encrypt([
+      userEmail,
+      userPassword,
+      otp,
+      mobileNumber,
+      deviceInfo?.buildId,
+      deviceInfo?.uniqueId,
+      Loc_Data?.latitude,
+      Loc_Data?.longitude,
+      deviceInfo?.modelNumber,
+      deviceInfo?.brand,
+      deviceInfo?.ipAddress,
+      deviceInfo?.address,
+      deviceInfo?.city,
+      deviceInfo?.postalCode,
+      net
+    ]);
 
-    Alert.alert('Error', errorDescription);
+    if (!encryption?.encryptedData || encryption.encryptedData.length < 15) {
+      throw new Error('Encryption failed');
+    }
+
+    /* ---------------- PAYLOAD ---------------- */
+    const loginData = {
+      UserName: encryption.encryptedData[0],
+      Password: encryption.encryptedData[1],
+      'X-OTP': encryption.encryptedData[2],
+      Mobile: encryption.encryptedData[3],
+      Imei: encryption.encryptedData[4],
+      Devicetoken: encryption.encryptedData[5],
+      Latitude: encryption.encryptedData[6],
+      Longitude: encryption.encryptedData[7],
+      ModelNo: encryption.encryptedData[8],
+      BrandName: encryption.encryptedData[9],
+      IPAddress: encryption.encryptedData[10],
+      City: encryption.encryptedData[11],
+      Address: encryption.encryptedData[12],
+      PostalCode: encryption.encryptedData[13],
+      InternetTYPE: encryption.encryptedData[14],
+      grant_type: 'password',
+    };
+
+    /* ---------------- API CALL ---------------- */
+    const responseRaw = await post({
+      url: APP_URLS.getToken,
+      data: loginData,
+      config: {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: 'bearer',
+          value1: encryption.keyEncode,
+          value2: encryption.ivEncode,
+        },
+      },
+    });
+
+    const response = responseRaw?.data ?? responseRaw ?? {};
+    console.log(response);
+
+    /* ---------------- SUCCESS ---------------- */
+    if (response?.access_token) {
+      role = response.role;
+      msg = `Login success: ${role}`;
+      dispatch(setIsDealer(response.role === 'Dealer'));
+      authenticate(response);
+      dispatch(setUserId(response?.userId));
+      dispatch(setRefreshToken(response?.refresh_token));
+      userData(response[".expires"]);
+    }
+
+    /* ---------------- API ERROR ---------------- */
+    else if (response?.error || response?.message) {
+      const errorDescription =
+        response?.error_description ||
+        response?.message ||
+        response?.error ||
+        'Something went wrong';
+
+      msg = errorDescription;
+      Alert.alert('Login Error', errorDescription);
+
+      if (response?.error === 'SENDOTP') {
+        setShowOtpModal(true);
+      }
+    }
+
+    /* ---------------- UNKNOWN ---------------- */
+    else {
+      msg = 'Unexpected response';
+    }
+
+  } catch (error) {
+
+    const apiError =
+      error?.response?.data ||
+      error?.data ||
+      error;
+
+    const errorDescription =
+      apiError?.error_description ||
+      apiError?.message ||
+      apiError?.error ||
+      error?.message ||
+      'Network failed';
+
+    msg = errorDescription;
+
+    addDebugStep('CATCH_ERROR', {
+      status: 'ERROR',
+      message: errorDescription,
+      data: apiError
+    });
+
+    console.log('FULL ERROR =>', JSON.stringify(apiError, null, 2));
+
+    // 🔥 OTP CASE
+    if (apiError?.error === 'SENDOTP') {
+      addDebugStep('OTP_RESEND', { status: 'INFO', message: 'Opening OTP Modal' });
+      setShowOtpModal(false);
+      setTimeout(() => setShowOtpModal(true), 100);
+      ToastAndroid.show(
+        apiError?.error_description || 'OTP Send To Your Registered Email',
+        ToastAndroid.LONG
+      );
+    }
+
+    // ✅ NETWORK FAILED → Hardcoded fallback
+    else if (
+      errorDescription === 'Network failed' ||
+      errorDescription === 'Network Error' ||
+      error?.message === 'Network Error' ||
+      !error?.response  // ← server se koi response nahi aaya
+    ) {
+      console.log('🔁 Network failed detected → Hardcoded login trigger');
+
+      addDebugStep('NETWORK_FALLBACK', {
+        status: 'INFO',
+        message: 'Switching to hardcoded login'
+      });
+
+      // Loading ON rakho, directly call karo
+      onPressLoginHardcoded(otp);
+      return; // ← finally mein setIsLoading(false) mat hone do
+    }
+
+    else {
+      Alert.alert('Error', errorDescription);
+    }
+
+    const debug = getDebugJson();
+    await saveDebugToStorage(debug);
+
+  } finally {
+    addDebugStep('FINAL', {
+      message: 'Flow completed',
+      data: { role, msg }
+    });
+
+    const debug = getDebugJson();
+    console.log('🧪 FULL DEBUG JSON 👉', JSON.stringify(debug, null, 2));
+    await saveDebugToStorage(debug);
+
+    onReceiveNotification2({
+      notification: { title: role || 'Login', body: msg || 'Done' },
+    });
+
+    setIsLoading(false);
   }
 
-  // 🔥 Backup save
-  const debug = getDebugJson();
-  await saveDebugToStorage(debug);
+}, [
+  dispatch,
+  post,
+  userEmail,
+  userPassword,
+  mobileNumber,
+  Loc_Data,
+  deviceInfo,
+  onPressLoginHardcoded,
+]);
 
-} finally {
-
-  addDebugStep('FINAL', {
-    message: 'Flow completed',
-    data: { role, msg }
-  });
-
-  const debug = getDebugJson();
-
-  console.log(
-    '🧪 FULL DEBUG JSON 👉',
-    JSON.stringify(debug, null, 2)
-  );
-
-  await saveDebugToStorage(debug);
-
-  onReceiveNotification2({
-    notification: {
-      title: role || 'Login',
-      body: msg || 'Done',
-    },
-  });
-
-  setIsLoading(false);
-}
-
-  }, [
-    dispatch,
-    post,
-    userEmail,
-    userPassword,
-    mobileNumber,
-    Loc_Data,
-    deviceInfo
-  ]);
-  const onPressLoginHardcoded = useCallback(async (otp) => {
+const onPressLoginHardcoded = useCallback(async (otp) => {
 
     initDebug(); // 🔥 reset हर बार
 
@@ -631,16 +833,16 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
     try {
 
       /* ---------------- INIT ---------------- */
-      addDebugStep('INIT', { message: 'Hardcoded login started' });
+      // addDebugStep('INIT', { message: 'Hardcoded login started' });
 
       setShowOtpModal(false);
-      addDebugStep('OTP_MODAL_CLOSED');
+      // addDebugStep('OTP_MODAL_CLOSED');
 
       const net = 'wifi';
 
-      addDebugStep('NETWORK_FIXED', {
-        data: { net }
-      });
+      // addDebugStep('NETWORK_FIXED', {
+      //   data: { net }
+      // });
 
       /* ---------------- RAW DATA ---------------- */
       const rawData = [
@@ -661,25 +863,25 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
         net
       ];
 
-      addDebugStep('RAW_DATA_READY', {
-        data: rawData
-      });
+      // addDebugStep('RAW_DATA_READY', {
+      //   data: rawData
+      // });
 
       /* ---------------- ENCRYPTION ---------------- */
       const encryption = encrypt(rawData);
 
       if (!encryption?.encryptedData || encryption.encryptedData.length < 15) {
 
-        addDebugStep('ENCRYPTION_FAILED', {
-          status: 'ERROR',
-          message: 'Encryption failed',
-          data: encryption
-        });
+        // addDebugStep('ENCRYPTION_FAILED', {
+        //   status: 'ERROR',
+        //   message: 'Encryption failed',
+        //   data: encryption
+        // });
 
         throw new Error('Encryption failed');
       }
 
-      addDebugStep('ENCRYPTION_SUCCESS');
+      // addDebugStep('ENCRYPTION_SUCCESS');
 
       /* ---------------- PAYLOAD ---------------- */
       const loginData = {
@@ -701,12 +903,12 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
         grant_type: 'password',
       };
 
-      addDebugStep('PAYLOAD_READY', {
-        data: { keys: Object.keys(loginData) }
-      });
+      // addDebugStep('PAYLOAD_READY', {
+      //   data: { keys: Object.keys(loginData) }
+      // });
 
       /* ---------------- API CALL ---------------- */
-      addDebugStep('API_CALL_STARTED');
+      // addDebugStep('API_CALL_STARTED');
 
       const responseRaw = await post({
         url: APP_URLS.getToken,
@@ -723,9 +925,9 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
       const response = responseRaw?.data ?? responseRaw ?? {};
 
-      addDebugStep('API_RESPONSE', {
-        data: response
-      });
+      // addDebugStep('API_RESPONSE', {
+      //   data: response
+      // });
 
       /* ---------------- SUCCESS ---------------- */
       if (response?.access_token) {
@@ -733,10 +935,10 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
         role = response.role || 'USER';
         msg = 'Login success';
 
-        addDebugStep('LOGIN_SUCCESS', {
-          message: msg,
-          data: { role, userId: response.userId }
-        });
+        // addDebugStep('LOGIN_SUCCESS', {
+        //   message: msg,
+        //   data: { role, userId: response.userId }
+        // });
 
         dispatch(setIsDealer(role === 'Dealer'));
         authenticate(response);
@@ -750,14 +952,14 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
         msg = response?.error_description || 'Login failed';
 
-        addDebugStep('API_ERROR', {
-          status: 'ERROR',
-          message: msg,
-          data: response
-        });
+        // addDebugStep('API_ERROR', {
+        //   status: 'ERROR',
+        //   message: msg,
+        //   data: response
+        // });
 
         if (response.error === 'SENDOTP') {
-          addDebugStep('OTP_RESEND', { status: 'INFO' });
+          // addDebugStep('OTP_RESEND', { status: 'INFO' });
           setShowOtpModal(true);
         }
       }
@@ -767,10 +969,10 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
         msg = 'Unexpected response';
 
-        addDebugStep('UNKNOWN_RESPONSE', {
-          status: 'ERROR',
-          data: response
-        });
+        // addDebugStep('UNKNOWN_RESPONSE', {
+        //   status: 'ERROR',
+        //   data: response
+        // });
       }
 
     } catch (error) {
@@ -778,11 +980,11 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
       const errMsg = error?.message || 'Unknown error';
       msg = errMsg;
 
-      addDebugStep('CATCH_ERROR', {
-        status: 'ERROR',
-        message: errMsg,
-        data: error
-      });
+      // addDebugStep('CATCH_ERROR', {
+      //   status: 'ERROR',
+      //   message: errMsg,
+      //   data: error
+      // });
 
       // 🔥 backup save
       const debug = getDebugJson();
@@ -790,10 +992,10 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
     } finally {
 
-      addDebugStep('FINAL', {
-        message: 'Hardcoded flow completed',
-        data: { role, msg }
-      });
+      // addDebugStep('FINAL', {
+      //   message: 'Hardcoded flow completed',
+      //   data: { role, msg }
+      // });
 
       const debug = getDebugJson();
 

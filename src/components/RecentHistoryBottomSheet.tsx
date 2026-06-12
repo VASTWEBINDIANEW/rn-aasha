@@ -72,7 +72,9 @@ const TransactionItem = React.memo(({ item, index, themeColor }: { item: any; in
   source={getOperatorImageUrl(item.Operator_name)}
   style={styles.logo}
   resizeMode={FastImage.resizeMode.contain}
-/>      </View>
+/>     
+
+ </View>
 
       {/* Info */}
       <View style={styles.infoCol}>

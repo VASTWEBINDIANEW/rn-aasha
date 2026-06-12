@@ -167,7 +167,7 @@ const { ContactPicker } = NativeModules;
     );
     console.log("===================");
 
-    getopertaorlist(translate("RechargeScreen.Prepaid"));
+    getopertaorlist("Prepaid");
     stateList();
     setSelectedOption(translate("RechargeScreen.Prepaid"));
     recenttransactions();
@@ -225,15 +225,12 @@ const { ContactPicker } = NativeModules;
 
   async function getopertaorlist(op: any) {
     try {
-      const url = await `${APP_URLS.getDthOperator}${op}`;
+      const url =  `${APP_URLS.getDthOperator}${op}`;
       const response = await get({
         url: url,
       });
-
-      const hh = await post({
-        url: `${APP_URLS.plandetails}optname=${operator}&circlename=${circle}&type=${"mobile"}`,
-      });
-      console.log("hh", hh);
+console.log("operator list", response);
+   
       const res = response.myprop2Items;
       console.log(res);
       setOperatorlist(res);
@@ -538,11 +535,7 @@ const openContactPicker = useCallback(async () => {
     [state, operator, circle, post],
   );
 
-  const selectState = (selectedState) => {
-    console.log("Selected State:", selectedState);
-    setState(selectedState);
-    toggleStateModal();
-  };
+
 
   const updateProceedButtonVisibility = () => {
     const isValid =
@@ -684,158 +677,6 @@ const onRechargePress = useCallback(async () => {
 
 
 
-  // const onRechargePress = useCallback(async () => {
-  //   console.log(
-  //     mobileNumber,
-  //     operatorcode,
-  //     Loc_Data,
-  //     latitude,
-  //     longitude,
-  //     "++++++++",
-  //     Loc_Data?.latitude,
-  //     Loc_Data?.longitude,
-  //     userPin,
-  //   );
-
-  //   setIsDetail(false);
-  //   setShowLoader(true);
-
-  //   try {
-  //     // Collect device and network info
-  //     const Model = await getMobileDeviceId();
-  //     const mobileNetwork = await getNetworkCarrier();
-  //     const ip = await getMobileIp();
-  //     // console.log(
-  //     //   "&&&&&&&&&&&&&&&&&&&&",
-  //     //   userId,
-  //     //   mobileNumber,
-  //     //   operatorcode,
-  //     //   Amount,
-  //     //   Loc_Data?.latitude,
-  //     //   Loc_Data?.longitude,
-  //     //   translate("RechargeScreen.city"),
-  //     //   translate("RechargeScreen.address"),
-  //     //   translate("RechargeScreen.postcode"),
-  //     //   mobileNetwork,
-  //     //   ip,
-  //     //   "57bea5094fd9082d",
-  //     // );
-  //     // Encrypt sensitive details
-  //     const encryption = encrypt([
-  //       userId,
-  //       mobileNumber,
-  //       operatorcode,
-  //       Amount,
-  //       Loc_Data?.latitude,
-  //       Loc_Data?.longitude,
-  //       "city",
-  //       "address",
-  //       "postcode",
-  //       mobileNetwork,
-  //       ip,
-  //       "57bea5094fd9082d",
-  //     ]);
-
-  //     const [
-  //       rd,
-  //       n1,
-  //       ok1,
-  //       ,
-  //       Latitude1,
-  //       Longitude1,
-  //       devtoken,
-  //       Addresss,
-  //       PostalCode,
-  //       InternetTYPE,
-  //       ip1,
-  //       ModelNo,
-  //     ] = encryption.encryptedData.map(encodeURIComponent);
-
-  //     const url = `${APP_URLS.rechTask}rd=${rd}&n=${n1}&ok=${ok1}&amn=${Amount}&pc=&bu=&acno=&lt=&ip=${ip1}&mc=&em=${Model}&offerprice=&commAmount=&Devicetoken=${devtoken}&Latitude=${Latitude1}&Longitude=${Longitude1}&ModelNo=${ModelNo}&City=${devtoken}&PostalCode=${PostalCode}&InternetTYPE=${InternetTYPE}&Addresss=${Addresss}&value1=${encodeURIComponent(encryption.keyEncode)}&value2=${encodeURIComponent(encryption.ivEncode)}&circle=${state}`;
-
-  //     console.log("Recharge URL:", url);
-
-  //     let status = translate("RechargeScreen.Failed");
-  //     let Message = translate(
-  //       "RechargeScreen.Recharge failed, please try again",
-  //     );
-
-  //     // 🔄 Recharge API Call
-  //     const res = await post({ url });
-  //     console.log(res, "Recharge Response");
-
-  //     if (res?.status === "False") {
-  //       ToastAndroid.showWithGravity(
-  //         res.message,
-  //         ToastAndroid.SHORT,
-  //         ToastAndroid.BOTTOM,
-  //       );
-  //     } else {
-  //       status = res?.Response || "Success";
-  //       Message =
-  //         res?.Message ||
-  //         res?.message ||
-  //         translate("RechargeScreen.Recharge successful");
-  //     }
-
-  //     // 🧹 Clear input fields
-  //     setMobileNumber("");
-  //     setOperator(translate("RechargeScreen.Select Operator & Circle"));
-  //     setState("");
-  //     setCircle("");
-  //     setAmount("");
-  //     setIsFocused(false);
-
-  //     // 🕒 Fetch latest transaction details
-  //     const url2 = `${APP_URLS.recenttransaction}pageindex=1&pagesize=5&retailerid=${userId}&fromdate=${formattedDate}&todate=${formattedDate}&role=Retailer&rechargeNo=ALL&status=ALL&OperatorName=ALL&portno=ALL`;
-  //     console.log("&&&&&&&&&&&", url2);
-
-  //     const recent = await get({ url: url2 });
-
-  //     const latest = recent?.[0] || {};
-
-  //     // 🚀 Navigate to Recharge Details Screen
-  //     navigation.navigate("Rechargedetails", {
-  //       Amount,
-  //       rechType: ispost
-  //         ?"Postpaid"
-  //         : "Prepaid",
-  //       operator,
-  //       mobileNumber,
-  //       status,
-  //       reqTime: latest?.Reqesttime || "N/A",
-  //       Message,
-  //       reqId: latest?.Request_ID || "N/A",
-  //       idno: latest?.Idno || "N/A",
-  //     });
-  //   } catch (error) {
-  //     console.error("Recharge failed:", error);
-  //     ToastAndroid.showWithGravity(
-  //       translate(
-  //         "RechargeScreen.Recharge failed. Please check your network or try again.",
-  //       ),
-  //       ToastAndroid.SHORT,
-  //       ToastAndroid.BOTTOM,
-  //     );
-  //   } finally {
-  //     setShowLoader(false);
-  //   }
-  // }, [
-  //   Amount,
-  //   getMobileIp,
-  //   getNetworkCarrier,
-  //   latitude,
-  //   longitude,
-  //   mobileNumber,
-  //   operatorcode,
-  //   post,
-  //   userId,
-  //   state,
-  //   ispost,
-  //   operator,
-  //   navigation,
-  //   Loc_Data,
-  // ]);
 
   const keyExtractor = useCallback(
     (item: any, i: number) => `${i}-${item.recordID}`,
@@ -974,12 +815,12 @@ const onRechargePress = useCallback(async () => {
           Selected={translate("RechargeScreen.PREPAID")}
           onPress2={() => {
             setViewPlans(false);
-            getopertaorlist(translate("RechargeScreen.Postpaid"));
+            getopertaorlist("Postpaid");
             setispost(true);
           }}
           onPress1={() => {
             setViewPlans(true);
-            getopertaorlist(translate("RechargeScreen.Prepaid"));
+            getopertaorlist("Prepaid");
             setispost(false);
           }}
         />
@@ -1026,8 +867,7 @@ const onRechargePress = useCallback(async () => {
               setpath(""),
                 setOperator(
                   translate("RechargeScreen.Select Operator & Circle"),
-                ),
-                setState("");
+                );
             }}
             onKeyPress={() => {
               setAutoplay(true);

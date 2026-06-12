@@ -441,6 +441,7 @@ if (backendTime) {
         <GlassSection
           title={translate("Financial_Services")}
           rightElement={
+            
             <LottieView
               autoPlay loop
               style={styles.lotiRight}
