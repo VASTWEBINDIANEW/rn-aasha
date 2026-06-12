@@ -72,38 +72,42 @@ const UpdateScreen = () => {
         const url = `${APP_URLS.playUrl}${id}`;
         await Linking.openURL(url);
       } else {
-        const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
-        setIsDownloading(true);
-        setDownloadProgress(0);
+                const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
 
-        onReceiveNotification2({
-          notification: { title: "Downloading App Update", body: "Please Wait" },
-        });
+        await Linking.openURL(apkUrl);
 
-        const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
+return ;
+        // setIsDownloading(true);
+        // setDownloadProgress(0);
 
-        ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
-          .fetch("GET", apkUrl)
-          .progress((received, total) => {
-            if (total > 0) {
-              const percentage = Math.floor((received / total) * 100);
-              setDownloadProgress(percentage);
-            }
-          })
-          .then((res) => {
-            setIsDownloading(false);
-            setDownloadProgress(100);
-            ReactNativeBlobUtil.android.actionViewIntent(
-              res.path(),
-              "application/vnd.android.package-archive"
-            );
-          })
-          .catch((errorMessage) => {
-            setIsDownloading(false);
-            console.log("Download error:", errorMessage);
-            Linking.openURL(apkUrl);
-            Alert.alert("Update Failed", "Could not download APK.");
-          });
+        // onReceiveNotification2({
+        //   notification: { title: "Downloading App Update", body: "Please Wait" },
+        // });
+
+        // const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
+
+        // ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
+        //   .fetch("GET", apkUrl)
+        //   .progress((received, total) => {
+        //     if (total > 0) {
+        //       const percentage = Math.floor((received / total) * 100);
+        //       setDownloadProgress(percentage);
+        //     }
+        //   })
+        //   .then((res) => {
+        //     setIsDownloading(false);
+        //     setDownloadProgress(100);
+        //     ReactNativeBlobUtil.android.actionViewIntent(
+        //       res.path(),
+        //       "application/vnd.android.package-archive"
+        //     );
+        //   })
+        //   .catch((errorMessage) => {
+        //     setIsDownloading(false);
+        //     console.log("Download error:", errorMessage);
+        //     Linking.openURL(apkUrl);
+        //     Alert.alert("Update Failed", "Could not download APK.");
+        //   });
       }
     } catch (error) {
       setIsDownloading(false);
