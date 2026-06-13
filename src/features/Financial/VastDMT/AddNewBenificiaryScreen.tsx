@@ -239,7 +239,7 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
   const Banks = () => (
     <FlashList
       keyboardShouldPersistTaps="handled"
-      style={{ marginBottom: wScale(50), marginHorizontal: wScale(8) }}
+      style={{ marginBottom: wScale(20), marginHorizontal: wScale(8) }}
       data={filteredData}
       renderItem={({ item }) => (
         <TouchableOpacity
@@ -284,13 +284,12 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
       {/* Form */}
       <KeyboardAwareScrollView
         enableOnAndroid={true}
-        extraScrollHeight={150}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: hScale(40) }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: hScale(10), justifyContent: 'space-between' }}
         enableAutomaticScroll={true}
-        extraHeight={150}
+        extraHeight={100}
       >
         <View style={styles.formContainer}>
 
@@ -320,25 +319,20 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
               value={name}
               onChangeTextCallback={text => setName(text)}
             />
-
             <View style={styles.divider} />
-
             <FlotingInput
               label={'Account Number'}
               keyboardType="number-pad"
               value={accountNumber}
               onChangeTextCallback={text => setAccountNumber(text)}
             />
-
             <View style={styles.divider} />
-
             <FlotingInput
               label={translate("Re-Enter Account Number")}
               keyboardType="number-pad"
               value={reEnterAccountNumber}
               onChangeTextCallback={text => setReEnterAccountNumber(text)}
             />
-
             {validate && (
               <View style={styles.errorBadge}>
                 <Text style={styles.errorText}>⚠ {translate("Account_numbers_do_not_match")}</Text>
@@ -379,8 +373,10 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
             />
           </View>
 
-          {/* Action Buttons — Verify + Add side by side */}
-          <View style={styles.actionSection}>
+        </View>
+        
+        {/* Action Buttons — Verify + Add side by side */}
+        <View style={styles.actionSection}>
             {isR ? (
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: colorConfig.secondaryColor }]}
@@ -436,9 +432,6 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
                 </TouchableOpacity>
               </View>
             )}
-          </View>
-
-          <View style={{ height: hScale(40) }} />
         </View>
       </KeyboardAwareScrollView>
 
@@ -499,7 +492,7 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
                     <Text style={styles.detailValue}>{verificationDetails.name}</Text>
                   </View>
                 </View>
-                <View style={[styles.detailRow, { marginTop: hScale(12) }]}>
+                <View style={[styles.detailRow, { marginTop: hScale(10) }]}>
                   <Text style={styles.detailIcon}>
                     {verificationDetails.status === 'VERIFIED' ? '✅' : '⚠️'}
                   </Text>
@@ -511,7 +504,7 @@ const AddNewBenificiaryScreen = ({ no, Name2, Name, remid, onPress, onPress2 }) 
                     ]}>{verificationDetails.status}</Text>
                   </View>
                 </View>
-                <View style={[styles.detailRow, { marginTop: hScale(12) }]}>
+                <View style={[styles.detailRow, { marginTop: hScale(10) }]}>
                   <Text style={styles.detailIcon}>🏦</Text>
                   <View>
                     <Text style={styles.detailLabel}>Bank Reference No</Text>
@@ -547,79 +540,80 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FC',
     borderRadius: wScale(16),
-    marginHorizontal: wScale(12),
-    marginTop: hScale(16),
+    marginHorizontal: wScale(8),
+    marginTop: hScale(8),
+    marginBottom: hScale(8),
     overflow: 'hidden',
-    elevation: 6,
+    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 6,
     borderWidth: 1,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: wScale(20),
-    paddingTop: hScale(16),
-    paddingBottom: hScale(14),
+    paddingHorizontal: wScale(16),
+    paddingTop: hScale(12),
+    paddingBottom: hScale(10),
   },
   headerLeft: { flex: 1 },
   headerTitle: {
-    fontSize: wScale(18),
+    fontSize: wScale(16),
     fontWeight: '700',
     color: '#fff',
     letterSpacing: 0.3,
   },
   headerSubtitle: {
-    fontSize: wScale(12),
+    fontSize: wScale(11),
     color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
   },
   closeBtn: {
-    width: wScale(36),
-    height: wScale(36),
-    borderRadius: wScale(18),
+    width: wScale(32),
+    height: wScale(32),
+    borderRadius: wScale(16),
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   formContainer: {
-    paddingHorizontal: wScale(16),
-    paddingTop: hScale(16),
+    paddingHorizontal: wScale(12),
+    paddingTop: hScale(10),
   },
   stepsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: hScale(20),
-    paddingHorizontal: wScale(8),
+    marginBottom: hScale(12),
+    paddingHorizontal: wScale(4),
   },
   stepItem: { alignItems: 'center', flex: 1 },
   stepCircle: {
-    width: wScale(28),
-    height: wScale(28),
-    borderRadius: wScale(14),
+    width: wScale(24),
+    height: wScale(24),
+    borderRadius: wScale(12),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  stepNum: { fontSize: wScale(12), fontWeight: '700' },
-  stepLabel: { fontSize: wScale(10), fontWeight: '500', textAlign: 'center' },
+  stepNum: { fontSize: wScale(11), fontWeight: '700' },
+  stepLabel: { fontSize: wScale(9), fontWeight: '500', textAlign: 'center' },
   sectionLabel: {
-    fontSize: wScale(12),
+    fontSize: wScale(11),
     fontWeight: '700',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
-    marginBottom: hScale(8),
+    marginBottom: hScale(6),
     marginLeft: wScale(4),
   },
   inputCard: {
     backgroundColor: '#fff',
-    borderRadius: wScale(12),
-    paddingHorizontal: wScale(4),
-    paddingVertical: hScale(4),
-    marginBottom: hScale(16),
+    borderRadius: wScale(10),
+    paddingHorizontal: wScale(2),
+    paddingVertical: hScale(2),
+    marginBottom: hScale(10),
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -629,58 +623,54 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#F1F3F7',
-    marginHorizontal: wScale(12),
+    marginHorizontal: wScale(10),
   },
   dropdownIcon: {
     position: 'absolute',
-    right: wScale(12),
+    right: wScale(10),
     top: 0,
     bottom: 0,
     justifyContent: 'center',
   },
   errorBadge: {
     backgroundColor: '#FEF2F2',
-    borderRadius: wScale(8),
-    paddingHorizontal: wScale(12),
-    paddingVertical: hScale(8),
-    margin: wScale(10),
+    borderRadius: wScale(6),
+    paddingHorizontal: wScale(10),
+    paddingVertical: hScale(6),
+    margin: wScale(8),
     borderLeftWidth: 3,
     borderLeftColor: '#DC2626',
   },
   errorText: {
     color: '#DC2626',
-    fontSize: wScale(12),
+    fontSize: wScale(11),
     fontWeight: '500',
   },
   actionSection: {
-    marginTop: hScale(4),
-    marginBottom: hScale(8),
+    paddingHorizontal: wScale(12),
+    paddingBottom: hScale(10),
   },
   btnRow: {
     flexDirection: 'row',
-    gap: wScale(10),
+    gap: wScale(8),
   },
   btnHalf: {
     flex: 1,
   },
   actionBtn: {
-    borderRadius: wScale(12),
-    height: hScale(54),
+    borderRadius: wScale(10),
+    height: hScale(46),
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: wScale(20),
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    paddingHorizontal: wScale(16),
+    elevation: 2,
   },
   actionBtnDisabled: {
     opacity: 0.5,
   },
   actionBtnText: {
     color: '#fff',
-    fontSize: wScale(15),
+    fontSize: wScale(14),
     fontWeight: '700',
     letterSpacing: 0.5,
     textAlign: 'center',
@@ -690,23 +680,22 @@ const styles = StyleSheet.create({
   bottomSheet: {
     backgroundColor: '#fff',
     height: SCREEN_HEIGHT / 1.35,
-    borderTopLeftRadius: wScale(20),
-    borderTopRightRadius: wScale(20),
+    borderTopLeftRadius: wScale(16),
+    borderTopRightRadius: wScale(16),
     overflow: 'hidden',
   },
   sheetHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: wScale(20),
-    paddingVertical: hScale(14),
+    paddingHorizontal: wScale(16),
+    paddingVertical: hScale(12),
   },
   sheetTitle: {
-    fontSize: wScale(16),
+    fontSize: wScale(15),
     fontWeight: '700',
     color: '#fff',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   sheetSub: {
     fontSize: wScale(11),
@@ -714,10 +703,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   sheetClose: {
-    width: wScale(36),
-    height: wScale(36),
+    width: wScale(32),
+    height: wScale(32),
     backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: wScale(18),
+    borderRadius: wScale(16),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -725,16 +714,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    marginHorizontal: wScale(16),
-    marginVertical: hScale(12),
-    borderRadius: wScale(10),
-    paddingHorizontal: wScale(12),
+    marginHorizontal: wScale(12),
+    marginVertical: hScale(10),
+    borderRadius: wScale(8),
+    paddingHorizontal: wScale(10),
   },
   searchIcon: { fontSize: wScale(14), marginRight: wScale(8) },
   searchInput: {
     flex: 1,
-    paddingVertical: hScale(10),
-    fontSize: wScale(14),
+    paddingVertical: hScale(8),
+    fontSize: wScale(13),
     color: '#111827',
   },
   bankItem: {
@@ -743,23 +732,23 @@ const styles = StyleSheet.create({
   bankItemInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: wScale(16),
-    paddingVertical: hScale(12),
+    paddingHorizontal: wScale(12),
+    paddingVertical: hScale(10),
   },
   bankIcon: {
-    width: wScale(40),
-    height: wScale(40),
-    borderRadius: wScale(20),
+    width: wScale(36),
+    height: wScale(36),
+    borderRadius: wScale(18),
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: wScale(14),
+    marginRight: wScale(12),
   },
   bankIconText: {
-    fontSize: wScale(16),
+    fontSize: wScale(15),
     fontWeight: '700',
   },
   bankName: {
-    fontSize: wScale(14),
+    fontSize: wScale(13),
     color: '#1F2937',
     fontWeight: '500',
     flex: 1,
@@ -767,7 +756,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: '#F3F4F6',
-    marginLeft: wScale(70),
+    marginLeft: wScale(60),
   },
 
   // Modal
@@ -775,79 +764,74 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
     justifyContent: 'center',
-    paddingHorizontal: wScale(20),
+    paddingHorizontal: wScale(16),
   },
   modalCard: {
     backgroundColor: '#fff',
-    borderRadius: wScale(20),
+    borderRadius: wScale(16),
     overflow: 'hidden',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
+    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: wScale(20),
-    paddingVertical: hScale(16),
+    paddingHorizontal: wScale(16),
+    paddingVertical: hScale(14),
   },
   modalHeaderTitle: {
-    fontSize: wScale(16),
+    fontSize: wScale(15),
     fontWeight: '700',
     color: '#fff',
   },
   modalCloseBtn: {
-    width: wScale(30),
-    height: wScale(30),
-    borderRadius: wScale(15),
+    width: wScale(28),
+    height: wScale(28),
+    borderRadius: wScale(14),
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCloseText: {
     color: '#fff',
-    fontSize: wScale(13),
+    fontSize: wScale(12),
     fontWeight: '700',
   },
   modalBody: {
-    paddingHorizontal: wScale(24),
-    paddingTop: hScale(20),
+    paddingHorizontal: wScale(20),
+    paddingTop: hScale(16),
     paddingBottom: hScale(8),
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F9FAFB',
-    borderRadius: wScale(10),
-    padding: wScale(14),
+    borderRadius: wScale(8),
+    padding: wScale(12),
   },
-  detailIcon: { fontSize: wScale(22), marginRight: wScale(14) },
+  detailIcon: { fontSize: wScale(20), marginRight: wScale(12) },
   detailLabel: {
-    fontSize: wScale(11),
+    fontSize: wScale(10),
     color: '#9CA3AF',
     fontWeight: '500',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: wScale(14),
+    fontSize: wScale(13),
     color: '#111827',
     fontWeight: '700',
     marginTop: 2,
   },
   modalFooter: {
     flexDirection: 'row',
-    gap: wScale(10),
-    paddingHorizontal: wScale(20),
-    paddingVertical: hScale(20),
+    gap: wScale(8),
+    paddingHorizontal: wScale(16),
+    paddingVertical: hScale(16),
   },
   modalBtn: {
     flex: 1,
-    height: hScale(48),
-    borderRadius: wScale(10),
+    height: hScale(44),
+    borderRadius: wScale(8),
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
@@ -859,7 +843,7 @@ const styles = StyleSheet.create({
   },
   modalBtnText: {
     color: '#fff',
-    fontSize: wScale(14),
+    fontSize: wScale(13),
     fontWeight: '700',
   },
 });

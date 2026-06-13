@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TextInput, Button, ActivityIndicator, StyleSheet, ToastAndroid,  FlatList,
+  View, Text, TextInput, ActivityIndicator, StyleSheet, ToastAndroid,
   TouchableOpacity, Alert, ScrollView, Keyboard
 } from 'react-native';
 import { APP_URLS } from '../../../utils/network/urls';
@@ -12,7 +12,6 @@ import { hScale, wScale } from '../../../utils/styles/dimensions';
 import DynamicButton from '../../drawer/button/DynamicButton';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxUtils/store';
-import AppBarSecond from '../../drawer/headerAppbar/AppBarSecond';
 import LinearGradient from 'react-native-linear-gradient';
 import { FlashList } from '@shopify/flash-list';
 import { SvgXml } from 'react-native-svg';
@@ -25,17 +24,11 @@ import ShowLoader from '../../../components/ShowLoder';
 const GetBenifiaryScreen = () => {
   const { colorConfig } = useSelector((state: RootState) => state.userInfo);
   const EditIcon = ` 
-
  <?xml version="1.0" encoding="UTF-8"?>
 <svg version="1.1" viewBox="0 0 2048 2048" width="1280" fill="#fff" height="1280" xmlns="http://www.w3.org/2000/svg">
-<path transform="translate(674,170)" d="m0 0h18l15 3 16 7 14 10 13 13 9 14 4 8 4 13 1 5v26l-4 15-8 16-9 12-7 8-7 6-184 184 1159 1 20 2 16 5 13 7 10 8 7 7 9 14 5 11 4 18v28l-3 14-5 13-6 11-11 13-14 10-14 6-17 4-9 1h-1164l7 8 188 188 11 14 9 17 4 16v25l-4 15-8 16-9 13-9 9-14 10-13 6-11 3-7 1h-23l-14-3-16-8-11-8-358-358-6-10-7-15-2-7-1-8v-18l3-16 4-9 8-16 9-9 1-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2l2-4h2l2-4h2l2-4h2l2-4h2l2-4h2l2-4h2v-2l8-7 14-10 16-7z"/>
+<path transform="translate(674,170)" d="m0 0h18l15 3 16 7 14 10 13 13 9 14 4 8 4 13 1 5v26l-4 15-8 16-9 12-7 8-7 6-184 184 1159 1 20 2 16 5 13 7 10 8 7 7 9 14 5 11 4 18v28l-3 14-5 13-6 11-11 13-14 10-14 6-17 4-9 1h-1164l7 8 188 188 11 14 9 17 4 16v25l-4 15-8 16-9 13-9 9-14 10-13 6-11 3-7 1h-23l-14-3-16-8-11-8-358-358-6-10-7-15-2-7-1-8v-18l3-16 4-9 8-16 9-9 1-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2v-2h2l2-4h2l2-4h2l2-4h2l2-4h2l2-4h2l2-4h2v-2l8-7 14-10 16-7z"/>
 <path transform="translate(1360,1023)" d="m0 0h10l15 2 14 5 12 7 10 8 10 9 339 339v2h2l8 10 4 9 6 20 2 8v25l-3 10-9 19-9 11-349 349-12 9-11 6-15 5-12 2h-14l-17-3-12-5-12-7-12-11-9-10-9-15-6-16-2-14v-9l2-14 4-13 5-10 7-11 7-7 7-8 159-159h2l2-4 23-23h2v-2l-1168-1-14-2-15-5-14-8-13-12-7-10-8-16-4-17-1-9v-12l2-16 5-16 7-13 8-10 7-7 14-9 11-5 18-4h994l172-1 6 1-2-4-198-198-9-13-7-15-3-12-1-8v-11l3-16 4-12 8-14 7-9 11-11 15-10 15-6 9-2z"/>
 </svg>
-
-  
-  
-  
-  
   `;
   const [sendernum, setSendernum] = useState('');
   const [onTap, setOnTap] = useState(false);
@@ -58,7 +51,11 @@ const GetBenifiaryScreen = () => {
   const [addinfo, setAddInfo] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
   const [isVisible2, setIsVisible2] = useState(false);
-const [isload,setIsload]= useState(false)
+  const [isload, setIsload] = useState(false)
+  const [searchText, setSearchText] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [unqid, setUnqiD] = useState('');
+
   useEffect(() => {
     getGenUniqueId();
   }, []);
@@ -69,41 +66,32 @@ const [isload,setIsload]= useState(false)
     }, [])
   );
 
+  useEffect(() => {
+    filterData(searchText);
+  }, [searchText, banklist]);
+
   const checksendernumber = async (number) => {
-    setIsload(true)
+    setIsload(true);
     setisLoading(true);
 
     try {
       const url = `${APP_URLS.getCheckSenderNo}${number}`;
-      console.log("********^^*******",url)
       const res = await get({ url: url });
-      console.log('res', JSON.stringify(res));
-
       const addinfo = res['ADDINFO'];
-      setAddInfo(addinfo)
-      console.log(addinfo, '*-*-');
+      setAddInfo(addinfo);
 
       if (res) {
         setisLoading(false);
         const status = addinfo?.statuscode;
         setTXNP1(status);
         if (status === "TXN") {
-
           setremitter(addinfo?.data?.remitter);
           setkyc(addinfo?.data?.remitter.kycdone);
 
-
-
-          const remmname = addinfo?.data?.remitter?.name || '';
-          const consumelimit = addinfo?.data?.remitter?.consumedlimit?.toString() || '0';
-          const remainlimit = addinfo?.data?.remitter?.remaininglimit?.toString() || '0';
-          const kycsts = addinfo?.data?.remitter?.kycdone?.toString() || '';
-          const photo = addinfo?.data?.remitter?.Photo?.toString() || '';
           const beneficiary = addinfo?.data?.beneficiary || [];
           const remid = addinfo?.data?.remitter?.id || '';
           setRemid(remid);
           await setBanklist(beneficiary);
-          console.log(beneficiary);
 
           if (beneficiary.length === 0) {
             setisLoading(false);
@@ -112,85 +100,51 @@ const [isload,setIsload]= useState(false)
           } else {
             setnodata(false);
           }
-        } else if (addinfo.statuscode === "RNF" || addinfo.statuscode === "NUMBEROTP" || addinfo.statuscode === "AADHAROTP") {
-          setIsVisible(addinfo.statuscode === 'RNF' || addinfo.statuscode === 'NUMBEROTP' ||addinfo.statuscode === "AADHAROTP")
+        } else if (status === "RNF" || status === "NUMBEROTP" || status === "AADHAROTP") {
+          setIsVisible(status === 'RNF' || status === 'NUMBEROTP' || status === "AADHAROTP");
 
-          if (addinfo.statuscode === "RNF" || addinfo.statuscode === "NUMBEROTP" || addinfo.statuscode === "AADHAROTP") {
+          if (status === "RNF" || status === "NUMBEROTP" || status === "AADHAROTP") {
             Alert.alert(
-              addinfo.statuscode === "AADHAROTP" ? 'Aadhar Verification' : "User does not exist",
+              status === "AADHAROTP" ? 'Aadhar Verification' : "User does not exist",
               "",
               [
+                { text: "Cancel", style: "cancel" },
                 {
-                  text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
-                  style: "cancel",
-                },
-                {
-                  text: addinfo.statuscode === "AADHAROTP" ? 'Continue Aadhar Verification ' : "Register",
-                  onPress: () => 
-
-                    setIsVisible( addinfo.statuscode === 'RNF' || addinfo.statuscode === 'NUMBEROTP')
-                  //  navigation.navigate("NumberRegisterScreen", { type: addinfo.statuscode, CName: addinfo.Name, No: number, Name: 'VASTWEB' })
-
+                  text: status === "AADHAROTP" ? 'Continue Aadhar Verification ' : "Register",
+                  onPress: () => setIsVisible(status === 'RNF' || status === 'NUMBEROTP')
                 },
               ],
               { cancelable: false }
             );
           }
-
         } else if (status === 'ERR') {
           ToastAndroid.showWithGravity(addinfo, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
         }
       } else if (res?.RESULT === '1') {
         ToastAndroid.showWithGravity(addinfo, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-
-        const status = addinfo?.data?.statuscode;
-        console.log(addinfo.statuscode)
-        console.log(addinfo.data.status)
-
-
-
         setisLoading(false);
       }
-
       setOnTap1(false);
       setOnTap(true);
-      setIsload(false)
-
+      setIsload(false);
     } catch (error) {
       setisLoading(false);
+      setIsload(false);
       console.error('Error:', error);
-      // Handle error
     }
   };
 
-  const [unqid, setUnqiD] = useState('');
   const getGenUniqueId = async () => {
     try {
       const url = `${APP_URLS.getGenIMPSUniqueId}`
-      console.log(url);
       const res = await get({ url: url });
       setUnqiD(res['Message']);
       setisLoading(false);
-
-
-      if (res['Response'] == 'Failed') {
-        ToastAndroid.showWithGravity(
-          res['Message'],
-          ToastAndroid.SHORT,
-          ToastAndroid.BOTTOM,
-        )
-      } else {
-        ToastAndroid.showWithGravity(
-          res['Response'],
-          ToastAndroid.SHORT,
-          ToastAndroid.BOTTOM,
-        )
-      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+
   const handleNextButtonPress = () => {
     if (onTap) {
       setOnTap1(true);
@@ -200,68 +154,44 @@ const [isload,setIsload]= useState(false)
   };
 
   const handleImpsPress = async (item) => {
-    console.log(item)
-    console.log('IMPS pressed for:', item);
-    const bankname = item['bank'];
-    const ACCno = item['account'];
-    const accHolder = item['name'];
-    const ifsc = item['ifsc'];
-    console.log('**CHECK', bankname, ACCno, accHolder, ifsc);
     setIfsc(item['ifsc']);
     setAccHolder(item['name']);
     setAccNo(item['account']);
-    setBankName(item['bank'])
-
-    navigation.navigate("toBankScreen", { bankname, ACCno, accHolder, ifsc, mode: 'IMPS', unqid, kyc, senderNo: sendernum, dmttype: 'VASTWEB', id: remid },);
-
+    setBankName(item['bank']);
+    navigation.navigate("toBankScreen", { bankname: item['bank'], ACCno: item['account'], accHolder: item['name'], ifsc: item['ifsc'], mode: 'IMPS', unqid, kyc, senderNo: sendernum, dmttype: 'VASTWEB', id: remid });
   };
 
-
   const handleNeftPress = async (item) => {
-
-    await setIfsc(item['ifsc']);
-    await setAccHolder(item['name']);
-    await setAccNo(item['account']);
-    await setBankName(item['bank'])
-    const bankname = item['bank'];
-    const ACCno = item['account'];
-    const accHolder = item['name'];
-    const ifsc = item['ifsc'];
-    navigation.navigate("toBankScreen", { bankname, ACCno, accHolder, ifsc, mode: 'NEFT', unqid, dmttype: 'VASTWEB', id: remid },);
-    console.log('NEFT pressed for:', item);
+    setIfsc(item['ifsc']);
+    setAccHolder(item['name']);
+    setAccNo(item['account']);
+    setBankName(item['bank']);
+    navigation.navigate("toBankScreen", { bankname: item['bank'], ACCno: item['account'], accHolder: item['name'], ifsc: item['ifsc'], mode: 'NEFT', unqid, dmttype: 'VASTWEB', id: remid });
   };
 
   const handleDeletePress = async (item) => {
-    setisLoading(true);
-    console.log('Delete pressed for:', item);
-
     Alert.alert(
       'Delete Account',
-      `Account: ${item.account}\nBank: ${item.bank}\nID: ${item.id}\nIFSC: ${item.ifsc}\nName: ${item.name}`,
+      `Account: ${item.account}\nBank: ${item.bank}\nName: ${item.name}`,
       [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Confirm',
           onPress: async () => {
+            setisLoading(true);
             try {
               const res = await post({
                 url: `${APP_URLS.bankbenDelete}mobile=${item['mobile']}&ifsc=${item['ifsc']}&code&remitterid=${remid}&beneficiaryid=${item['id']}`,
               });
-              console.log(res);
               if (res['RESULT'] === '1') {
                 ToastAndroid.showWithGravity(res['ADDINFO'], ToastAndroid.SHORT, ToastAndroid.BOTTOM);
               } else {
                 checksendernumber(sendernum);
-                const response = JSON.parse(res['ADDINFO']);
-                ToastAndroid.showWithGravity(response.status, ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-                console.log(response);
               }
             } catch (error) {
               console.log(error);
+            } finally {
+              setisLoading(false);
             }
           },
         },
@@ -270,600 +200,319 @@ const [isload,setIsload]= useState(false)
     );
   };
 
+  const toggleEditable = () => setEditable(!editable);
 
+  const filterData = (text) => {
+    if (!text.trim()) {
+      setFilteredData(banklist);
+    } else {
+      const filtered = banklist.filter(item =>
+        item.name?.toLowerCase().includes(text.toLowerCase()) ||
+        item.account?.toString().includes(text)
+      );
+      setFilteredData(filtered);
+    }
+  };
 
-  const toggleEditable = () => {
-    setEditable(!editable);
-
-  }
-
-  const [searchText, setSearchText] = useState('');
-const [filteredData, setFilteredData] = useState([]);
-
-useEffect(() => {
-  filterData(searchText);
-}, [searchText,  banklist]);
-
-const filterData = (text) => {
-  const dataToFilter =  banklist;
-
-  if (!text.trim()) {
-    setFilteredData(dataToFilter);
-  } else {
-    const filtered = dataToFilter.filter(item =>
-      item.name?.toLowerCase().includes(text.toLowerCase()) ||
-      item.account?.toString().includes(text)
-    );
-    setFilteredData(filtered);
-    
-  }
-};
-
- const BeneficiaryList = () => {
-    console.log("************^#%%%%%%%%%", filteredData);
- 
+  const BeneficiaryList = () => {
     return (
       <FlashList
         data={filteredData}
-        keyExtractor={item => item.id}
-        estimatedItemSize={160}
-        contentContainerStyle={{ paddingHorizontal: wScale(12), paddingVertical: hScale(8) }}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        estimatedItemSize={140}
+        contentContainerStyle={{ paddingHorizontal: wScale(10), paddingVertical: hScale(8) }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
- 
-            {/* Bank Down Warning */}
             {item.isbankdown && (
               <View style={styles.warningBanner}>
                 <Text style={styles.warningIcon}>⚠️</Text>
-                <Text style={styles.noteText} numberOfLines={2}>
+                <Text style={styles.noteText} numberOfLines={1}>
                   {translate("Note_Currently_the_beneficiary_banks_server_is_down_or_busy_please_try_after_sometime")}
                 </Text>
               </View>
             )}
- 
-            {/* Top: Avatar + Name + IFSC */}
+
             <View style={styles.cardTop}>
-              <View style={[styles.avatar, { backgroundColor: `${colorConfig.secondaryColor}18` }]}>
+              <View style={[styles.avatar, { backgroundColor: `${colorConfig.secondaryColor}15` }]}>
                 <Text style={[styles.avatarText, { color: colorConfig.secondaryColor }]}>
                   {item.name?.charAt(0)?.toUpperCase() ?? '?'}
                 </Text>
               </View>
- 
               <View style={styles.cardTopInfo}>
                 <Text style={styles.nameText} numberOfLines={1}>{item.name}</Text>
                 <View style={styles.ifscBadge}>
-                  <Text style={styles.ifscLabel}>{translate("IFSC_Code")}  </Text>
+                  <Text style={styles.ifscLabel}>IFSC: </Text>
                   <Text style={styles.ifscValue}>{item.ifsc}</Text>
                 </View>
               </View>
             </View>
- 
-            {/* Divider */}
+
             <View style={styles.divider} />
- 
-            {/* Middle: Bank + Account */}
+
             <View style={styles.infoGrid}>
               <View style={styles.infoCell}>
-                <Text style={styles.cellLabel}>{translate("Bank_Name")}</Text>
-                <Text style={styles.cellValue} numberOfLines={1} ellipsizeMode="tail">{item.bank}</Text>
+                <Text style={styles.cellLabel}>Bank</Text>
+                <Text style={styles.cellValue} numberOfLines={1}>{item.bank}</Text>
               </View>
               <View style={styles.infoCellDivider} />
               <View style={[styles.infoCell, { alignItems: 'flex-end' }]}>
-                <Text style={styles.cellLabel}>{translate("Account")}</Text>
-                <Text style={styles.cellValue} numberOfLines={1} ellipsizeMode="tail">{item.account}</Text>
+                <Text style={styles.cellLabel}>Account</Text>
+                <Text style={styles.cellValue} numberOfLines={1}>{item.account}</Text>
               </View>
             </View>
- 
-            {/* Divider */}
+
             <View style={styles.divider} />
- 
-            {/* Bottom: Action Buttons */}
+
             <View style={styles.btnRow}>
-              <TouchableOpacity
-                style={[styles.actionChip, { backgroundColor: '#1D6FE8' }]}
-                onPress={() => handleImpsPress(item)}
-                activeOpacity={0.82}
-              >
-                <Text style={styles.chipText}>{translate("IMPS")}</Text>
+              <TouchableOpacity style={[styles.actionChip, { backgroundColor: '#1D6FE8' }]} onPress={() => handleImpsPress(item)} activeOpacity={0.8}>
+                <Text style={styles.chipText}>IMPS</Text>
               </TouchableOpacity>
- 
-              <TouchableOpacity
-                style={[styles.actionChip, { backgroundColor: '#16A34A' }]}
-                onPress={() => handleNeftPress(item)}
-                activeOpacity={0.82}
-              >
-                <Text style={styles.chipText}>{translate("NEFT")}</Text>
+              <TouchableOpacity style={[styles.actionChip, { backgroundColor: '#16A34A' }]} onPress={() => handleNeftPress(item)} activeOpacity={0.8}>
+                <Text style={styles.chipText}>NEFT</Text>
               </TouchableOpacity>
- 
-              <View style={styles.chipSpacer} />
- 
-              <TouchableOpacity
-                style={[styles.actionChip, styles.deleteChip]}
-                onPress={() => handleDeletePress(item)}
-                activeOpacity={0.82}
-              >
-                <Text style={styles.deleteChipText}>{translate("Delete")}</Text>
+              <View style={{ flex: 1 }} />
+              <TouchableOpacity style={[styles.actionChip, styles.deleteChip]} onPress={() => handleDeletePress(item)} activeOpacity={0.8}>
+                <Text style={styles.deleteChipText}>Del</Text>
               </TouchableOpacity>
             </View>
- 
           </View>
         )}
       />
     );
   };
- 
- 
-
-
-
 
   return (
+    // Main Container with flex: 1 (Prevents whole page scrolling)
     <View style={styles.main}>
-
-      {isload && <ShowLoader/>}
-      <LinearGradient colors={[colorConfig.primaryColor, colorConfig.secondaryColor]} style={styles.lineargradient}>
-        <View style={styles.container} >
-          {sendernum.length === 10 && <TextInput
-            placeholder="Search by Name or Account No"
-            value={searchText}
-            onChangeText={setSearchText}
-            style={styles.inputstyle}
-            placeholderTextColor="#888"
-          />
-          }
-
-          <View>
+      {isload && <ShowLoader />}
+      
+      {/* ── TOP SECTION (Fixed/Pinned) ── */}
+      <LinearGradient 
+        colors={[colorConfig.primaryColor, colorConfig.secondaryColor]} 
+        style={styles.headerGradient}
+      >
+        <View style={styles.headerContainer}>
+          {sendernum.length === 10 && (
             <TextInput
-              placeholder='Enter Remitter Registered  Number'
-              placeholderTextColor={colors.black75}
-              style={styles.inputstyle
+              placeholder="Search Name or Account"
+              value={searchText}
+              onChangeText={setSearchText}
+              style={styles.compactInput}
+              placeholderTextColor="#666"
+            />
+          )}
 
-              }
+          <View style={styles.inputWrapper}>
+            <TextInput
+              placeholder='Enter Remitter Number'
+              placeholderTextColor="#666"
+              style={styles.compactInput}
               maxLength={10}
               keyboardType="number-pad"
               value={sendernum}
-              //   onChangeText={(text) => {
-              //     if (/^\d+$/.test(text) && +text >= 1 && +text <= 5000) {
-              //       setSendernum(text);
-              //     } else if (text === '') {
-              //       setSendernum(text);
-              //     }
-              // }}
-              editable={banklist.length === 0 ? true : editable}
               onChangeText={text => {
-                setSendernum(text)
+                setSendernum(text);
                 if (text.length === 10) {
                   setNxtbtn(true);
                   setOnTap(false);
                   setOnTap1(true);
                   checksendernumber(text);
                   Keyboard.dismiss();
-
                 } else {
                   setNxtbtn(false);
                   setOnTap(true);
                   setOnTap1(false);
                 }
               }}
-            />{
-              banklist.length === 0 ? null :
-                <View style={[styles.righticon2]}>
-                  <TouchableOpacity style={{ backgroundColor: colorConfig.secondaryColor, paddingVertical: hScale(4) }}
-                    onPress={toggleEditable}>
-                    <SvgXml xml={EditIcon} width={wScale(40)} height={wScale(28)} />
-                  </TouchableOpacity>
-                </View>
-            }
+            />
+            {banklist.length > 0 && (
+              <TouchableOpacity style={styles.editBtn} onPress={toggleEditable}>
+                <SvgXml xml={EditIcon} width={wScale(22)} height={wScale(22)} />
+              </TouchableOpacity>
+            )}
           </View>
 
-          {remitter === null ? null :
-            <View style={[styles.limitview, { flexDirection: 'row' }]}>
+          {remitter !== null && (
+            <View style={styles.limitCard}>
               <View style={styles.limitcolum}>
-                <Text style={styles.label}>{translate("Consume_limit")}</Text>
-                <Text style={styles.value}>
-                  {remitter === null ? '0000' : remitter.consumedlimit}
-                </Text>
+                <Text style={styles.limitLabel}>Consumed</Text>
+                <Text style={styles.limitValue}>{remitter.consumedlimit}</Text>
               </View>
-              <View style={styles.borderview} />
-
-              <View style={styles.limitcolum}>
-                <Text style={styles.label}>{translate("Remain_limit")}</Text>
-                <Text style={[styles.value, { textAlign: 'center' }]}>
-                  {remitter === null ? '0000' : remitter.remaininglimit}
-                </Text>
+              <View style={styles.limitDivider} />
+              <View style={[styles.limitcolum, { alignItems: 'center' }]}>
+                <Text style={styles.limitLabel}>Remaining</Text>
+                <Text style={styles.limitValue}>{remitter.remaininglimit}</Text>
               </View>
-              <View style={styles.borderview} />
-              <View style={styles.limitcolum}>
-                <Text style={styles.label}>{translate("Per_txn_limit")}</Text>
-                <Text style={[styles.value, { textAlign: 'right' }]}>
-                  {remitter === null ? '0000' : remitter.perm_txn_limit}
-                </Text>
+              <View style={styles.limitDivider} />
+              <View style={[styles.limitcolum, { alignItems: 'flex-end' }]}>
+                <Text style={styles.limitLabel}>Per TXN</Text>
+                <Text style={styles.limitValue}>{remitter.perm_txn_limit}</Text>
               </View>
             </View>
-          }
-          {isTXNP1 === 'TXN' && <DynamicButton
-            title={onTap1 ? <ActivityIndicator size={'large'} color={colorConfig.labelColor} /> : banklist.length === 0 ? "Next" : "add_acc"}
-            disabled={!nxtbtn}
-            onPress={() => {
-              if (banklist.length === 0) {
-                handleNextButtonPress();
-              } else {
+          )}
 
-                setIsVisible2(true)
-                // navigation.navigate("AddNewBenificiaryScreen", { no: sendernum });
-              }
-            }}
-          />}
+          {isTXNP1 === 'TXN' && (
+            <DynamicButton
+              title={onTap1 ? <ActivityIndicator size={'small'} color={colorConfig.labelColor} /> : banklist.length === 0 ? "Next" : "Add Account"}
+              disabled={!nxtbtn}
+              buttonStyle={styles.compactBtn}
+              onPress={() => {
+                if (banklist.length === 0) handleNextButtonPress();
+                else setIsVisible2(true);
+              }}
+            />
+          )}
         </View>
       </LinearGradient>
 
-      <ScrollView>
-
-        {banklist.length === 0 ?
-          <View style={styles.container}>
-            <Text style={styles.titletext}>{translate("Very_Important_Notice")}</Text>
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP1')}</Text>
+      {/* ── BOTTOM SECTION (Takes remaining space) ── */}
+      <View style={styles.contentArea}>
+        {banklist.length === 0 ? (
+          <ScrollView contentContainerStyle={styles.noticeScroll}>
+            <View style={styles.noticeCard}>
+              <Text style={styles.noticeTitle}>{translate("Very_Important_Notice")}</Text>
+              {[1, 2, 3, 4, 5, 6].map(num => (
+                <View key={num} style={styles.noticeRow}>
+                  <View style={styles.bulletPoint} />
+                  <Text style={styles.noticeText}>{translate(`SP${num}`)}</Text>
+                </View>
+              ))}
             </View>
+            {nodata && (
+              <View style={styles.noDataBox}>
+                <Text style={styles.noDataText}>{translate('No Data Found')}</Text>
+                <DynamicButton title='ADD ACC' onPress={() => setIsVisible2(true)} buttonStyle={{marginTop: 10}} />
+              </View>
+            )}
+          </ScrollView>
+        ) : (
+          /* FlashList renders directly here. It manages its own scroll */
+          <BeneficiaryList />
+        )}
+      </View>
 
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP2')}</Text>
-            </View>
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP3')}</Text>
-            </View>
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP4')}</Text>
-            </View>
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP5')}</Text>
-            </View>
-            <View style={styles.textview} >
-              <View style={styles.bulletPoint} />
-              <Text style={styles.textstyle}> {translate('SP6')}</Text>
-            </View>
-          </View>
-          :
-
-          <View style={{
-            paddingTop: hScale(20),
-          }}>
-            <BeneficiaryList />
-
-
-          </View>
-          
-        }
-        </ScrollView>
-        <ScrollView>
-        {nodata ? <View style={styles.container}>
-          <Text style={styles.title}>{translate('No Data Found')}</Text>
-
-          <DynamicButton title={'ADD ACC'} onPress={() => {
-            setIsVisible2(true)
-            //  navigation.navigate("AddNewBenificiaryScreen", { no: sendernum });
-
-          }} />
-
-        </View>
-          : <></>
-        }
-        {(addinfo && addinfo.statuscode === 'RNF' || addinfo.statuscode === 'NUMBEROTP' ||addinfo.statuscode === 'AADHAROTP') &&
-
-
-          <BottomSheet animationType="none"   onBackdropPress={() => { setIsVisible(false) }} isVisible={isVisible}>
-
-            <NumberRegisterScreen
-              type={addinfo.statuscode}
-              CName={addinfo.Name}
-              No={sendernum}
-              Name={'VASTWEB'}
-              onPress={(v) => {
-                setIsVisible(v);
-              }}
-            />
-          </BottomSheet>
-        }
-
-
-
-        <BottomSheet animationType="none"   
-        onBackdropPress={() => {  setIsVisible2(false) }} isVisible={isVisible2}>
-
-          <AddNewBenificiaryScreen
-            Name={''}
-            Name2={''}
-            no={sendernum}
-            remid={''}
-            onPress={() => {
-              setIsVisible2(false);
-            }}
-            onPress2={() => {
-              setisLoading(true);
-
-              checksendernumber(sendernum)
-              setIsVisible2(false);
-            }}
-
+      {/* ── MODALS (Outside Scroll Views) ── */}
+      {(addinfo?.statuscode === 'RNF' || addinfo?.statuscode === 'NUMBEROTP' || addinfo?.statuscode === 'AADHAROTP') && (
+        <BottomSheet animationType="none" onBackdropPress={() => setIsVisible(false)} isVisible={isVisible}>
+          <NumberRegisterScreen
+            type={addinfo.statuscode}
+            CName={addinfo.Name}
+            No={sendernum}
+            Name={'VASTWEB'}
+            onPress={(v) => setIsVisible(v)}
           />
-
         </BottomSheet>
-      </ScrollView>
-    </View >
+      )}
+
+      <BottomSheet animationType="none" onBackdropPress={() => setIsVisible2(false)} isVisible={isVisible2}>
+        <AddNewBenificiaryScreen
+          Name={''} Name2={''} no={sendernum} remid={''}
+          onPress={() => setIsVisible2(false)}
+          onPress2={() => {
+            setisLoading(true);
+            checksendernumber(sendernum);
+            setIsVisible2(false);
+          }}
+        />
+      </BottomSheet>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  main: {
-    flex: 1,
+  main: { flex: 1, backgroundColor: '#F3F4F6' },
+  
+  // ── Header Section ──
+  headerGradient: {
+    paddingTop: hScale(10),
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    elevation: 4,
+    zIndex: 10,
   },
-  lineargradient: {
-    paddingTop: hScale(10)
-  },
-  container: {
-    paddingHorizontal: wScale(10),
-    paddingBottom: wScale(10),
-  },
-  inputstyle: {
-    backgroundColor: 'white',
-    paddingLeft: wScale(15),
-    borderRadius: 5,
-    marginBottom: hScale(15),
-    fontSize: wScale(18),
-    color: '#000'
-  },
-
-  righticon2: {
-    position: "absolute",
-    left: "auto",
-    right: wScale(0),
-    top: hScale(0),
-    height: "78%",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    paddingRight: wScale(12),
-  },
-
-  title: {
-    fontWeight: 'bold',
-    color: '#000'
-  },
-  titletext: {
-    color: 'red',
-    fontSize: wScale(18),
-    paddingBottom: hScale(15),
-    paddingTop: hScale(5)
-  },
-  bulletPoint: {
-    backgroundColor: 'red',
-    borderRadius: 100,
-    width: wScale(10),
-    height: wScale(10),
-    marginRight: wScale(10),
-    marginTop: wScale(6),
-  },
-  textview: {
-    flexDirection: 'row',
-    paddingBottom: hScale(10)
-  },
-  textstyle: {
-    fontSize: wScale(14),
-    flex: 1,
-    textAlign: 'justify',
-    color: colors.black75
-  },
-  itemContainer: {
-    flex: 1,
-    padding: wScale(10),
-    backgroundColor: '#f8f9fa',
-    borderRadius: 5,
-    elevation: 2,
-    marginBottom: hScale(10),
-    marginHorizontal: wScale(10)
-  },
-
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  itemLabel: {
-    fontSize: wScale(16),
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  itemValue: {
-    fontSize: wScale(16),
-    color: '#555',
-    flex: 1, textAlign: 'right'
-  },
-  noteText: {
-    fontSize: wScale(14),
-    color: '#d9534f',
-    marginBottom: hScale(10)
-  },
-
-  button: {
-    flex: 1,
-    paddingVertical: hScale(12),
-    borderRadius: 3,
-    alignItems: 'center',
-    marginLeft: wScale(8),
-  },
-  impsButton: {
-    backgroundColor: '#007bff',
-  },
-  neftButton: {
-    backgroundColor: '#28a745',
-  },
-  deleteButton: {
-    backgroundColor: '#dc3545',
-  },
-  verifyButton: {
-    backgroundColor: '#17a2b8',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: wScale(16),
-    fontWeight: 'bold',
-  },
-  limitview: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginBottom: hScale(10),
-    paddingHorizontal: wScale(5),
-    borderRadius: 5,
-  },
-  limitcolum: {
-    flexDirection: 'column',
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#fff'
-  },
-  value: {
-    fontSize: 14,
-    color: '#fff'
-
-  },
-  borderview: {
-    height: '100%',
-    width: wScale(0.7),
-    backgroundColor: "#fff",
-  },
-
-  warningBanner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#FFF7ED',
+  headerContainer: {
     paddingHorizontal: wScale(12),
-    paddingVertical: hScale(8),
-    borderBottomWidth: 1,
-    borderBottomColor: '#FED7AA',
-    gap: wScale(6),
-  },
-  warningIcon: { fontSize: wScale(13), marginTop: 1 },
- 
- 
-  // Card Top
-  cardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: wScale(14),
-    paddingTop: hScale(14),
     paddingBottom: hScale(10),
-    gap: wScale(12),
   },
-  avatar: {
-    width: wScale(44),
-    height: wScale(44),
-    borderRadius: wScale(22),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontSize: wScale(20),
-    fontWeight: '800',
-  },
-  cardTopInfo: { flex: 1 },
-  nameText: {
+  inputWrapper: { position: 'relative', marginBottom: hScale(8) },
+  compactInput: {
+    backgroundColor: '#fff',
+    height: hScale(42),
+    borderRadius: 8,
+    paddingHorizontal: wScale(12),
     fontSize: wScale(15),
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: hScale(3),
+    color: '#333',
+    marginBottom: hScale(8),
   },
-  ifscBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  editBtn: {
+    position: "absolute", right: 0, top: 0,
+    height: hScale(42), width: wScale(44),
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    alignItems: "center", justifyContent: "center",
+    borderTopRightRadius: 8, borderBottomRightRadius: 8,
   },
-  ifscLabel: {
-    fontSize: wScale(11),
-    color: '#9CA3AF',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+  compactBtn: { height: hScale(40), marginTop: hScale(4) },
+
+  // Limits Card
+  limitCard: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8, padding: hScale(8),
+    marginBottom: hScale(8), borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)',
   },
-  ifscValue: {
-    fontSize: wScale(12),
-    color: '#374151',
-    fontWeight: '600',
-    letterSpacing: 0.3,
+  limitcolum: { flex: 1 },
+  limitLabel: { fontSize: wScale(10), color: '#eee', textTransform: 'uppercase', marginBottom: 2 },
+  limitValue: { fontSize: wScale(13), color: '#fff', fontWeight: 'bold' },
+  limitDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.3)', marginHorizontal: 5 },
+
+  // ── Content Area ──
+  contentArea: { flex: 1 }, // takes remaining screen space
+
+  // Notice Card
+  noticeScroll: { padding: wScale(12) },
+  noticeCard: {
+    backgroundColor: '#fff', borderRadius: 12,
+    padding: wScale(14), elevation: 2, marginBottom: 15,
   },
- 
-  // Info Grid
-  divider: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-    marginHorizontal: wScale(14),
+  noticeTitle: { color: '#E11D48', fontSize: wScale(15), fontWeight: 'bold', marginBottom: hScale(10) },
+  noticeRow: { flexDirection: 'row', marginBottom: hScale(6), alignItems: 'flex-start' },
+  bulletPoint: { backgroundColor: '#E11D48', borderRadius: 4, width: 6, height: 6, marginRight: 8, marginTop: 6 },
+  noticeText: { fontSize: wScale(13), color: '#4B5563', flex: 1, lineHeight: 18 },
+  noDataBox: { backgroundColor: '#fff', borderRadius: 12, padding: 15, alignItems: 'center' },
+  noDataText: { fontSize: wScale(15), fontWeight: 'bold', color: '#333' },
+
+  // ── List Item (Compact) ──
+  itemContainer: {
+    backgroundColor: '#fff', borderRadius: 12,
+    marginBottom: hScale(10), borderWidth: 1, borderColor: '#E5E7EB',
+    elevation: 1, overflow: 'hidden',
   },
-  infoGrid: {
-    flexDirection: 'row',
-    paddingHorizontal: wScale(14),
-    paddingVertical: hScale(10),
-    alignItems: 'center',
+  warningBanner: {
+    flexDirection: 'row', backgroundColor: '#FEF2F2',
+    padding: wScale(8), borderBottomWidth: 1, borderBottomColor: '#FECACA', gap: 6,
   },
+  warningIcon: { fontSize: wScale(12) },
+  noteText: { fontSize: wScale(11), color: '#DC2626', flex: 1 },
+  cardTop: { flexDirection: 'row', padding: wScale(12), alignItems: 'center', gap: 10 },
+  avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: wScale(16), fontWeight: 'bold' },
+  cardTopInfo: { flex: 1 },
+  nameText: { fontSize: wScale(14), fontWeight: '700', color: '#1F2937' },
+  ifscBadge: { flexDirection: 'row', marginTop: 2 },
+  ifscLabel: { fontSize: wScale(10), color: '#9CA3AF' },
+  ifscValue: { fontSize: wScale(11), color: '#4B5563', fontWeight: '600' },
+  divider: { height: 1, backgroundColor: '#F3F4F6' },
+  infoGrid: { flexDirection: 'row', paddingHorizontal: wScale(12), paddingVertical: hScale(8) },
   infoCell: { flex: 1 },
-  infoCellDivider: {
-    width: 1,
-    height: hScale(30),
-    backgroundColor: '#E5E7EB',
-    marginHorizontal: wScale(12),
-  },
-  cellLabel: {
-    fontSize: wScale(10),
-    color: '#9CA3AF',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-    marginBottom: 2,
-  },
-  cellValue: {
-    fontSize: wScale(13),
-    color: '#1F2937',
-    fontWeight: '600',
-  },
- 
-  // Buttons
-  btnRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: wScale(14),
-    paddingVertical: hScale(10),
-    gap: wScale(6),
-  },
-  actionChip: {
-    paddingHorizontal: wScale(16),
-    paddingVertical: hScale(9),
-    borderRadius: wScale(8),
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chipText: {
-    color: '#fff',
-    fontSize: wScale(13),
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  chipSpacer: { flex: 1 },
-  deleteChip: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  deleteChipText: {
-    color: '#DC2626',
-    fontSize: wScale(13),
-    fontWeight: '700',
-  },
+  infoCellDivider: { width: 1, backgroundColor: '#E5E7EB', marginHorizontal: 10 },
+  cellLabel: { fontSize: wScale(10), color: '#9CA3AF', marginBottom: 2 },
+  cellValue: { fontSize: wScale(12), color: '#1F2937', fontWeight: '600' },
+  btnRow: { flexDirection: 'row', padding: wScale(10), gap: 8 },
+  actionChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 6, justifyContent: 'center' },
+  chipText: { color: '#fff', fontSize: wScale(11), fontWeight: 'bold' },
+  deleteChip: { backgroundColor: '#FEF2F2', borderWidth: 1, borderColor: '#FECACA' },
+  deleteChipText: { color: '#DC2626', fontSize: wScale(11), fontWeight: 'bold' },
 });
 
 export default GetBenifiaryScreen;

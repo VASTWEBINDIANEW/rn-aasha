@@ -22,6 +22,10 @@ import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/
 import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
 import firestore from '@react-native-firebase/firestore';
+<<<<<<< HEAD
+=======
+import useAxiosHook from './src/utils/network/AxiosClient';
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
@@ -32,6 +36,7 @@ const AppContent = () => {
   const authToken = useSelector((state: any) => state.userInfo.authToken);
   const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
+<<<<<<< HEAD
  
   const appState = useRef(AppState.currentState);
 const fetchOtaDetails = async () => {
@@ -46,6 +51,118 @@ const fetchOtaDetails = async () => {
     if (!documentSnapshot.exists) {
       console.log('OTA document not found');
       return null;
+=======
+ const {get} = useAxiosHook()
+  const appState = useRef(AppState.currentState);
+// const fetchOtaDetails = async () => {
+//   try {
+//     const documentSnapshot = await firestore()
+//       .collection('otaData')
+//       .doc('otadata')
+//       .collection('smartpay1')
+//       .doc('ota')
+//       .get();
+
+//     if (!documentSnapshot.exists) {
+//       console.log('OTA document not found');
+//       return null;
+//     }
+
+//     return documentSnapshot.data();
+//   } catch (error) {
+//     console.log('Firestore Error:', error);
+//     return null;
+//   }
+// };
+// const checkOta = async () => {
+//   try {
+//     const data = await fetchOtaDetails();
+
+//     if (!data) {
+//       return;
+//     }
+
+//     const installed =
+//       Number(await OtUpdate.getCurrentVersion()) || 0;
+
+//     const latest = Number(data.version);
+
+//     console.log('Installed Version:', installed);
+//     console.log('Firebase Version:', latest);
+//     console.log('Bundle URL:', data.url);
+
+//     if (!latest || isNaN(latest)) {
+//       return;
+//     }
+
+//     if (
+//       latest > installed &&
+//       data.status === true &&
+//       data.url
+//     ) {
+//       console.log('🚀 New OTA update found');
+
+//       startUpdate({
+//         version: latest,
+//         bundle_url: data.url,
+//       });
+//     } else {
+//       //Alert.alert('✅ Already latest version');
+//     }
+//   } catch (error) {
+//     console.log('OTA Check Failed:', error);
+//   }
+// };
+
+  // ✅ START UPDATE
+  
+  
+    const fetchOtaDetails = async () => {
+    try {
+      const version = await get({ url: APP_URLS.current_version });
+      console.log('OTA API Response:', version);
+
+      return {
+        version: version.otaVersion,
+        url: version.bundleUrl,
+        status: version.isgoogle, // true = update allowed
+        currentVersion: version.currentversion,
+        message: version.message,
+      };
+    } catch (error) {
+      console.log('OTA Fetch Error:', error);
+      return null;
+    }
+  };
+  const checkOta = async () => {
+    try {
+      const data = await fetchOtaDetails();
+      console.log('OTA Data:', data);
+
+      if (!data) {
+        return;
+      }
+
+      const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
+      const latest = Number(data.version);
+
+      console.log('Installed Version:', installed);
+      console.log('Latest Version:', latest);
+      console.log('Bundle URL:', data.url);
+
+      if (!latest || isNaN(latest)) {
+        return;
+      }
+
+      if (latest > installed && data.status === true && data.url) {
+        console.log('🚀 New OTA update found');
+        startUpdate({ version: latest, bundle_url: data.url });
+      } else {
+        console.log('✅ Already on latest version');
+      }
+    } catch (error) {
+      console.log('OTA Check Failed:', error);
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
     }
 
     return documentSnapshot.data();

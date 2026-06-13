@@ -114,7 +114,7 @@ const RechargeHistory = ({ route }) => {
 
       await Share.open({
         message: translate(
-          translate(`key_hiiams_47 ${APP_URLS.AppName} App.`),
+          `key_hiiams_47`,
         ),
         url: uri,
         filename: filename,

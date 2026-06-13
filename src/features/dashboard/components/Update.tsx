@@ -7,7 +7,6 @@ import {
   Alert,
   StatusBar,
   SafeAreaView,
-  Image,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { hScale, wScale } from "../../../utils/styles/dimensions";
@@ -24,7 +23,11 @@ import { onReceiveNotification2 } from "../../../utils/NotificationService";
 import LanguageButton from "../../../components/LanguageButton";
 
 const UpdateScreen = () => {
+<<<<<<< HEAD
   const { colorConfig, logoUrl,AppName  } = useSelector((state: RootState) => state.userInfo);
+=======
+  const { colorConfig } = useSelector((state: RootState) => state.userInfo);
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
   const { get } = useAxiosHook();
 
   const [latestVersion, setLatestVersion] = useState("...");
@@ -40,10 +43,6 @@ const UpdateScreen = () => {
         const version = await get({ url: APP_URLS.current_version });
         setResponse(version);
         setLatestVersion(version.currentversion);
-        console.log('====================================');
-        console.log(version);
-
-        console.log('====================================');
         setid(version.PackageName);
       } catch (error) {
         console.log("Version fetch error:", error);
@@ -122,7 +121,6 @@ const UpdateScreen = () => {
         colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
         style={styles.container}
       >
-
         {/* Background Blobs */}
         <View style={styles.blob1} />
         <View style={styles.blob2} />
@@ -205,10 +203,13 @@ const UpdateScreen = () => {
           <Text style={styles.note}>
             {translate("You will be redirected to Google Play Store.")}
           </Text>
+<<<<<<< HEAD
           <Text style={styles.note}>
             {AppName}
           </Text>
 
+=======
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
         </View>
       </LinearGradient>
     </SafeAreaView>

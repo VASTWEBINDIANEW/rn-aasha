@@ -5,18 +5,32 @@ export const APP_URLS = {
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
+<<<<<<< HEAD
   baseapiurl: 'http://native.ssvcms.in/',
   // baseWebUrl: 'vastwebindia.com/',
   baseWebUrl: 'ssvcms.in/',
 
   AppName: 'Ssv Cms',
   // app_logo: 'sonicswipe.png',
+=======
+  baseapiurl: 'http://native.adityaintelligence.in.net/',
+  // baseWebUrl: 'vastwebindia.com/',
+  baseWebUrl: 'adityaintelligence.in.net/',
+  daybook:'Retailer/api/data/Retailerdaybook?',
+  AppName: 'Recharge Drishti',
+  app_logo: 'sonicswipe.png',
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
   cms_logo: 'radiant.png',
+  dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
   DownloadAPK: '/Home/DownloadAPK',
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
   current_version: 'Common/api/data/Check_Android_Current_Version?vs_no=7',
+<<<<<<< HEAD
   version: '2.0.6',
+=======
+  version: '4',
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
   AepsBankInfo: 'AEPS/api/data/AepsBankInfo',
   daywisecommsofuser: 'Money/api/Money/daywisecommsofuser',
   ExtracommReport: 'Money/api/Money/ExtracommReport',

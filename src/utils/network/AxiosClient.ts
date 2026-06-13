@@ -21,7 +21,11 @@ const useAxiosHook = () => {
   const axiosInstance = useMemo(
     () =>
       axios.create({
+<<<<<<< HEAD
         baseURL: 'http://native.ssvcms.in/',
+=======
+        baseURL: 'http://native.adityaintelligence.in.net/',
+>>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
         //  baseURL: 'http://native.skeshari.in/',
         timeout: 120000
       }),

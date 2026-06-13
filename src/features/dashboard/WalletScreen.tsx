@@ -87,7 +87,7 @@ const WalletScreen = () => {
         const response = await get({ url: APP_URLS.balanceInfo });
         setBalanceInfo(response.data[0]);
       } else {
-        al;
+       
         const decryptedData = {
           adminfarmname: decryptData(data.kkkk, data.vvvv, data.adminfarmname),
           posremain: decryptData(data.kkkk, data.vvvv, data.posremain),
