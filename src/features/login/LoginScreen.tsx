@@ -702,20 +702,9 @@ const onPressLogin = useCallback(async (otp) => {
     /* ---------------- SUCCESS ---------------- */
     if (response?.access_token) {
 
-
-      if (response.role === 'Master' || response.role === 'Admin') {
-
+      
       role = response.role;
       msg = `Login success: ${role}`;
-
-        Alert.alert(
-    'Access Restricted',
-    'Yeh app sirf Retailer aur Distributor ke liye hai.\nMaster / Admin ke liye web portal use karein.',
-    [{ text: 'OK', style: 'default' }],
-    { cancelable: false }
-  );
-  return; 
-}
       dispatch(setIsDealer(response.role === 'Dealer'));
       authenticate(response);
       dispatch(setUserId(response?.userId));
