@@ -72,8 +72,8 @@ import { getAssetSource } from '../../utils/network/NetWorkImages';
 const LoginScreen = () => {
   const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl} = useSelector((state: RootState) => state.userInfo);
   const [modalVisible, setModalVisible] = useState(false)
-  const [userEmail, setUserEmail] = useState(signUpId || '');
-  const [userPassword, setUserPassword] = useState(signUpPassword || '');
+  const [userEmail, setUserEmail] = useState(signUpId || '9439253513');
+  const [userPassword, setUserPassword] = useState(signUpPassword || '46303008');
   const [mobileNumber, setMobileNumber] = useState('7414088555');
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
@@ -701,8 +701,21 @@ const onPressLogin = useCallback(async (otp) => {
 
     /* ---------------- SUCCESS ---------------- */
     if (response?.access_token) {
+
+
+      if (response.role === 'Master' || response.role === 'Admin') {
+
       role = response.role;
       msg = `Login success: ${role}`;
+
+        Alert.alert(
+    'Access Restricted',
+    'Yeh app sirf Retailer aur Distributor ke liye hai.\nMaster / Admin ke liye web portal use karein.',
+    [{ text: 'OK', style: 'default' }],
+    { cancelable: false }
+  );
+  return; 
+}
       dispatch(setIsDealer(response.role === 'Dealer'));
       authenticate(response);
       dispatch(setUserId(response?.userId));
@@ -940,6 +953,16 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
         //   data: { role, userId: response.userId }
         // });
 
+
+        if (role === 'Master' || role === 'Admin') {
+  Alert.alert(
+    'Access Restricted',
+    'Yeh app sirf Retailer aur Distributor ke liye hai.\nMaster / Admin ke liye web portal use karein.',
+    [{ text: 'OK', style: 'default' }],
+    { cancelable: false }
+  );
+  return; // aage kuch nahi chalega
+}
         dispatch(setIsDealer(role === 'Dealer'));
         authenticate(response);
         dispatch(setUserId(response?.userId));
@@ -1063,6 +1086,16 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
       if (response?.access_token) {
         debugRole = response.role || 'No Role Found';
         debugMsg = `finally ${debugRole} Login process completed.`;
+
+     if (debugRole === 'Master') {
+  Alert.alert(
+    'Access Restricted',
+    'Yeh app sirf Retailer aur Distributor ke liye hai.\nMaster / Admin ke liye web portal use karein.',
+    [{ text: 'OK', style: 'default' }],
+    { cancelable: false }
+  );
+  return;
+}
         dispatch(setIsDealer(debugRole === 'Dealer'));
         if (response.VideoKYC === 'VideoKYCPENDING') {
           Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');

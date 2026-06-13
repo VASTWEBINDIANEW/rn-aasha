@@ -17,27 +17,88 @@ import { setUnlocked } from './src/reduxUtils/store/userInfoSlice';
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
-import OtaUpdateModal from './src/components/OtaUpdateModal';
-import useAxiosHook from './src/utils/network/AxiosClient';
 import { APP_URLS } from './src/utils/network/urls';
-
+import OtaUpdateModal from './src/components/OtaUpdateModal';
+import firestore from '@react-native-firebase/firestore';
+import useAxiosHook from './src/utils/network/AxiosClient';
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-  const { get } = useAxiosHook();
-
+  // ── State add karo AppContent ke andar ──
   const [otaProgress, setOtaProgress] = useState(0);
-  const [otaStatus, setOtaStatus] = useState<
-    'idle' | 'downloading' | 'installing' | 'success' | 'failed'
-  >('idle');
+  const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
+  const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
+ const {get} = useAxiosHook()
   const appState = useRef(AppState.currentState);
+// const fetchOtaDetails = async () => {
+//   try {
+//     const documentSnapshot = await firestore()
+//       .collection('otaData')
+//       .doc('otadata')
+//       .collection('smartpay1')
+//       .doc('ota')
+//       .get();
 
-  const fetchOtaDetails = async () => {
+//     if (!documentSnapshot.exists) {
+//       console.log('OTA document not found');
+//       return null;
+//     }
+
+//     return documentSnapshot.data();
+//   } catch (error) {
+//     console.log('Firestore Error:', error);
+//     return null;
+//   }
+// };
+// const checkOta = async () => {
+//   try {
+//     const data = await fetchOtaDetails();
+
+//     if (!data) {
+//       return;
+//     }
+
+//     const installed =
+//       Number(await OtUpdate.getCurrentVersion()) || 0;
+
+//     const latest = Number(data.version);
+
+//     console.log('Installed Version:', installed);
+//     console.log('Firebase Version:', latest);
+//     console.log('Bundle URL:', data.url);
+
+//     if (!latest || isNaN(latest)) {
+//       return;
+//     }
+
+//     if (
+//       latest > installed &&
+//       data.status === true &&
+//       data.url
+//     ) {
+//       console.log('🚀 New OTA update found');
+
+//       startUpdate({
+//         version: latest,
+//         bundle_url: data.url,
+//       });
+//     } else {
+//       //Alert.alert('✅ Already latest version');
+//     }
+//   } catch (error) {
+//     console.log('OTA Check Failed:', error);
+//   }
+// };
+
+  // ✅ START UPDATE
+  
+  
+    const fetchOtaDetails = async () => {
     try {
       const version = await get({ url: APP_URLS.current_version });
       console.log('OTA API Response:', version);
@@ -54,7 +115,6 @@ const AppContent = () => {
       return null;
     }
   };
-
   const checkOta = async () => {
     try {
       const data = await fetchOtaDetails();
@@ -93,6 +153,7 @@ const AppContent = () => {
     }
 
     isUpdating.current = true;
+
     setOtaStatus('downloading');
     setOtaProgress(0);
 
@@ -112,17 +173,17 @@ const AppContent = () => {
             setOtaStatus('success');
           },
 
-          updateFail(error: any) {
+          updateFail(error) {
             console.log('❌ OTA Failed:', error);
             setOtaStatus('failed');
-            toast.show('Update Failed', { type: 'danger' });
           },
 
-          progress(received: number, total: number) {
+          progress(received, total) {
             if (total > 0) {
-              const percent = Math.floor((received / total) * 100);
+              const percent = Math.floor(
+                (received / total) * 100
+              );
               setOtaProgress(percent);
-              console.log(`Download: ${percent}%`);
             }
           },
         }
@@ -135,22 +196,24 @@ const AppContent = () => {
     }
   };
 
+  // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
     dispatch(setUnlocked(false));
   }, [language, authToken]);
 
+  // ✅ APP RESUME CHECK
   useEffect(() => {
-    console.log('🚀 App Started → checking OTA');
-    checkOta();
-
+    checkOta(); // ✅ App open hone pe bhi check karo
+fetchOtaDetails()
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        console.log('🔄 App Resumed → checking OTA');
+        console.log('🔄 App resumed → checking OTA');
         checkOta();
       }
+
       appState.current = nextAppState;
     });
 
@@ -165,6 +228,7 @@ const AppContent = () => {
         ref={navigationRef}
         onReady={() => RNBootSplash.hide({ fade: true })}
       >
+
         <AppContainer />
       </NavigationContainer>
     </>
@@ -190,9 +254,11 @@ function App() {
             <Provider store={store}>
               <PaperProvider>
                 <PersistGate loading={null} persistor={persistor}>
+
                   <FormProvider>
                     <AppContent />
                   </FormProvider>
+
                 </PersistGate>
               </PaperProvider>
             </Provider>
