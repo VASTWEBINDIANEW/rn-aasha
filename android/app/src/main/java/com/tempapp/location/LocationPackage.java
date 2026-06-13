@@ -1,4 +1,4 @@
-package com.payon4u.location;
+package com.star2alldigital.location;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

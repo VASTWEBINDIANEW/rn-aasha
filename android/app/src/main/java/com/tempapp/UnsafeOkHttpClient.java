@@ -1,4 +1,4 @@
-package com.payon4u;
+package com.star2alldigital;
 
 import okhttp3.OkHttpClient;
 import javax.net.ssl.*;

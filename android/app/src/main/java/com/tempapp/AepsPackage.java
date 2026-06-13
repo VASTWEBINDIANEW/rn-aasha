@@ -1,4 +1,4 @@
-package com.payon4u;
+package com.star2alldigital;
 
 import androidx.annotation.NonNull;
 
@@ -10,7 +10,7 @@ import com.facebook.react.uimanager.ViewManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.payon4u.AepsModule;
+import com.star2alldigital.AepsModule;
 
 public class AepsPackage implements ReactPackage {
 

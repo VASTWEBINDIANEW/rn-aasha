@@ -1,4 +1,4 @@
-package com.payon4u;
+package com.star2alldigital;
 
 import android.app.Activity;
 import android.content.Intent;

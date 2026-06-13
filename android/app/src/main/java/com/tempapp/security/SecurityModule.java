@@ -1,4 +1,4 @@
-package com.payon4u.security;
+package com.star2alldigital.security;
 
 import android.app.Activity;
 import android.app.KeyguardManager;

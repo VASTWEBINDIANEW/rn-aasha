@@ -1,4 +1,4 @@
-// package com.payon4u
+// package com.star2alldigital
 
 // import android.Manifest
 // import android.app.Activity
@@ -14,7 +14,7 @@
 
 // class MainActivity : ReactActivity() {
 
-//     override fun getMainComponentName(): String = "globalmultisolution"
+//     override fun getMainComponentName(): String = "star2alldigital"
 
 //     override fun createReactActivityDelegate(): ReactActivityDelegate =
 //         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
@@ -89,7 +89,7 @@
 //         }
 //     }
 // }
-package com.payon4u
+package com.star2alldigital
 
 import android.Manifest
 import android.app.Activity
@@ -106,7 +106,7 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "globalmultisolution"
+    override fun getMainComponentName(): String = "star2alldigital"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

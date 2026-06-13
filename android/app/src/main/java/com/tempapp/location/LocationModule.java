@@ -1,4 +1,4 @@
-package com.payon4u.location;
+package com.star2alldigital.location;
 
 import android.Manifest;
 import android.app.Activity;

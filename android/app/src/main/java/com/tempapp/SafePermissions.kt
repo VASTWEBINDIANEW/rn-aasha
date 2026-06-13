@@ -1,4 +1,4 @@
-package com.payon4u   // ✅ was com.worldpayone
+package com.star2alldigital   // ✅ was com.worldpayone
 
 import android.Manifest
 import android.app.Activity

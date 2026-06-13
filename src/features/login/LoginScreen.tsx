@@ -70,7 +70,7 @@ import CheckSvg from '../drawer/svgimgcomponents/CheckSvg';
 import FastImage from 'react-native-fast-image';
 import { getAssetSource } from '../../utils/network/NetWorkImages';
 const LoginScreen = () => {
-  const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl} = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig, Loc_Data, deviceInfo, signUpId, signUpPassword ,logoUrl,AppName } = useSelector((state: RootState) => state.userInfo);
   const [modalVisible, setModalVisible] = useState(false)
   const [userEmail, setUserEmail] = useState(signUpId || '');
   const [userPassword, setUserPassword] = useState(signUpPassword || '');
@@ -1081,7 +1081,7 @@ ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Em
 
               
             </LinearGradient>
-            <Text style={styles.appName}>{APP_URLS.AppName}</Text>
+            <Text style={styles.appName}>{AppName}</Text>
             <Text style={styles.tagline}>{translate("Welcome back.")}</Text>
           </View>
 

@@ -1,4 +1,4 @@
-package com.payon4u.security;
+package com.star2alldigital.security;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

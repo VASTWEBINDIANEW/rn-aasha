@@ -24,7 +24,7 @@ import { onReceiveNotification2 } from "../../../utils/NotificationService";
 import LanguageButton from "../../../components/LanguageButton";
 
 const UpdateScreen = () => {
-  const { colorConfig, logoUrl } = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig, logoUrl,AppName  } = useSelector((state: RootState) => state.userInfo);
   const { get } = useAxiosHook();
 
   const [latestVersion, setLatestVersion] = useState("...");
@@ -73,6 +73,10 @@ const UpdateScreen = () => {
         await Linking.openURL(url);
       } else {
         const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
+
+        await Linking.openURL(apkUrl);
+
+        return
         setIsDownloading(true);
         setDownloadProgress(0);
 
@@ -202,7 +206,7 @@ const UpdateScreen = () => {
             {translate("You will be redirected to Google Play Store.")}
           </Text>
           <Text style={styles.note}>
-            {response?.PackageName || ''}
+            {AppName}
           </Text>
 
         </View>

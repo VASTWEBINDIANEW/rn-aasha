@@ -1,4 +1,4 @@
-package com.payon4u.upi;
+package com.star2alldigital.upi;
 
 import androidx.annotation.NonNull;
 

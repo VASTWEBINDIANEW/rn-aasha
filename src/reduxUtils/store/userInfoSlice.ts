@@ -77,6 +77,7 @@ const initialState = {
   signUpId: null,
   signUpPassword: null,
   logoUrl: '',
+  AppName:'',
 
 };
 
@@ -135,7 +136,9 @@ const userInfoSlice = createSlice({
     setSignUpId: (state, action) => { state.signUpId = action.payload; },
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
     setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
-
+setAppName: (state, action) => {
+  state.AppName = action.payload;
+},
     reset: () => initialState,
   },
 });
@@ -180,7 +183,8 @@ export const {
   setUnlocked,
   setSignUpId,
   setSignUpPassword,
-  setLogoUrl
+  setLogoUrl,
+  setAppName,
 
 } = userInfoSlice.actions;
 

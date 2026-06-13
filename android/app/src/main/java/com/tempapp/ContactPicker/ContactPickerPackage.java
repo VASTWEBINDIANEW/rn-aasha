@@ -1,4 +1,4 @@
-package com.payon4u.ContactPicker;
+package com.star2alldigital.ContactPicker;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

@@ -4,6 +4,7 @@ import { RootState } from './reduxUtils/store';
 import useAxiosHook from './utils/network/AxiosClient';
 import { APP_URLS } from './utils/network/urls';
 import {
+  setAppName,
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
@@ -316,17 +317,11 @@ export const AppContainer = () => {
           labelColor: res.LABLECOLOR,
         }));
       }
-      const version = await get({ url: APP_URLS.current_version });
-      console.log('====================================');
-      console.log(version);
-      console.log('====================================');
-      if (version) {
-        dispatch(setLogoUrl(version.Logo))
-      }
-      if (version.isgoogle) {
-        setUpdate(version.isgoogle);
-
-      } else {
+   const version = await get({ url: APP_URLS.current_version });
+if (version) {
+  dispatch(setLogoUrl(version.Logo));
+  dispatch(setAppName(version.UserName)); // ← ye add karo
+}else {
         setUpdate(APP_URLS.version === version.currentversion);
       }
 
