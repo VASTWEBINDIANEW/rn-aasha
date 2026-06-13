@@ -369,6 +369,7 @@ const PicUpScreen = () => {
       console.log("📥 API Response:", JSON.stringify(res, null, 2));
 
       if (res?.Content?.ADDINFO?.status === 'success') {
+          setDetailsModalVisible(false);
 
         await AsyncStorage.setItem('pickup_status', 'unverified');
         setCashPickupData([]);
@@ -462,7 +463,7 @@ const PicUpScreen = () => {
         if (Content) {
 
         } else {
-          alert('CEID not available')
+          // alert('CEID not available')
 
         }
 
@@ -1903,6 +1904,7 @@ const PicUpScreen = () => {
                 showOtpModal={otpModalVisible}
                 setMobileOtp={setMobileOtp}
                 verifyOtp={() => {
+          setDetailsModalVisible(false);
 
 
                   if (clientOtp === mobileOtp) {
