@@ -211,7 +211,7 @@ const LoginScreen = () => {
         if (authToken) {
           navigation.navigate('Dashboard');
         }
-        await checkNotificationPermission()
+       // await checkNotificationPermission()
       } catch (error) {
         Alert.alert('Error', 'There was an issue fetching the data. Please try again.');
       } finally {
@@ -801,7 +801,7 @@ const onPressLogin = useCallback(async (otp) => {
     const debug = getDebugJson();
     console.log('🧪 FULL DEBUG JSON 👉', JSON.stringify(debug, null, 2));
     await saveDebugToStorage(debug);
-
+ToastAndroid.show(msg,ToastAndroid.BOTTOM)
     onReceiveNotification2({
       notification: { title: role || 'Login', body: msg || 'Done' },
     });

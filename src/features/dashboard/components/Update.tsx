@@ -7,7 +7,6 @@ import {
   Alert,
   StatusBar,
   SafeAreaView,
-  Image,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { hScale, wScale } from "../../../utils/styles/dimensions";
@@ -24,7 +23,7 @@ import { onReceiveNotification2 } from "../../../utils/NotificationService";
 import LanguageButton from "../../../components/LanguageButton";
 
 const UpdateScreen = () => {
-  const { colorConfig, logoUrl } = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig } = useSelector((state: RootState) => state.userInfo);
   const { get } = useAxiosHook();
 
   const [latestVersion, setLatestVersion] = useState("...");
@@ -40,10 +39,6 @@ const UpdateScreen = () => {
         const version = await get({ url: APP_URLS.current_version });
         setResponse(version);
         setLatestVersion(version.currentversion);
-        console.log('====================================');
-        console.log(version);
-
-        console.log('====================================');
         setid(version.PackageName);
       } catch (error) {
         console.log("Version fetch error:", error);
@@ -68,46 +63,42 @@ const UpdateScreen = () => {
         return;
       }
 
-      if (false) {
+      if (response.isgoogle) {
         const url = `${APP_URLS.playUrl}${id}`;
         await Linking.openURL(url);
       } else {
-                const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
+        const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
+        setIsDownloading(true);
+        setDownloadProgress(0);
 
-        await Linking.openURL(apkUrl);
+        onReceiveNotification2({
+          notification: { title: "Downloading App Update", body: "Please Wait" },
+        });
 
-return ;
-        // setIsDownloading(true);
-        // setDownloadProgress(0);
+        const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
 
-        // onReceiveNotification2({
-        //   notification: { title: "Downloading App Update", body: "Please Wait" },
-        // });
-
-        // const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
-
-        // ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
-        //   .fetch("GET", apkUrl)
-        //   .progress((received, total) => {
-        //     if (total > 0) {
-        //       const percentage = Math.floor((received / total) * 100);
-        //       setDownloadProgress(percentage);
-        //     }
-        //   })
-        //   .then((res) => {
-        //     setIsDownloading(false);
-        //     setDownloadProgress(100);
-        //     ReactNativeBlobUtil.android.actionViewIntent(
-        //       res.path(),
-        //       "application/vnd.android.package-archive"
-        //     );
-        //   })
-        //   .catch((errorMessage) => {
-        //     setIsDownloading(false);
-        //     console.log("Download error:", errorMessage);
-        //     Linking.openURL(apkUrl);
-        //     Alert.alert("Update Failed", "Could not download APK.");
-        //   });
+        ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
+          .fetch("GET", apkUrl)
+          .progress((received, total) => {
+            if (total > 0) {
+              const percentage = Math.floor((received / total) * 100);
+              setDownloadProgress(percentage);
+            }
+          })
+          .then((res) => {
+            setIsDownloading(false);
+            setDownloadProgress(100);
+            ReactNativeBlobUtil.android.actionViewIntent(
+              res.path(),
+              "application/vnd.android.package-archive"
+            );
+          })
+          .catch((errorMessage) => {
+            setIsDownloading(false);
+            console.log("Download error:", errorMessage);
+            Linking.openURL(apkUrl);
+            Alert.alert("Update Failed", "Could not download APK.");
+          });
       }
     } catch (error) {
       setIsDownloading(false);
@@ -122,7 +113,6 @@ return ;
         colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
         style={styles.container}
       >
-
         {/* Background Blobs */}
         <View style={styles.blob1} />
         <View style={styles.blob2} />
@@ -205,10 +195,6 @@ return ;
           <Text style={styles.note}>
             {translate("You will be redirected to Google Play Store.")}
           </Text>
-          <Text style={styles.note}>
-            {response?.PackageName || ''}
-          </Text>
-
         </View>
       </LinearGradient>
     </SafeAreaView>

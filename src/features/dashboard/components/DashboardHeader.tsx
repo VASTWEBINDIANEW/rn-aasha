@@ -92,7 +92,6 @@ const getData = useCallback(async () => {
     const userInfo = await get({ url: APP_URLS.getUserInfo });
     const data = userInfo.data;
 
-<<<<<<< HEAD
     if (!IsDealer) {
       const response = await get({ url: APP_URLS.balanceInfo });
       setBalanceInfo(response.data[0]);
@@ -115,58 +114,6 @@ const getData = useCallback(async () => {
       
       setfirmName(decryptedData.adminfarmname as string);
       setBalanceInfo(decryptedData);
-=======
-      if (!IsDealer) {
-        const response = await get({ url: APP_URLS.balanceInfo });
-        setBalanceInfo(response.data[0]);
-      } else {
-        // Yahan humne conditional checking laga di hai taaki bina data ke decrypt call na ho
-        const decryptedData: ExtendedBalanceType = {
-          adminfarmname: decryptData(data.kkkk, data.vvvv, data.adminfarmname),
-          posremain: decryptData(data.kkkk, data.vvvv, data.posremain),
-          remainbal: decryptData(data.kkkk, data.vvvv, data.remainbal),
-          frmanems: decryptData(data.kkkk, data.vvvv, data.frmanems),
-
-          // Agar data exist karega tabhi decrypt hoga, nahi toh render nahi hoga (undefined rahega)
-          ...(data.cmsremainbal && {
-            cmsremainbal: decryptData(data.kkkk, data.vvvv, data.cmsremainbal)
-          }),
-          ...(data.holdandleanbal && {
-            holdandleanbal: decryptData(data.kkkk, data.vvvv, data.holdandleanbal)
-          }),
-        };
-
-        setfirmName(decryptedData.adminfarmname as string);
-        setBalanceInfo(decryptedData);
-      }
-
-      const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
-      setfirmName(adminFarmName);
-
-      // RCE ID checks
-      const res = await post({ url: APP_URLS.RCEID }).catch(() => null);
-      if (res?.Content?.ADDINFO?.sts === false) {
-        const res2 = await post({ url: APP_URLS.RadiantCEIntersetCheck }).catch(() => null);
-        if (res2 && res2 !== 'Invalid response..') {
-          dispatch(setRceIdStatus({
-            status: res.Content.ADDINFO.sts,
-            status2: res2.Content.ADDINFO.sts,
-          }));
-        }
-      }
-
-      await AsyncStorage.setItem('adminFarmData', JSON.stringify({
-        adminFarmName: adminFarmName,
-        frmanems: decryptData(data.vvvv, data.kkkk, data.frmanems),
-        photoss: data.photoss ? decryptData(data.vvvv, data.kkkk, data.photoss) : '',
-      }));
-    } catch (error: any) {
-      if (error.message !== 'Network Error') {
-        console.error('getData error:', error);
-      }
-    } finally {
-      setIsLoading(false);
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
     }
 
     const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
@@ -249,7 +196,6 @@ const getData = useCallback(async () => {
     alert(`${latitude.length}\n${longitude.length}`);
   }, [latitude, longitude]);
 
-<<<<<<< HEAD
 // ─── Balance card config ──────────────────────────────────────────────────
 const balanceCards: BalanceCardProps[] = [
   { 
@@ -284,42 +230,6 @@ const balanceCards: BalanceCardProps[] = [
     }
   ] : [])
 ];
-=======
-  // ─── Balance card config ──────────────────────────────────────────────────
-  const balanceCards: BalanceCardProps[] = [
-    {
-      label: translate('Main Balance'),
-      value: balanceInfo?.remainbal,
-      accentColor: '#81C784',
-      align: 'left',
-      delay: 0
-    },
-    {
-      label: translate('Pos Balance'),
-      value: balanceInfo?.posremain,
-      accentColor: colorConfig.primaryColor,
-      align: 'center',
-      delay: 80
-    },
-    // Agar IsDealer false hoga, sirf tabhi yeh niche ke dono cards list me aayenge
-    ...(!IsDealer ? [
-      {
-        label: translate('CMS Balance'),
-        value: balanceInfo?.cmsremainbal,
-        accentColor: '#FFB74D',
-        align: 'center',
-        delay: 160
-      },
-      {
-        label: translate('Hold & Lean'),
-        value: balanceInfo?.holdandleanbal,
-        accentColor: '#C90909',
-        align: 'right',
-        delay: 240
-      }
-    ] : [])
-  ];
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
   const notifCount = notifications.length;
 
   return (
@@ -371,7 +281,6 @@ const balanceCards: BalanceCardProps[] = [
               </TouchableOpacity>
             )}
 
-<<<<<<< HEAD
       {  !IsDealer &&   <View>
                <TouchableOpacity  
               style={styles.notiBell}
@@ -385,42 +294,19 @@ const balanceCards: BalanceCardProps[] = [
             </Text>
 </View>}
           {!IsDealer &&  <TouchableOpacity
-=======
-            {!IsDealer && <View>
-              <TouchableOpacity
-                style={styles.notiBell}
-
-                onPress={() => navigation.navigate({ name: "PostoMain" })}
-              >
-                <ToselfSvg size={20} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.towallet}>
-                {translate('to Wallet')}
-              </Text>
-            </View>}
-            {!IsDealer && <TouchableOpacity
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "RecentTx" })}            >
               <RecentTrSvg size={25} color="#fff" />
             </TouchableOpacity>}
-<<<<<<< HEAD
          {!IsDealer &&   <TouchableOpacity
-=======
-            {!IsDealer && <TouchableOpacity
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "QRScanScreen" })}            >
               <QrcodSvg size={25} color="#fff" />
 
             </TouchableOpacity>}
-<<<<<<< HEAD
          { !IsDealer &&  <TouchableOpacity
-=======
-            {!IsDealer && <TouchableOpacity
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
               style={styles.notiRow}
               onPress={() => navigation.navigate('Notifications')}
             >

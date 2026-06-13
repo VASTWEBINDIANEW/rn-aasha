@@ -199,51 +199,7 @@ const IconButtons = ({
 export default memo(IconButtons);
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   element: { paddingHorizontal: wScale(2), paddingVertical: wScale(8), alignItems: "center", justifyContent: "center", marginHorizontal: wScale(2), flex: 1 },
   InputImage: { height: wScale(50), width: wScale(50), shadowRadius: 3, elevation: 2, alignItems: "center", justifyContent:"center" },
   screeitemname: { color: "white", textAlign: "center", fontSize: wScale(12) },
 });
-=======
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  element: {
-    paddingHorizontal: wScale(2),
-    paddingVertical: wScale(8),
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: wScale(2),
-    flex: 1,
-  },
-  InputImage: {
-    height: wScale(50),
-    width: wScale(50),
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: "center",
-  },
-  morebtn: {
-    paddingVertical: wScale(8),
-    padding: wScale(7),
-    alignItems: "center",
-    width: "100%",
-  },
-  imgview: {
-    // backgroundColor: "#fff",
-    height: wScale(50),
-    width: wScale(50),
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    // transform: [{ rotate: '90deg' }]
-  },
-  screeitemname: {
-    color: "white",
-    textAlign: "center",
-    fontSize: wScale(11),
-  },
-});
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd

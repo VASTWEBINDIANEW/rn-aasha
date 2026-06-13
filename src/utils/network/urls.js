@@ -5,16 +5,11 @@ export const APP_URLS = {
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
-  baseapiurl: 'http://native.payon4u.com/',
+  baseapiurl: 'http://native.ssvcms.in/',
   // baseWebUrl: 'vastwebindia.com/',
-  baseWebUrl: 'payon4u.com/',
-<<<<<<< HEAD
+  baseWebUrl: 'ssvcms.in/',
   daybook:'Retailer/api/data/Retailerdaybook?',
   AppName: 'Recharge Drishti',
-=======
-
-  AppName: 'Payon4u',
->>>>>>> 08ebad6f0a6700f4c9dd59d28ba7ab6b5c7139cd
   app_logo: 'sonicswipe.png',
   cms_logo: 'radiant.png',
   dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
@@ -22,7 +17,7 @@ export const APP_URLS = {
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
   current_version: 'Common/api/data/Check_Android_Current_Version?vs_no=7',
-  version: '5',
+  version: '2.0.6',
   AepsBankInfo: 'AEPS/api/data/AepsBankInfo',
   daywisecommsofuser: 'Money/api/Money/daywisecommsofuser',
   ExtracommReport: 'Money/api/Money/ExtracommReport',
