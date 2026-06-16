@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, AsyncStorage,
+  View, Text, StyleSheet, ScrollView,
   ImageBackground, BackHandler, ToastAndroid
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,6 +17,7 @@ import ShareGoback from "./ShareGoback";
 import useAxiosHook from "../utils/network/AxiosClient";
 import { APP_URLS } from "../utils/network/urls";
 import { clearEntryScreen, setCmsAddMFrom } from "../reduxUtils/store/userInfoSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AddMoneyPayResponse() {
   const capRef = useRef();

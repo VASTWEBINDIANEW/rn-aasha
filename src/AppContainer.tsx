@@ -4,7 +4,6 @@ import { RootState } from './reduxUtils/store';
 import useAxiosHook from './utils/network/AxiosClient';
 import { APP_URLS } from './utils/network/urls';
 import {
-  setAppName,
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
@@ -47,6 +46,7 @@ import ConnectionLost from './components/ConnectionLost';
 import { translate } from './utils/languageUtils/I18n';
 import BlockedMessageAnimated from './features/dashboard/components/Pkgmiss';
 import firestore from '@react-native-firebase/firestore';
+
 export const AppContainer = () => {
   const { LocationModule } = NativeModules;
   const dispatch = useDispatch();
@@ -66,8 +66,8 @@ export const AppContainer = () => {
   const [locationAllowed, setLocationAllowed] = useState(false);
   const [update, setUpdate] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [pkgmiss, setpkgmiss] = useState(false)
-  const [pkg, setpkg] = useState('')
+  const [pkgmiss, setpkgmiss] = useState(false);
+  const [pkg, setpkg] = useState('');
   const isDemo = reduxIsDemoUser || DemoConfig.demoNumbers.includes(loginId);
 
   // Firebase Init
@@ -81,10 +81,8 @@ export const AppContainer = () => {
 
   try { getApp(); } catch (e) { initializeApp(firebaseConfig, 'aircharge'); }
 
-
   useEffect(() => {
     const init = async () => {
-
       await fetchAppData();
 
       if (authToken) {
@@ -102,7 +100,6 @@ export const AppContainer = () => {
     init();
 
     const subscription = AppState.addEventListener('change', nextAppState => {
-
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
@@ -111,45 +108,36 @@ export const AppContainer = () => {
           checkGPSOnResume();
         }
       }
-
       appState.current = nextAppState;
     });
 
     return () => subscription.remove();
-
   }, [authToken]);
-
 
   const checkGPSOnResume = async () => {
     try {
-
       const isEnabled = await LocationModule.isLocationEnabled();
 
       if (!isEnabled) {
-
         setLocationAllowed(false);
-
         const status = await LocationModule.requestGPSEnabling();
 
         if (status === "ENABLED") {
           fetchDeviceInfo(false);
         } else {
-
           // user cancel kare toh 2 sec baad fir check
           setTimeout(() => {
             checkGPSOnResume();
           }, 2000);
-
         }
-
       } else {
         fetchDeviceInfo(false);
       }
-
     } catch (e) {
       console.log("Resume Error", e);
     }
   };
+
   const [allowed, setAllowed] = useState(null);
 
   useEffect(() => {
@@ -160,15 +148,10 @@ export const AppContainer = () => {
         documentSnapshot => {
           try {
             if (documentSnapshot?.exists) {
-
               const data = documentSnapshot.data();
-
               const status = data?.isAllowed ?? false;
-
               setAllowed(status);
-
               console.log('User allowed status:', status);
-
             } else {
               setAllowed(false);
               console.log('Document does not exist');
@@ -186,24 +169,20 @@ export const AppContainer = () => {
 
     return () => subscriber();
   }, []);
-  const initAppAndLocation = async () => {
 
+  const initAppAndLocation = async () => {
     let granted = false;
 
     if (Platform.OS === 'android') {
-
       const result = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
-
       granted = result === PermissionsAndroid.RESULTS.GRANTED;
-
     } else {
       granted = true;
     }
 
     if (!granted) {
-
       Alert.alert(
         translate('Location Required'),
         translate('Please allow location to continue.'),
@@ -214,7 +193,6 @@ export const AppContainer = () => {
           }
         ]
       );
-
       return;
     }
 
@@ -222,17 +200,16 @@ export const AppContainer = () => {
   };
 
   const fetchDeviceInfo = async (skipLocation: boolean) => {
-
     try {
-
       const buildId = await getBuildId();
       const ip = await getIpAddress();
       const bundleId = DeviceInfo.getBundleId();
 
       console.log('====================================');
-      console.log(bundleId);
+      console.log("Bundle ID:", bundleId);
       console.log('====================================');
-      setpkg(bundleId)
+      setpkg(bundleId);
+      
       let locData = {
         latitude: '0',
         longitude: '0',
@@ -242,44 +219,31 @@ export const AppContainer = () => {
       };
 
       if (!skipLocation) {
-
         try {
-
           const isEnabled = await LocationModule.isLocationEnabled();
 
           if (!isEnabled) {
-
             const status = await LocationModule.requestGPSEnabling();
-
             if (status !== "ENABLED") {
               setLocationAllowed(false);
               return;
             }
-
           }
 
           const loc = await LocationModule.getCurrentLocation();
-
           locData = loc;
           setLocationAllowed(true);
-
         } catch (e) {
-
           console.log("Location Error", e);
-
           const status = await LocationModule.requestGPSEnabling();
-
           if (status === "ENABLED") {
             fetchDeviceInfo(false);
             return;
           }
-
         }
-
       }
 
       dispatch(setDeviceInfo({
-
         brand: getBrand(),
         ipAddress: ip,
         modelNumber: getModel(),
@@ -289,17 +253,11 @@ export const AppContainer = () => {
         net: (await getCarrier()) || 'wifi/net',
         ...locData,
         packageName: bundleId,
-
       }));
-
     } catch (err) {
-
       console.log("Device Info Error", err);
-
     } finally {
-
       setIsLoading(false);
-
     }
   };
 
@@ -317,27 +275,24 @@ export const AppContainer = () => {
           labelColor: res.LABLECOLOR,
         }));
       }
-   const version = await get({ url: APP_URLS.current_version });
-if (version) {
-  dispatch(setLogoUrl(version.Logo));
-  dispatch(setAppName(version.UserName)); // ← ye add karo
-}else {
-        setUpdate(APP_URLS.version === version.currentversion);
+      
+      const version = await get({ url: APP_URLS.current_version });
+      console.log('====================================');
+      console.log("Server Version Response:", version);
+      console.log('====================================');
+      
+      if (version) {
+        dispatch(setLogoUrl(version.Logo));
+        dispatch(setVersionData(version)); // पूरे डेटा को Redux में डाला ताकि UpdateBox लिंक रीड कर सके
+
+        const isUpToDate = APP_URLS.version === version.currentversion;
+        setUpdate(isUpToDate);
       }
 
-      const bundleId = DeviceInfo.getBundleId(); // Get it locally inside fetchAppData
-      // if (version?.PackageName) {
-      //   const mismatch = bundleId !== version.PackageName;
-      //   setpkgmiss(mismatch);
-      // }
+      const bundleId = DeviceInfo.getBundleId(); 
 
       if (version?.PackageName) {
-
         const mismatch = bundleId !== version.PackageName;
-
-        console.log('====================================');
-        console.log(mismatch);
-        console.log('====================================');
         setpkgmiss(mismatch);
 
         console.log('📦 LOCAL PACKAGE:', bundleId);
@@ -345,17 +300,19 @@ if (version) {
         console.log('❗ PACKAGE MISMATCH:', mismatch);
       }
       registerNotification();
-    } catch (e) { console.log('❌ API Error', e); }
+    } catch (e) { 
+      console.log('❌ API Error', e); 
+    }
   };
 
-  const [connectionLost, setConnectionLost] = useState(false)
+  const [connectionLost, setConnectionLost] = useState(false);
+  
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
-
       const isDisconnected = !state.isConnected;
 
       setConnectionLost(prev => {
-        if (prev === isDisconnected) return prev; // same value → no rerender
+        if (prev === isDisconnected) return prev; 
         return isDisconnected;
       });
 
@@ -364,14 +321,14 @@ if (version) {
       } else {
         console.log("Internet Connected ✅");
       }
-
     });
 
     return () => unsubscribe();
   }, []);
-  // --- 2. RENDER LOGIC (Priority Based) --- 
 
+  // --- RENDER LOGIC (Priority Based) --- 
   const renderMainContent = () => {
+    // अगर पैकेज मिसमैच ब्लॉक को एक्टिवेट करना चाहते हैं तो इसे अनकमेंट कर सकते हैं
     // if (pkgmiss) {
     //   return (
     //     <BlockedMessageAnimated
@@ -380,15 +337,13 @@ if (version) {
     //     />
     //   );
     // }
+
     if (connectionLost) {
-      return <ConnectionLost onRetry={() => console.log('retry')} />
+      return <ConnectionLost onRetry={() => console.log('retry')} />;
     }
 
-    if (APP_URLS.AppName === 'Maxus Pay') {
-      if (!update && allowed == true) {
-        return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
-      }
-    }
+    // 🔥 GOOGLE & APP NAME BYPASS BLOCKS REMOVED HERE TOO
+    // सीधे चेक होगा: अगर ऐप अपडेटेड नहीं है (!update), तो अपडेट बॉक्स दिखाओ
     if (!update) {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
     }
@@ -398,11 +353,10 @@ if (version) {
       return <AuthNavigator />;
     }
 
-    // Priority 3: Biometric Auth (Login ke turant baad lock screen aani chahiye)
+    // Priority 3: Biometric Auth
     if (isFingerprintEnabled && !unLocked) {
       return <BiometricAuth />;
     }
-
 
     return IsDealer ? <DealerNavigator /> : <AppNavigator />;
   };

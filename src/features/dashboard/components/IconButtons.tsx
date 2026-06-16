@@ -1,42 +1,69 @@
+// features/dashboard/components/IconButtons.tsx
 import React, { memo, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ToastAndroid, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ToastAndroid,
+  Alert,
+} from "react-native";
 import { SvgXml } from "react-native-svg";
 import { FlashList } from "@shopify/flash-list";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxUtils/store";
 import { hScale, wScale } from "../../../utils/styles/dimensions";
-import BackArrow from "../../../utils/svgUtils/BackArrow";
 import { sectionData } from "../utils";
 import { useNavigation } from "@react-navigation/native";
-import SkeletonPlaceholder from "react-native-skeleton-placeholder";
-import { colors } from "../../../utils/styles/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APP_URLS } from "../../../utils/network/urls";
 import useAxiosHook from "../../../utils/network/AxiosClient";
 import { translate } from "../../../utils/languageUtils/I18n";
-// import { logSectionDataReceived, logIconRender, logSvgSuccess, logSvgError, logSvgMissingUrl } from "../../../utils/SvgLogger";
+import FastImage from "react-native-fast-image"; 
+import {
+  logSectionDataReceived,
+  logIconRender,
+  logSvgSuccess,
+  logSvgError,
+  logSvgMissingUrl,
+} from "../../../utils/SvgLogger";
 
 const loader = [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
 const MAX_ITEMS = 4;
+
+// ─── SVG fetch cache — एक बार fetch होने के बाद मेमोरी से तुरंत लोड होगा ───
 const svgCache: Record<string, string> = {};
 
-// ─── TrackedSvgIcon Component (WITH CORRECTIONS) ───────────────────────────
-const TrackedSvgIcon = memo(({ item, section }: { item: sectionData; section: string }) => {
+// ─── Remote Fallback URL (लोकल require एसेट्स पूरी तरह हटा दिए गए हैं) ───
+const REMOTE_FALLBACK_URL = `http://native.${APP_URLS.baseWebUrl}//SvgOperatorImage/exclamation-mark.png`;
+
+// ─── Per-item SVG Component ────────────────────────────────────────────────
+interface TrackedSvgIconProps {
+  item: sectionData;
+  section: string;
+  fallbackLogoUrl?: string; 
+}
+
+const TrackedSvgIcon = memo(({
+  item,
+  section,
+  fallbackLogoUrl,
+}: TrackedSvgIconProps) => {
   const [xmlContent, setXmlContent] = useState<string | null>(null);
   const [failed,     setFailed]     = useState(false);
 
   useEffect(() => {
     if (!item.svg) {
-      //logSvgMissingUrl(item.name, section);
+      logSvgMissingUrl(item.name, section);
       setFailed(true);
       return;
     }
 
-    //logIconRender(item.name, item.svg, section);
+    logIconRender(item.name, item.svg, section);
 
     if (svgCache[item.svg]) {
       setXmlContent(svgCache[item.svg]);
-      //logSvgSuccess(item.name, item.svg);
+      logSvgSuccess(item.name, item.svg);
       return;
     }
 
@@ -69,42 +96,61 @@ const TrackedSvgIcon = memo(({ item, section }: { item: sectionData; section: st
 
         svgCache[item.svg] = xml;
         setXmlContent(xml);
-        //logSvgSuccess(item.name, item.svg);
+        logSvgSuccess(item.name, item.svg);
       })
       .catch(err => {
         if (cancelled) return;
         setFailed(true); // Trigger immediate fallback
-        //logSvgError(item.name, item.svg, err);
+        logSvgError(item.name, item.svg, err);
       });
 
     return () => { cancelled = true; };
   }, [item.svg]);
 
-  // 🔥 FIXED LOGIC SEQUENCE: Error handles take precedence over infinite loading loops
-  if (failed) {
+  // इमेज सोर्स लॉजिक: पहले Redux का logoUrl चेक करेगा, खाली होने पर फॉलबैक यूआरएल लेगा
+  const imageSource = fallbackLogoUrl 
+    ? { uri: fallbackLogoUrl, priority: FastImage.priority.normal } 
+    : { uri: REMOTE_FALLBACK_URL, priority: FastImage.priority.normal };
+
+  // 1. ERROR/MISSING STATE
+  if (failed || (!xmlContent && !item.svg)) {
     return (
       <View style={styles.InputImage}>
-        <BackArrow />
+        <FastImage 
+          source={imageSource} 
+          style={styles.defaultImageStyle} 
+          resizeMode={FastImage.resizeMode.contain}
+        />
       </View>
     );
   }
 
+  // 2. LOADING STATE
   if (!xmlContent) {
     return (
-      <SkeletonPlaceholder speed={1200} backgroundColor={colors.gray} borderRadius={4}>
-        <SkeletonPlaceholder.Item width={wScale(45)} height={wScale(45)} borderRadius={wScale(45)} />
-      </SkeletonPlaceholder>
+      <View style={styles.InputImage}>
+        <FastImage 
+          source={imageSource} 
+          style={[styles.defaultImageStyle, { opacity: 0.6 }]} 
+          resizeMode={FastImage.resizeMode.contain}
+        />
+      </View>
     );
   }
 
+  // 3. SUCCESS STATE
   return (
     <View style={styles.InputImage}>
-      <SvgXml xml={xmlContent} height={wScale(50)} width={wScale(50)} />
+      <SvgXml
+        xml={xmlContent}
+        height={wScale(50)}
+        width={wScale(50)}
+      />
     </View>
   );
 });
 
-// ─── Main IconButtons Component ──────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────────────
 const IconButtons = ({
   getItem,
   isQuickAccess,
@@ -115,15 +161,27 @@ const IconButtons = ({
   setViewMoreStatus = (p0: (prev: any) => boolean) => {},
   buttonTitle = "",
 }) => {
-  const { isDemoUser } = useSelector((state: RootState) => state.userInfo);
-  const { post }       = useAxiosHook();
-  const navigation     = useNavigation();
+  const { isDemoUser, logoUrl } = useSelector((state: RootState) => state.userInfo);
+  const { post }                = useAxiosHook();
+  const navigation              = useNavigation();
+  const [Radius1,               setRadius1] = useState(0);
 
   useEffect(() => {
     if (buttonData?.length > 0) {
-      //logSectionDataReceived(section, buttonData.length, buttonData[0]?.svg);
+      logSectionDataReceived(section, buttonData.length, buttonData[0]?.svg);
     }
   }, [buttonData, section]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await post({ url: APP_URLS.signUpSvg });
+        if (res?.[0]?.Radius1) setRadius1(res[0].Radius1);
+      } catch (e) {
+        console.error("Radius fetch error:", e);
+      }
+    })();
+  }, []);
 
   const saveItemToStorage = async (item: sectionData) => {
     try {
@@ -137,7 +195,9 @@ const IconButtons = ({
       if (arr.length > MAX_ITEMS) arr.pop();
       await AsyncStorage.setItem("quickAccessItems", JSON.stringify(arr));
       getItem?.();
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error("AsyncStorage error:", e);
+    }
   };
 
   const comingSoon = [
@@ -145,27 +205,33 @@ const IconButtons = ({
     "FlightScreen", "TrainScreen", "HotelScreen", "BusScreen",
   ];
 
+  const loaderImageSource = logoUrl 
+    ? { uri: logoUrl, priority: FastImage.priority.low } 
+    : { uri: REMOTE_FALLBACK_URL, priority: FastImage.priority.low };
+
   return (
     <FlashList
       style={[iconButtonstyle, { justifyContent: "space-between", alignSelf: "stretch" }]}
       data={buttonData}
       ListEmptyComponent={() => (
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignSelf: "stretch" }}>
           {loader.map((item) => (
-            <View key={item.id} style={{ marginHorizontal: wScale(18) }}>
-              <SkeletonPlaceholder speed={1200} backgroundColor={colors.gray} borderRadius={4}>
-                <SkeletonPlaceholder.Item alignItems="center">
-                  <SkeletonPlaceholder.Item width={wScale(45)} height={wScale(45)} borderRadius={wScale(45)} />
-                  <SkeletonPlaceholder.Item margin={wScale(10)} width={wScale(40)} height={wScale(10)} />
-                </SkeletonPlaceholder.Item>
-              </SkeletonPlaceholder>
+            <View key={item.id} style={styles.element}>
+              <View style={styles.InputImage}>
+                <FastImage 
+                  source={loaderImageSource} 
+                  style={[styles.defaultImageStyle, { opacity: 0.3 }]} 
+                  resizeMode={FastImage.resizeMode.contain}
+                />
+              </View>
+              <View style={styles.textPlaceholder} />
             </View>
           ))}
         </View>
       )}
       numColumns={4}
       estimatedItemSize={20}
-      renderItem={({ item }: { item: sectionData; index: number }) => (
+      renderItem={({ item, index }: { item: sectionData; index: number }) => (
         <TouchableOpacity
           onPress={() => {
             if (comingSoon.includes(item.ScreenName)) {
@@ -186,7 +252,8 @@ const IconButtons = ({
           }}
           style={styles.element}
         >
-          <TrackedSvgIcon item={item} section={section} />
+          <TrackedSvgIcon item={item} section={section} fallbackLogoUrl={logoUrl} />
+          
           <Text style={styles.screeitemname} numberOfLines={2}>
             {translate(item.name)}
           </Text>
@@ -199,7 +266,36 @@ const IconButtons = ({
 export default memo(IconButtons);
 
 const styles = StyleSheet.create({
-  element: { paddingHorizontal: wScale(2), paddingVertical: wScale(8), alignItems: "center", justifyContent: "center", marginHorizontal: wScale(2), flex: 1 },
-  InputImage: { height: wScale(50), width: wScale(50), shadowRadius: 3, elevation: 2, alignItems: "center", justifyContent:"center" },
-  screeitemname: { color: "white", textAlign: "center", fontSize: wScale(12) },
+  element: {
+    paddingHorizontal: wScale(2),
+    paddingVertical:   wScale(8),
+    alignItems:        "center",
+    justifyContent:    "center",
+    marginHorizontal:  wScale(2),
+    flex:              1,
+  },
+  InputImage: {
+    height:        wScale(50),
+    width:         wScale(50),
+    shadowRadius:  3,
+    elevation:     2,
+    alignItems:    "center",
+    justifyContent:"center",
+  },
+  defaultImageStyle: {
+    width: wScale(50),  
+    height: wScale(50), 
+  },
+  textPlaceholder: {
+    width: wScale(40),
+    height: hScale(8),
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 4,
+    marginTop: hScale(8),
+  },
+  screeitemname: {
+    color:     "white",
+    textAlign: "center",
+    fontSize:  wScale(12),
+  },
 });

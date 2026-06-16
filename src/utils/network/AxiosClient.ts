@@ -1,33 +1,38 @@
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../reduxUtils/store';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { reset, setAuthToken, setRefreshToken, setUserId } from '../../reduxUtils/store/userInfoSlice';
 import { APP_URLS } from './urls';
 import { encrypt } from '../encryptionUtils';
+
+// ✅ Heavy endpoints ke liye timeout alag
+const HEAVY_ENDPOINTS = [
+  'CashpickupSubmit',
+  'CashDeposit',
+  'Submit',
+  'hkhk2'
+];
+const HEAVY_TIMEOUT = 300000;  // 5 minutes
+const DEFAULT_TIMEOUT = 120000; // 2 minutes
+
+const getTimeoutForUrl = (url: string): number => {
+  const isHeavy = HEAVY_ENDPOINTS.some(ep => url.includes(ep));
+  return isHeavy ? HEAVY_TIMEOUT : DEFAULT_TIMEOUT;
+};
 
 const useAxiosHook = () => {
   const { authToken = '', refreshToken, IsDealer } = useSelector(
     (state: RootState) => state.userInfo,
   );
   const dispatch = useDispatch();
-  let isRefreshing = false;
-
-  useEffect(() => {
-    console.log('**AUTH_TOKEN', authToken);
-  }, [authToken]);
-  
+  const isRefreshing = useRef(false); // ✅ useRef — render pe reset nahi hoga
 
   const axiosInstance = useMemo(
     () =>
       axios.create({
-<<<<<<< HEAD
-        baseURL: 'http://native.ssvcms.in/',
-=======
-        baseURL: 'http://native.adityaintelligence.in.net/',
->>>>>>> 1f3d23d0bf79e62d3bf243dd76b35e63adeaf9c8
-        //  baseURL: 'http://native.skeshari.in/',
-        timeout: 120000
+        baseURL: 'http://native.payon4u.com/',
+        timeout: DEFAULT_TIMEOUT,
       }),
     [],
   );
@@ -52,12 +57,15 @@ const useAxiosHook = () => {
       config?: any;
     }) => {
       try {
-        const response = await axiosInstance.post(url, data, config);
+        // ✅ Heavy endpoints ke liye timeout override
+        const timeout = getTimeoutForUrl(url);
+        const response = await axiosInstance.post(url, data, {
+          ...config,
+          timeout,
+        });
         return response.data;
       } catch (e) {
-
-      // Alert.alert("API ERROR:", e?.response?.data || e?.message);
-      throw e;
+        throw e;
       }
     },
     [axiosInstance],
@@ -71,7 +79,7 @@ const useAxiosHook = () => {
     [axiosInstance],
   );
 
-  // ---------- Refresh Token (Normal) ----------
+  // ---------- Refresh Token ----------
   const onRefreshToken = useCallback(async () => {
     const data = {
       refresh_token: refreshToken,
@@ -88,7 +96,8 @@ const useAxiosHook = () => {
         },
       },
     });
-    isRefreshing = false;
+
+    isRefreshing.current = false;
 
     if (response?.access_token) {
       dispatch(setAuthToken(response?.access_token));
@@ -99,94 +108,63 @@ const useAxiosHook = () => {
     return null;
   }, [dispatch, post, refreshToken]);
 
-  // ---------- Refresh Token (Test - Username/Password + Encryption) ----------
-  const onRefreshTokenTest = useCallback(async () => {
-    const encryption = encrypt(['9090909090', '123456789']);
+  // ✅ Interceptors useEffect mein — sirf ek baar register, cleanup bhi
+  useEffect(() => {
+    const reqId = axiosInstance.interceptors.request.use(
+      config => {
+        if (authToken && !config.headers.Authorization) {
+          config.headers.Authorization = `Bearer ${authToken}`;
+        }
 
-    const data = {
-      UserName: encryption.encryptedData[0],
-      Password: encryption.encryptedData[1],
-      grant_type: 'password',
-    };
+        if (config.url) {
+          console.log('🌐 FULL URL:', `${config.baseURL}${config.url}`);
+          console.log('📡 IsDealer:', IsDealer);
 
-    const response = await post({
-      url: APP_URLS.getToken,
-      data,
-      config: {
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          Authorization: 'bearer',
-          value1: encryption.keyEncode,
-          value2: encryption.ivEncode,
-        },
-      },
-    });
-    isRefreshing = false;
-
-    if (response?.access_token) {
-      dispatch(setAuthToken(response?.access_token));
-      dispatch(setUserId(response?.userId));
-      dispatch(setRefreshToken(response?.refresh_token));
-      return response;
-    }
-    return null;
-  }, [dispatch, post]);
-
-  // ---------- Request Interceptor ----------
-  axiosInstance.interceptors.request.use(
-    config => {
-      // Token set karna
-      if (authToken && !config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${authToken}`;
-      }
-
-      // Dealer prefix handling
-      if (config.url) {
-      console.log('🌐 FULL URL:', `${config.baseURL}${config.url}`);
-      console.log('📡 IsDealer:', IsDealer);       // ← add
-        if (IsDealer) {
           if (
-            config.url.startsWith("api/Radiant/") ||
-            config.url.startsWith("api/RadiantCash/")
+            IsDealer &&
+            (config.url.startsWith('api/Radiant/') ||
+              config.url.startsWith('api/RadiantCash/'))
           ) {
             config.url = `Dealer/${config.url}`;
           }
+
+          console.log('📡 AFTER URL:', config.url);
         }
-              console.log('📡 AFTER URL:', config.url);   // ← add
+        return config;
+      },
+      error => Promise.reject(error),
+    );
 
-      }
-      return config;
-    },
-    error => Promise.reject(error),
-  );
+    const resId = axiosInstance.interceptors.response.use(
+      response => response,
+      async error => {
+        if (error.response?.status === 401 && !isRefreshing.current) {
+          isRefreshing.current = true;
 
-  // ---------- Response Interceptor ----------
-  axiosInstance.interceptors.response.use(
-    response => response,
-    async error => {
-      if (error.response && error.response.status === 401 && isRefreshing === false) {
-        isRefreshing = true;
+          const response = await onRefreshToken();
 
-        // Pehle test wala refresh
-        let response = await onRefreshToken();
-
-
-        if (response) {
-          error.config.headers.Authorization = `Bearer ${response?.access_token}`;
-          return axiosInstance(error.config);
-        } else {
-          dispatch(reset());
-          return Promise.reject(error);
+          if (response) {
+            error.config.headers.Authorization = `Bearer ${response?.access_token}`;
+            return axiosInstance(error.config);
+          } else {
+            dispatch(reset());
+            return Promise.reject(error);
+          }
         }
-      }
-      if (error.response && error.response.data) {
-        return Promise.reject(error.response.data);
-      }
-      return Promise.reject(error);
-    },
-  );
+
+        if (error.response?.data) return Promise.reject(error.response.data);
+        return Promise.reject(error);
+      },
+    );
+
+    // ✅ Cleanup — purane interceptors eject
+    return () => {
+      axiosInstance.interceptors.request.eject(reqId);
+      axiosInstance.interceptors.response.eject(resId);
+    };
+  }, [authToken, IsDealer, onRefreshToken]);
 
   return { get, post, put };
 };
 
-export default useAxiosHook;
+export default useAxiosHook; 

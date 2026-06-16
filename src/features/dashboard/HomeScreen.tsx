@@ -26,7 +26,7 @@ import NewsSlider from "../../components/SliderText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QrcodSvg from '../drawer/svgimgcomponents/QrcodSvg';
 import FastImage from "react-native-fast-image";
-import {  getAssetSource } from "../../utils/network/NetWorkImages";
+import { getAssetSource } from "../../utils/network/NetWorkImages";
 
 // ─── Glow Orbs (same as ReportScreen / AccReportScreen) ──────────────────────
 const GlowOrbs = ({ primaryColor }: { primaryColor: string }) => (
@@ -168,13 +168,13 @@ const HomeScreen = () => {
   }, [scaleValue]);
 
   const Newssms = async () => {
-    const res = await get({ url: APP_URLS.getProfile });
-    if (res.data) {
-      JSON.parse(decryptData(res.value1, res.value2, res.data));
-    }
     try {
+      const res = await get({ url: APP_URLS.getProfile });
+      if (res && res.data) {
+        JSON.parse(decryptData(res.value1, res.value2, res.data));
+      }
       const response = await get({ url: APP_URLS.NewsNotifaction });
-      if (response.Status) setNewsData(response.data);
+      if (response && response.Status) setNewsData(response.data);
     } catch (_) {}
   };
 
@@ -196,31 +196,30 @@ const HomeScreen = () => {
       }
       if (storedItems) setSavedItems(JSON.parse(storedItems));
 
-    let backendTime = null;
+      let backendTime = null;
 
-try {
-  const themeResponse = await post({
-    url: APP_URLS.ThemeChangeTime,
-  });
+      try {
+        const themeResponse = await post({
+          url: APP_URLS.ThemeChangeTime,
+        });
+        backendTime = themeResponse?.FullDateTime;
+      } catch (error) {
+        console.log("ThemeChangeTime API not available, skipping cache check");
+      }
 
-  backendTime = themeResponse?.FullDateTime;
-} catch (error) {
-  console.log(
-    "ThemeChangeTime API not available, skipping cache check"
-  );
-}
+      const localTime = themeChangeTime?.themeUpdateTime;
 
-const localTime = themeChangeTime?.themeUpdateTime;
+      console.log('====================================');
+      console.log(backendTime, localTime);
+      console.log('====================================');
 
-console.log('====================================');
-console.log(backendTime, localTime);
-console.log('====================================');
-if (
-  backendTime &&
-  backendTime === localTime &&
-  dashboardData &&
-  Object.keys(dashboardData).length > 0
-) {        setFinanceSectionData(dashboardData.financeSectionData || []);
+      if (
+        backendTime &&
+        backendTime === localTime &&
+        dashboardData &&
+        Object.keys(dashboardData).length > 0
+      ) {        
+        setFinanceSectionData(dashboardData.financeSectionData || []);
         setOtherSectionData(dashboardData.otherSectionData   || []);
         setTravelSectionData(dashboardData.travelSectionData  || []);
         setCmsSectionData(dashboardData.cmsSectionData        || []);
@@ -233,23 +232,19 @@ if (
         return;
       }
 
-    const results = await Promise.allSettled([
-  post({ url: APP_URLS.getRechargeSectionImages }),
-  post({ url: APP_URLS.getFinanceSectionImages }),
-  post({ url: APP_URLS.getOtherSectionImages }),
-  post({ url: APP_URLS.getTravelSectionImages }),
-  post({ url: APP_URLS.getcmsSectionImages }),
-]);
-
-const rRes = results[0].status === "fulfilled" ? results[0].value : [];
-const fRes = results[1].status === "fulfilled" ? results[1].value : [];
-const oRes = results[2].status === "fulfilled" ? results[2].value : [];
-const tRes = results[3].status === "fulfilled" ? results[3].value : [];
-const cRes = results[4].status === "fulfilled" ? results[4].value : [];
+      // ─── FIX: Promise.allSettled को Promise.all से बदला ताकि पुराने डिवाइसेज पर क्रैश न हो ───
+      const [rRes, fRes, oRes, tRes, cRes] = await Promise.all([
+        post({ url: APP_URLS.getRechargeSectionImages }).catch(err => { console.log("Recharge API Error:", err); return []; }),
+        post({ url: APP_URLS.getFinanceSectionImages }).catch(err => { console.log("Finance API Error:", err); return []; }),
+        post({ url: APP_URLS.getOtherSectionImages }).catch(err => { console.log("Other API Error:", err); return []; }),
+        post({ url: APP_URLS.getTravelSectionImages }).catch(err => { console.log("Travel API Error:", err); return []; }),
+        post({ url: APP_URLS.getcmsSectionImages }).catch(err => { console.log("CMS API Error:", err); return []; }),
+      ]);
 
       const filtered = rRes?.filter((i: any) => i.name !== "Hide More1") || [];
       const first7   = filtered.slice(0, 7);
       const vmItem   = filtered.find((i: any) => i.name === "View More");
+      
       setRechargeSectionData(vmItem ? [...first7, vmItem] : first7);
       setRechargeViewMoreData(filtered);
       setFinanceSectionData(fRes || []);
@@ -257,11 +252,18 @@ const cRes = results[4].status === "fulfilled" ? results[4].value : [];
       setTravelSectionData(tRes  || []);
       setCmsSectionData(cRes     || []);
 
-      dispatch(setDashboardData({ rechargeSectionData: rRes || [], financeSectionData: fRes || [],
-        otherSectionData: oRes || [], travelSectionData: tRes || [], cmsSectionData: cRes || [] }));
-if (backendTime) {
-  dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
-}      setRefreshing(false);
+      dispatch(setDashboardData({ 
+        rechargeSectionData: rRes || [], 
+        financeSectionData: fRes || [],
+        otherSectionData: oRes || [], 
+        travelSectionData: tRes || [], 
+        cmsSectionData: cRes || [] 
+      }));
+
+      if (backendTime) {
+        dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
+      }      
+      setRefreshing(false);
     } catch (e) {
       console.error("Fetch Data Error:", e);
       setRefreshing(false);
@@ -276,16 +278,22 @@ if (backendTime) {
   useEffect(() => {
     setViewMoreStatus(false);
     const getData = async () => {
-      await post({ url: `Retailer/api/data/Rem_CallAutofundtransfer?userid=${userId}` });
-      const userInfo = await get({ url: APP_URLS.getUserInfo });
-      const data     = userInfo.data;
-      setFirmDet(decryptData(data.vvvv, data.kkkk, data.frmanems));
-      setAdminFirmDet(decryptData(data.vvvv, data.kkkk, data.adminfarmname));
-      await AsyncStorage.setItem("adminFarmData", JSON.stringify({
-        adminFarmName: decryptData(data.vvvv, data.kkkk, data.adminfarmname),
-        frmanems:      decryptData(data.vvvv, data.kkkk, data.frmanems),
-        photoss:       decryptData(data.vvvv, data.kkkk, data.photoss),
-      }));
+      try {
+        await post({ url: `Retailer/api/data/Rem_CallAutofundtransfer?userid=${userId}` });
+        const userInfo = await get({ url: APP_URLS.getUserInfo });
+        if(userInfo && userInfo.data) {
+          const data     = userInfo.data;
+          setFirmDet(decryptData(data.vvvv, data.kkkk, data.frmanems));
+          setAdminFirmDet(decryptData(data.vvvv, data.kkkk, data.adminfarmname));
+          await AsyncStorage.setItem("adminFarmData", JSON.stringify({
+            adminFarmName: decryptData(data.vvvv, data.kkkk, data.adminfarmname),
+            frmanems:      decryptData(data.vvvv, data.kkkk, data.frmanems),
+            photoss:       decryptData(data.vvvv, data.kkkk, data.photoss),
+          }));
+        }
+      } catch (error) {
+        console.error("Error in getData init:", error);
+      }
     };
     Promise.all([getData(), fetchData()]).then(() => setRefreshing(false));
     adharpanStatus();
@@ -294,19 +302,16 @@ if (backendTime) {
   const adharpanStatus = async () => {
     try {
       const userInfo = await get({ url: APP_URLS.getUserInfo });
-      dispatch(setIsDemoUser(userInfo));
-      setId_Demo(userInfo.data.Demo_User);
-      const APstatus = await get({ url: `${APP_URLS.AddharPanStatus}=${userId}` });
-      if (!APstatus) return;
-      let isVerify = true;
-      if      (APstatus.verify_type === "all")    isVerify = APstatus.aadhar_status && APstatus.pan_status;
-      else if (APstatus.verify_type === "aadhar") isVerify = APstatus.aadhar_status === true;
-      else if (APstatus.verify_type === "pan")    isVerify = APstatus.pan_status    === true;
-      // if (!isVerify) {
-      //   navigation.replace("AadhrPanVerify", {
-      //     aadharcard: APstatus.aadhar, pancard: APstatus.pan, verify_type: APstatus.verify_type,
-      //   });
-      // }
+      if (userInfo && userInfo.data) {
+        dispatch(setIsDemoUser(userInfo));
+        setId_Demo(userInfo.data.Demo_User);
+        const APstatus = await get({ url: `${APP_URLS.AddharPanStatus}=${userId}` });
+        if (!APstatus) return;
+        let isVerify = true;
+        if      (APstatus.verify_type === "all")    isVerify = APstatus.aadhar_status && APstatus.pan_status;
+        else if (APstatus.verify_type === "aadhar") isVerify = APstatus.aadhar_status === true;
+        else if (APstatus.verify_type === "pan")    isVerify = APstatus.pan_status    === true;
+      }
     } catch (e) {
       console.error("Error in adharpanStatus:", e);
     }
@@ -330,10 +335,8 @@ if (backendTime) {
 
       <DashboardHeader refreshPress={onRefresh} />
 
-      {/* News ticker (non-Divyanshi) */}
-      {/* { newsData?.length > 0 && ( */}
-        <NewsSlider data={newsData} />
-      {/* )} */}
+      {/* News ticker */}
+      <NewsSlider data={newsData} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -347,7 +350,6 @@ if (backendTime) {
           />
         }
       >
-   
 
         {/* ── Quick Access ── */}
         {APP_URLS.AppName !== "Divyanshi Pay" && (
@@ -385,7 +387,7 @@ if (backendTime) {
 
             <View style={styles.sectionContent}>
               <IconButtons
-                buttonData={savedItems?.length > 0 ? savedItems : otherSectionData}
+                buttonData={savedItems?.length > 0 ? savedItems : APP_URLS.AppName == 'World Pay One' ? financeSectionData : otherSectionData}
               />
             </View>
           </View>
@@ -396,7 +398,7 @@ if (backendTime) {
           <CarouselView />
         </View>
 
-       
+        {/* ── Recharge Section ── */}
         <GlassSection
           title={translate("Recharge_Pay_Bill")}
           rightElement={
@@ -438,31 +440,32 @@ if (backendTime) {
         )}
 
         {/* ── Financial Services ── */}
-        <GlassSection
-          title={translate("Financial_Services")}
-          rightElement={
-            
-            <LottieView
-              autoPlay loop
-              style={styles.lotiRight}
-              source={require("../../utils/lottieIcons/Money-bag2")}
+        {APP_URLS.AppName !== "World Pay One" && (
+          <GlassSection
+            title={translate("Financial_Services")}
+            rightElement={
+              <LottieView
+                autoPlay loop
+                style={styles.lotiRight}
+                source={require("../../utils/lottieIcons/Money-bag2")}
+              />
+            }
+          >
+            {financeSectionData.length === 4 && (
+              <Animated.Text
+                style={[styles.newBadge, { transform: [{ scale: scaleValue }] }]}
+              >
+                New
+              </Animated.Text>
+            )}
+            <IconButtons
+              buttonData={financeSectionData}
+              getItem={undefined}
+              isQuickAccess={undefined}
+              iconButtonstyle={undefined}
             />
-          }
-        >
-          {financeSectionData.length === 4 && (
-            <Animated.Text
-              style={[styles.newBadge, { transform: [{ scale: scaleValue }] }]}
-            >
-              New
-            </Animated.Text>
-          )}
-          <IconButtons
-            buttonData={financeSectionData}
-            getItem={undefined}
-            isQuickAccess={undefined}
-            iconButtonstyle={undefined}
-          />
-        </GlassSection>
+          </GlassSection>
+        )}
 
         {/* ── Travel ── */}
         {!is_demo && APP_URLS.AppName !== "Divyanshi Pay" && (
@@ -503,7 +506,6 @@ const styles = StyleSheet.create({
     paddingBottom:     hScale(80),
   },
 
-  // ── Quick action row ──
   quickRow: {
     flexDirection:  "row",
     justifyContent: "space-between",
@@ -547,7 +549,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
 
-  // ── Glass section card ──
   glassSection: {
     borderRadius:   18,
     overflow:       "hidden",
@@ -584,7 +585,6 @@ const styles = StyleSheet.create({
     paddingTop: hScale(10),
   },
 
-  // ── Quick Access card ──
   quickAccessHeader: {
     flexDirection:  "row",
     justifyContent: "space-between",
@@ -623,10 +623,8 @@ const styles = StyleSheet.create({
   },
   lotiSmall: { height: hScale(18), width: wScale(18) },
 
-  // ── Carousel ──
   carouselWrap: { marginVertical: hScale(0) },
 
-  // ── Logos ──
   bblogo:  { height: wScale(25), width: wScale(20) },
   cmsLogo: { height: wScale(25), width: wScale(25) },
   lotiRight: {
@@ -636,7 +634,6 @@ const styles = StyleSheet.create({
     right:wScale(10),
   },
 
-  // ── New badge ──
   newBadge: {
     backgroundColor:   "red",
     position:          "absolute",

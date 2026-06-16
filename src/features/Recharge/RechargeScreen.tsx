@@ -51,6 +51,182 @@ import ShowLoader from "../../components/ShowLoder";
 import { useLocationHook } from "../../hooks/useLocationHook";
 
 const dropdown = `<svg xmlns="http://www.w3.org/2000/svg"  version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="26" height="26" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path fill="#000000" fill-rule="evenodd" d="M20.586 47.836a2 2 0 0 0 0 2.828l39.879 39.879a5 5 0 0 0 7.07 0l39.879-39.879a2 2 0 0 0-2.828-2.828L64.707 87.714a1 1 0 0 1-1.414 0L23.414 47.836a2 2 0 0 0-2.828 0z" clip-rule="evenodd" opacity="1" data-original="#000000" class=""></path></g></svg>`;
+
+// ─── GPay-style Plan Card ─────────────────────────────────────────────────────
+interface PlanCardProps {
+  item: any;
+  primaryColor: string;
+  secondaryColor: string;
+  color3: string;
+  onPress: () => void;
+}
+
+const PlanCard = React.memo(
+  ({ item, primaryColor, secondaryColor, color3, onPress }: PlanCardProps) => {
+    const description =
+      item.description ?? `${item.offer ?? ""}${item.offerDetails ?? ""}`;
+    const validity = item.Validity ?? "N/A";
+    const price = item.price ?? "N/A";
+
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.75}
+        style={[
+          planCardStyles.card,
+          { borderColor: `${primaryColor}22` },
+        ]}
+      >
+        {/* Left accent bar */}
+        <View
+          style={[
+            planCardStyles.accentBar,
+            { backgroundColor: primaryColor },
+          ]}
+        />
+
+        {/* Price badge */}
+        <View
+          style={[
+            planCardStyles.priceBadge,
+            { backgroundColor: primaryColor },
+          ]}
+        >
+          <Text style={planCardStyles.priceRupee}>₹</Text>
+          <Text style={planCardStyles.priceAmount}>{price}</Text>
+        </View>
+
+        {/* Content */}
+        <View style={planCardStyles.content}>
+          {/* Validity chip */}
+          <View
+            style={[
+              planCardStyles.validityChip,
+              {
+                backgroundColor: `${secondaryColor}18`,
+                borderColor: `${secondaryColor}40`,
+              },
+            ]}
+          >
+            <Text style={planCardStyles.validityIcon}>📅</Text>
+            <Text
+              style={[
+                planCardStyles.validityText,
+                { color: secondaryColor },
+              ]}
+            >
+              {validity}
+            </Text>
+          </View>
+
+          {/* Description */}
+          {!!description && (
+            <Text style={planCardStyles.description}>
+              {description}
+            </Text>
+          )}
+        </View>
+
+        {/* Arrow */}
+        <View
+          style={[
+            planCardStyles.arrow,
+            { backgroundColor: `${primaryColor}12` },
+          ]}
+        >
+          <Text style={[planCardStyles.arrowText, { color: primaryColor }]}>
+            ›
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  },
+);
+
+const planCardStyles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    marginHorizontal: wScale(12),
+    marginVertical: hScale(5),
+    borderRadius: wScale(14),
+    borderWidth: 1,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    backgroundColor: "#fff",
+  },
+  accentBar: {
+    width: wScale(4),
+  },
+  priceBadge: {
+    width: wScale(72),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: wScale(6),
+    paddingVertical: hScale(14),
+  },
+  priceRupee: {
+    color: "#fff",
+    fontSize: wScale(11),
+    fontWeight: "600",
+    lineHeight: wScale(14),
+    opacity: 0.85,
+  },
+  priceAmount: {
+    color: "#fff",
+    fontSize: wScale(20),
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    lineHeight: wScale(24),
+  },
+  content: {
+    flex: 1,
+    paddingVertical: hScale(10),
+    paddingHorizontal: wScale(10),
+  },
+  validityChip: {
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    alignItems: "center",
+    borderRadius: wScale(20),
+    borderWidth: 1,
+    paddingHorizontal: wScale(8),
+    paddingVertical: hScale(2),
+    marginBottom: hScale(5),
+  },
+  validityIcon: {
+    fontSize: wScale(10),
+    marginRight: wScale(3),
+  },
+  validityText: {
+    fontSize: wScale(11),
+    fontWeight: "700",
+    letterSpacing: 0.2,
+  },
+  description: {
+    fontSize: wScale(11.5),
+    color: "#555",
+    lineHeight: hScale(16),
+  },
+  arrow: {
+    width: wScale(30),
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: wScale(4),
+    borderRadius: wScale(8),
+  },
+  arrowText: {
+    fontSize: wScale(22),
+    fontWeight: "300",
+    marginTop: hScale(-2),
+  },
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 const RechargeScreen = () => {
   const [historylist, setHistorylist] = useState([]);
   const [reqTime, setReqTime] = useState("");
@@ -232,7 +408,7 @@ const { ContactPicker } = NativeModules;
 console.log("operator list", response);
    
       const res = response.myprop2Items;
-      console.log(res,'-908907890908908909089890');
+      console.log(res);
       setOperatorlist(res);
       if (ispost) {
         setSelectedOption(translate("RechargeScreen.Prepaid"));
@@ -253,7 +429,7 @@ console.log("operator list", response);
       setLoading(true);
       setIsPlanLoading(true);
 
-      if (APP_URLS.AppName !== "World Pay One") {
+      if (APP_URLS.AppName !== "World Pay One1") {
         setShowLoader(false);
       }
 
@@ -634,7 +810,6 @@ const onRechargePress = useCallback(async () => {
 
     const latest = recent?.[0] || {};
 
-    // 🚀 Navigate to Recharge Details Screen
     navigation.navigate("Rechargedetails", {
       Amount,
       rechType: ispost ? "Postpaid" : "Prepaid",
@@ -742,62 +917,63 @@ const onRechargePress = useCallback(async () => {
 
   const [amountSearch, setAmountSearch] = useState(""); // New state for search query
 
-  // Filter function for searching by amount
-  const filteredPlans = planListData.filter((item) =>
-    item.price?.toString().includes(amountSearch),
-  );
+  // Filter function for searching by amount OR description/offer/validity
+  const filteredPlans = planListData.filter((item) => {
+    if (!amountSearch) return true;
+    const q = amountSearch.toLowerCase();
+    return (
+      item.price?.toString().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      item.offer?.toLowerCase().includes(q) ||
+      item.Validity?.toLowerCase().includes(q)
+    );
+  });
 
   // eslint-disable-next-line react/no-unstable-nested-components
-  const Recenttransactionlist = () => {
-    return historylist.length === 0 ? (
-      <View style={styles.nodataview}>
-        <NoDatafound />
-      </View>
-    ) : (
+const Recenttransactionlist = () => {
+    if (!Array.isArray(historylist) || historylist.length === 0) {
+      return (
+        <View style={styles.nodataview}>
+          <NoDatafound />
+        </View>
+      );
+    }
+
+    return (
       <FlashList
         data={historylist}
+        keyExtractor={(_, index) => index.toString()}
+        estimatedItemSize={70}
         renderItem={({ item }: { item: any }) => {
+          // APIs se aane wali standard keys ko bina translate ke nikalna
+          const status = item?.Status || "";
+          const isSuccess = status === "SUCCESS";
+          const isFailed = status === "FAILED";
+          
           return (
-            <TouchableOpacity
-              style={[styles.transactionContainer, { backgroundColor: color3 }]}
-            >
-         
+            <TouchableOpacity style={[styles.transactionContainer, { backgroundColor: color3 }]}>
+              {/* Left Side Info */}
               <View style={styles.leftContainer}>
-                <Text style={styles.dateTimeText}>{item["Reqesttime"]}</Text>
-                <Text style={styles.mobileNumberText}>
-                  {item[translate("RechargeScreen.Recharge_number")]}
-                </Text>
-                <Text style={styles.mobileNumberText}>
-                  {item[translate("RechargeScreen.Operator_name")]}
-                </Text>
+                <Text style={styles.dateTimeText}>{item?.Reqesttime || ""}</Text>
+                <Text style={styles.mobileNumberText}>{item?.Recharge_number || ""}</Text>
+                <Text style={styles.mobileNumberText}>{item?.Operator_name || ""}</Text>
               </View>
 
+              {/* Right Side Info */}
               <View style={styles.rightContainer}>
-                <Text style={styles.amountText}>
-                  ₹ {item[translate("RechargeScreen.Recharge_amount")]}
-                </Text>
+                <Text style={styles.amountText}>₹ {item?.Recharge_amount || "0"}</Text>
                 <Text
                   style={[
                     styles.rechTypeText,
-                    {
-                      color:
-                        item[translate("RechargeScreen.Status")] ===
-                          translate("RechargeScreen.SUCCESS")
-                          ? translate("RechargeScreen.green")
-                          : item[translate("RechargeScreen.Status")] ===
-                            translate("RechargeScreen.FAILED")
-                            ? translate("RechargeScreen.red")
-                            : translate("RechargeScreen.#a89b0a"),
-                    },
+                    { color: isSuccess ? "#15803D" : isFailed ? "#B91C1C" : "#A89B0A" }
                   ]}
                 >
-                  {item[translate("RechargeScreen.Status")]}
+                  {status}
                 </Text>
               </View>
             </TouchableOpacity>
           );
         }}
-        keyExtractor={(item, index) => index.toString()}
       />
     );
   };
@@ -955,7 +1131,7 @@ const onRechargePress = useCallback(async () => {
             inputstyle={undefined}
             labelinputstyle={undefined}
           />
-          {APP_URLS.AppName != "World Pay One" && (
+          {APP_URLS.AppName != "World Pay One1" && (
             <View style={[styles.righticon2]}>
               {isViewPlans && (
                 <TouchableOpacity
@@ -1049,6 +1225,7 @@ const onRechargePress = useCallback(async () => {
               value={index ?? 0}
               onChange={(e) => {
                 setIndex(e);
+                setAmountSearch("");
                 if (rechargePlans && rechargePlans[e]?.value?.Response) {
                   setPlanListData(rechargePlans[e].value.Response);
                 } else {
@@ -1078,19 +1255,28 @@ const onRechargePress = useCallback(async () => {
             </Tab>
 
             {/* Search bar */}
-            {/* <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={translate("search_by_amount")}
-            keyboardType="numeric"
-            value={amountSearch}
-            onChangeText={setAmountSearch}
-          />
-        </View> */}
+            <View style={styles.planSearchContainer}>
+              <View style={styles.planSearchIconWrap}>
+                <SearchIcon />
+              </View>
+              <TextInput
+                style={[styles.planSearchInput, { borderColor: `${colorConfig.primaryColor}40` }]}
+                placeholder="Search by amount/plan"
+                placeholderTextColor="#999"
+                value={amountSearch}
+                onChangeText={setAmountSearch}
+                returnKeyType="search"
+              />
+              {!!amountSearch && (
+                <TouchableOpacity onPress={() => setAmountSearch("")} style={styles.planSearchClear}>
+                  <ClosseModalSvg />
+                </TouchableOpacity>
+              )}
+            </View>
 
             <View style={[{ flex: 1 }, styles.tabContent]}>
               <FlashList
-                data={planListData} // Use filtered plans
+                data={filteredPlans}
                 keyExtractor={(item, index) =>
                   item.price?.toString() ?? index.toString()
                 }
@@ -1141,29 +1327,17 @@ const onRechargePress = useCallback(async () => {
                   </View>
                 )}
                 renderItem={({ item }) => (
-                  <TouchableOpacity
+                  <PlanCard
+                    item={item}
+                    primaryColor={colorConfig.primaryColor}
+                    secondaryColor={colorConfig.secondaryColor}
+                    color3={color3}
                     onPress={() => {
                       setIsplanview(false);
                       setAmount(item.price ?? 0);
                       setIsFocused(false);
                     }}
-                    style={[styles.itemContainer, { backgroundColor: color3 }]}
-                  >
-                    <View style={styles.innerContainer}>
-                      <Text style={styles.priceText}>
-                        ₹ {item.price ?? "N/A"}
-                      </Text>
-                      <View>
-                        <Text style={styles.validityText}>{translate("Validity")}</Text>
-                        <Text style={styles.validityvalue}>
-                          {item.Validity ?? "N/A"}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.descriptionText}>
-                      {item.description ?? item.offer + item.offerDetails}
-                    </Text>
-                  </TouchableOpacity>
+                  />
                 )}
               />
             </View>
@@ -1241,7 +1415,7 @@ const onRechargePress = useCallback(async () => {
           }}
           styleoveride={{
             top:
-              APP_URLS.AppName == "World Pay One"
+              APP_URLS.AppName == "World Pay One1"
                 ? hScale(-20)
                 : 0,
           }}
@@ -1268,7 +1442,7 @@ const onRechargePress = useCallback(async () => {
       {APP_URLS.AppName == "Pc Pay" &&
         !isKeyboardVisible && <Recenttransactionlist />}
 
-      {APP_URLS.AppName === "World Pay One" &&
+      {APP_URLS.AppName === "World Pay One1" &&
         rechargePlans.length > 0 && (
           <View style={styles.bottomsheetview}>
             <Tab
@@ -1289,7 +1463,7 @@ const onRechargePress = useCallback(async () => {
                 fontWeight: active ? "bold" : "normal",
                 paddingHorizontal: active ? wScale(0) : 0,
                 fontSize: wScale(
-                  APP_URLS.AppName == "World Pay One"
+                  APP_URLS.AppName == "World Pay One1"
                     ? 13
                     : 15,
                 ),
@@ -1307,19 +1481,28 @@ const onRechargePress = useCallback(async () => {
             </Tab>
 
             {/* Search bar */}
-            {/* <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={translate("search_by_amount")}
-            keyboardType="numeric"
-            value={amountSearch}
-            onChangeText={setAmountSearch}
-          />
-        </View> */}
+            <View style={styles.planSearchContainer}>
+              <View style={styles.planSearchIconWrap}>
+                <SearchIcon />
+              </View>
+              <TextInput
+                style={[styles.planSearchInput, { borderColor: `${colorConfig.primaryColor}40` }]}
+                placeholder="Amount ya plan search karo..."
+                placeholderTextColor="#999"
+                value={amountSearch}
+                onChangeText={setAmountSearch}
+                returnKeyType="search"
+              />
+              {!!amountSearch && (
+                <TouchableOpacity onPress={() => setAmountSearch("")} style={styles.planSearchClear}>
+                  <ClosseModalSvg />
+                </TouchableOpacity>
+              )}
+            </View>
 
             <View style={[{ flex: 1 }, styles.tabContent]}>
               <FlashList
-                data={planListData} // Use filtered plans
+                data={filteredPlans}
                 keyExtractor={(item, index) =>
                   item.price?.toString() ?? index.toString()
                 }
@@ -1370,29 +1553,17 @@ const onRechargePress = useCallback(async () => {
                   </View>
                 )}
                 renderItem={({ item }) => (
-                  <TouchableOpacity
+                  <PlanCard
+                    item={item}
+                    primaryColor={colorConfig.primaryColor}
+                    secondaryColor={colorConfig.secondaryColor}
+                    color3={color3}
                     onPress={() => {
                       setIsplanview(false);
                       setAmount(item.price ?? 0);
                       setIsFocused(false);
                     }}
-                    style={[styles.itemContainer, { backgroundColor: color3 }]}
-                  >
-                    <View style={styles.innerContainer}>
-                      <Text style={styles.priceText}>
-                        ₹ {item.price ?? "N/A"}
-                      </Text>
-                      <View>
-                        <Text style={styles.validityText}>{translate("Validity")}</Text>
-                        <Text style={styles.validityvalue}>
-                          {item.Validity ?? "N/A"}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.descriptionText}>
-                      {item.description ?? item.offer + item.offerDetails}
-                    </Text>
-                  </TouchableOpacity>
+                  />
                 )}
               />
             </View>
@@ -1409,12 +1580,12 @@ const styles = StyleSheet.create({
   },
   tabview: {
     paddingHorizontal: wScale(20),
-    paddingTop: hScale(APP_URLS.AppName == "World Pay One" ? 7 : 10),
+    paddingTop: hScale(APP_URLS.AppName == "World Pay One1" ? 7 : 10),
   },
   container: {
     paddingHorizontal: wScale(20),
     flex: 1,
-    paddingTop: hScale(APP_URLS.AppName == "World Pay One" ? 11 : 30),
+    paddingTop: hScale(APP_URLS.AppName == "World Pay One1" ? 11 : 30),
   },
   righticon2: {
     position: "absolute",
@@ -1465,13 +1636,13 @@ const styles = StyleSheet.create({
     width: wScale(45),
   },
   bottomsheetview: {
-    paddingBottom:hScale(100),
+    paddingBottom:hScale(30),
     flexGrow:1,
-    top: APP_URLS.AppName === "World Pay One" ? -7 : 10,
-    padding: APP_URLS.AppName === "World Pay One" ? 5 : 10,
+    top: APP_URLS.AppName === "World Pay One1" ? -7 : 10,
+    padding: APP_URLS.AppName === "World Pay One1" ? 5 : 10,
     backgroundColor: "#fff",
     height:
-      APP_URLS.AppName === "World Pay One"
+      APP_URLS.AppName === "World Pay One1"
         ? SCREEN_HEIGHT / 2.2
         : SCREEN_HEIGHT / 1.3,
     borderTopLeftRadius: 15,
@@ -1511,7 +1682,7 @@ const styles = StyleSheet.create({
   itemContainer: {
     borderRadius: 5,
     marginHorizontal:
-      APP_URLS.AppName === "World Pay One" ? wScale(4) : wScale(8),
+      APP_URLS.AppName === "World Pay One1" ? wScale(4) : wScale(8),
     marginBottom: hScale(4),
     paddingVertical: hScale(1),
     paddingHorizontal: wScale(8),
@@ -1522,12 +1693,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   priceText: {
-    fontSize: APP_URLS.AppName === "World Pay One" ? wScale(12) : wScale(18),
+    fontSize: APP_URLS.AppName === "World Pay One1" ? wScale(12) : wScale(18),
     fontWeight: "bold",
     color: "#333",
   },
   validityText: {
-    fontSize: APP_URLS.AppName === "World Pay One" ? wScale(10) : wScale(14),
+    fontSize: APP_URLS.AppName === "World Pay One1" ? wScale(10) : wScale(14),
     color: "#666",
   },
   descriptionText: {
@@ -1650,6 +1821,33 @@ const styles = StyleSheet.create({
     width: wScale(45),
     height: wScale(45),
     marginRight: wScale(20),
+  },
+  planSearchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: wScale(12),
+    marginTop: hScale(8),
+    marginBottom: hScale(6),
+    backgroundColor: "#f5f5f5",
+    borderRadius: wScale(25),
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    paddingHorizontal: wScale(12),
+    height: hScale(44),
+  },
+  planSearchIconWrap: {
+    marginRight: wScale(8),
+    opacity: 0.5,
+  },
+  planSearchInput: {
+    flex: 1,
+    fontSize: wScale(13),
+    color: "#000",
+    paddingVertical: 0,
+  },
+  planSearchClear: {
+    padding: wScale(4),
+    opacity: 0.6,
   },
 });
 export default RechargeScreen;

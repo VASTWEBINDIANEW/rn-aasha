@@ -269,7 +269,6 @@ const RToRReport = () => {
           }}
           setSearchnumber={() => {}}
           cmsStatu={false}
-          onlyFromDate={false}
         />
       </LinearGradient>
 
