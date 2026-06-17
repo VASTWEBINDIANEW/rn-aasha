@@ -69,10 +69,10 @@ const GlassSection = ({
 
   return (
     <View style={styles.glassSection}>
-      
+
       {/* Glass fill */}
       <LinearGradient
-        colors={["rgba(13, 8, 8, 0.13)", "rgba(255,255,255,0.04)"]}
+        colors={["rgba(255,255,255,0.16)", "rgba(255,255,255,0.04)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -81,8 +81,8 @@ const GlassSection = ({
       {/* Top shimmer */}
       <LinearGradient
         colors={[
-          colorConfig.secondaryColor,
-          colorConfig.secondaryColor,
+          `${colorConfig.secondaryColor}E6`,
+          `${colorConfig.secondaryColor}00`,
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
@@ -90,7 +90,10 @@ const GlassSection = ({
       />
 
       <View style={styles.sectionTitleRow}>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <View style={styles.titleWithAccent}>
+          <View style={[styles.titleAccent, { backgroundColor: colorConfig.primaryColor }]} />
+          <Text style={styles.sectionTitle}>{title}</Text>
+        </View>
         {rightElement}
       </View>
 
@@ -158,13 +161,14 @@ const HomeScreen = () => {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const zoomInOut = () => {
+    const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleValue, { toValue: 1,   duration: 1000, useNativeDriver: true }),
         Animated.timing(scaleValue, { toValue: 0.8, duration: 1000, useNativeDriver: true }),
-      ]).start(() => zoomInOut());
-    };
-    zoomInOut();
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
   }, [scaleValue]);
 
   const Newssms = async () => {
@@ -367,11 +371,13 @@ const HomeScreen = () => {
 
             <View style={styles.quickAccessHeader}>
               <View style={styles.qaLeft}>
-                <Text style={styles.qaHi}>{translate("Hi.")}</Text>
-                <Text style={styles.qaName} numberOfLines={1} ellipsizeMode="tail">
-                  {FirmDet}
-                </Text>
-                <Text style={styles.qaHi}>{translate("Your_Quick_Access")}</Text>
+                <View style={styles.qaGreetRow}>
+                  <Text style={styles.qaHi}>{translate("Hi.")}</Text>
+                  <Text style={styles.qaName} numberOfLines={1} ellipsizeMode="tail">
+                    {FirmDet}
+                  </Text>
+                </View>
+                <Text style={styles.qaSub}>{translate("Your_Quick_Access")}</Text>
               </View>
               <Pressable
                 onPress={() => navigation.navigate({ name: "QuickAccessScreen" })}
@@ -550,27 +556,38 @@ const styles = StyleSheet.create({
   },
 
   glassSection: {
-    borderRadius:   18,
+    borderRadius:   22,
     overflow:       "hidden",
     borderWidth:    1,
-    borderColor:    "rgba(255,255,255,0.18)",
-    marginVertical: hScale(6),
+    borderColor:    "rgba(255,255,255,0.28)",
+    marginVertical: hScale(7),
     position:       "relative",
   },
   sectionTopShimmer: {
     position:              "absolute",
     top: 0, left: 0, right: 0,
-    height:                hScale(32),
-    borderTopLeftRadius:   18,
-    borderTopRightRadius:  18,
+    height:                hScale(40),
+    borderTopLeftRadius:   22,
+    borderTopRightRadius:  22,
   },
   sectionTitleRow: {
     flexDirection:  "row",
     justifyContent: "space-between",
     alignItems:     "center",
-    paddingTop:     hScale(5),
+    paddingTop:     hScale(8),
     paddingHorizontal: wScale(14),
     paddingRight:   wScale(12),
+  },
+  titleWithAccent: {
+    flexDirection: "row",
+    alignItems:    "center",
+    flex:          1,
+  },
+  titleAccent: {
+    width:        wScale(4),
+    height:       wScale(16),
+    borderRadius: wScale(2),
+    marginRight:  wScale(8),
   },
   sectionTitle: {
     fontSize:   wScale(15),
@@ -595,22 +612,29 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.05)",
   },
   qaLeft: {
-    flexDirection: "row",
-    alignItems:    "center",
-    flexWrap:      "wrap",
+    flexDirection: "column",
     flex:          1,
   },
+  qaGreetRow: {
+    flexDirection: "row",
+    alignItems:    "center",
+  },
   qaHi: {
-    fontSize:   wScale(13),
-    color:      "rgba(255,255,255,0.85)",
-    marginRight: wScale(4),
+    fontSize:   wScale(14),
+    color:      "rgba(255,255,255,0.9)",
+    marginRight: wScale(5),
   },
   qaName: {
-    fontSize:   wScale(13),
+    fontSize:   wScale(15),
     color:      "#fff",
     fontWeight: "bold",
-    maxWidth:   wScale(130),
-    marginRight: wScale(4),
+    maxWidth:   wScale(160),
+  },
+  qaSub: {
+    fontSize:   wScale(11),
+    color:      "rgba(255,255,255,0.65)",
+    marginTop:  hScale(2),
+    letterSpacing: 0.2,
   },
   editBtn: {
     height:        wScale(28),
