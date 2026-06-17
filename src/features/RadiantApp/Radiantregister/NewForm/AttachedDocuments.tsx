@@ -531,7 +531,7 @@ const AttachedDocuments = ({ onNext }: { onNext: () => void }) => {
   const [policeVerImg, setPoliceVerImg] = useState(emptyDoc());
   const [otherDoc, setOtherDoc] = useState(emptyDoc());
   const [passportPhoto, setPassportPhoto] = useState(emptyDoc());
-  const [otherId, setOtherId] = useState('');
+  const [otherId, setOtherId] = useState<any>('');
   const formik = useFormik<FormValues>({
     initialValues: {
       creditCardScore: '',
@@ -594,8 +594,6 @@ if (!aadhaarBack.base64 && !aadhaarBack.uri) { toast('Aadhaar back copy required
         const res = response?.data || response;
         console.log('✅ ShowForm6 RESPONSE:', JSON.stringify(res, null, 2));
         if (res?.StatusCode === 200) {
-                    setLoading(false);
-
           const c = res?.Content;
           setOtherId(c);
 
@@ -610,6 +608,8 @@ if (!aadhaarBack.base64 && !aadhaarBack.uri) { toast('Aadhaar back copy required
         }
       } catch (err) {
         console.log('❌ ShowForm6 ERROR:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -678,7 +678,7 @@ if (!aadhaarBack.base64 && !aadhaarBack.uri) { toast('Aadhaar back copy required
         {/* ── Other Documents ── */}
         <SectionCard title="Other Documents" icon="folder-open-outline" iconColor={stepColor}>
           <DocCard
-            label={`Select ${otherId.OtherDocName} Photo`}
+            label={`Select ${otherId?.OtherDocName || 'Other Document'} Photo`}
 
             icon="file-plus-outline"
             doc={otherDoc}
