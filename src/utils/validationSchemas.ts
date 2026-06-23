@@ -68,7 +68,7 @@ export const BasicInfoSchema = Yup.object({
 
   fatherName: Yup.string()
     .trim()
-    .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
+    .matches(/^[a-zA-Z\s]+$/, 'onclickhabets')
     .required("Father's name required"),
 
   fatherOccupation: Yup.string()

@@ -400,15 +400,6 @@ console.log(Loc_Data)
     
 
 
-    navigation.navigate("Rechargedetails", {
-      Amount,
-      operator:selectedOpt,
-      mobileNumber:consumerNo,
-      status: status || 'Unknown',
-      reqTime: reqTime || 'N/A',
-      Message: Message || 'No message',
-      reqId: reqId || 'N/A',
-    });
     // if (!res.ok) {
     //   Alert.alert(res['Response'], res['Message'], [{ text: 'OK', onPress: () => { } }]);
 
@@ -458,72 +449,52 @@ ToastAndroid.show(res.Message,ToastAndroid.BOTTOM)
 setShowLoader2(false)
 
 }
-      if (APP_URLS.AppName === 'Recharge Drishti') {
-        if (res && res['status'] === 'SUCCESS') {
-          // If successful, set the customer data
+   if (APP_URLS.AppName === 'Recharge Drishti') {
+  if (res && res['status'] === 'SUCCESS') {
 
-          // Check if res.Response.packages is defined and is an array
-          const packages = Array.isArray(res.Response.packages) ? res.Response.packages.join(", ") : "No packages available";
+    // ✅ res.Response nahi, directly res se lo
+    const packages = Array.isArray(res.packages)
+      ? res.packages.join(", ")
+      : "No packages available";
 
-          const message = `
-          Name:   ${res.Response.name}
-          RMN:   ${res.Response.RMN}
-          Balance:   ₹${res.Response.balance}
-          Last Recharge Amount:   ₹${res.Response.lastRechargeAmount || 0}
-          Last Recharge Date:   ${res.Response.lastRechargeDate || 0}
-          Monthly Recharge:   ₹${res.Response.monthlyRecharge}
-          Next Recharge Date:   ${res.Response.nextRechargeDate}
-          Packages:   ${packages}
-          Status:   ${res.Response.status ? 'Active' : 'Inactive'}
-        `;
-          console.log(res.Response.monthlyRecharge, '**********************')
-          // Set monthlyRecharge value from the response
-          setMonthlyRecharge(res.Response.monthlyRecharge.toString());
-          setAmount(res.Response.monthlyRecharge.toString());
-          // Show the modal and set details
-          setBottomSheetVisible2(true);
-          setBillDetails(res?.Response);
+    setMonthlyRecharge(res.monthlyRecharge?.toString() || '0');
+    setAmount(res.monthlyRecharge?.toString() || '0');
+    setBottomSheetVisible2(true);
+    setBillDetails(res);  // ✅ res.Response nahi
+    setShowLoader2(false);
 
-          setShowLoader2(false);
+  } else {
+    setStatus('Failed');
+    setShowLoader2(false);
 
+    // ✅ res.Response parse karne ki zarurat nahi
+    ToastAndroid.showWithGravity(
+      res.message || res.status || 'Something went wrong',
+      ToastAndroid.SHORT,
+      ToastAndroid.BOTTOM,
+    );
+  }
 
-
-        } else {
-          // Handle failure scenario
-          setStatus('Failed');
-          setShowLoader2(false);
-
-          const response = res.Response ? JSON.parse(res.Response) : res; // Handle case where Response might be stringified
-          console.log(response)
-          ToastAndroid.showWithGravity(
-            response.message || response.status,
-            ToastAndroid.SHORT,
-            ToastAndroid.BOTTOM,
-          );
-        }
-      } else {
-        if (res && res['status'] === 'SUCCESS') {
-          // If successful, set the customer data
-          setCustomerName(res['customerName']);
-          setCustBal(res['balance']);
-          setmonthrecharge(res['monthlyRecharge']);
-          setStatus(res['customerStatus'] || res['customerStatus']);
-          console.log('Balance:', res['balance']);
-          setDueDate(res['rechargedueDate']||'')
-
-          setBottomSheetVisible(true);
-          setShowLoader2(false);
-        } else {
-          setStatus('Failed');
-          setShowLoader2(false);
-
-          ToastAndroid.showWithGravity(
-            res['Response'].Response || res['Response'] ,
-            ToastAndroid.SHORT,
-            ToastAndroid.BOTTOM,
-          );
-        }
-      }
+} else {
+  // yeh block same rahega
+  if (res && res['status'] === 'SUCCESS') {
+    setCustomerName(res['customerName']);
+    setCustBal(res['balance']);
+    setmonthrecharge(res['monthlyRecharge']);
+    setStatus(res['customerStatus'] || '');
+    setDueDate(res['rechargedueDate'] || '');
+    setBottomSheetVisible(true);
+    setShowLoader2(false);
+  } else {
+    setStatus('Failed');
+    setShowLoader2(false);
+    ToastAndroid.showWithGravity(
+      res['Response']?.Response || res['Response'] || 'Failed',
+      ToastAndroid.SHORT,
+      ToastAndroid.BOTTOM,
+    );
+  }
+}
       setShowLoader(false)
 
     } catch (error) {
@@ -781,7 +752,7 @@ setShowLoader2(false)
               <View style={{ padding: hScale(6) }}>
                 <View style={{ flexDirection: 'row', marginBottom: 10 }}>
                   <Text style={{ color: 'black', fontWeight: 'bold', width: '40%' }}>{translate("Name")}</Text>
-                  <Text style={{ color: 'black', width: '60%' }}>{billDetails.name}</Text>
+                  <Text style={{ color: 'black', width: '60%' }}>{billDetails.name ?billDetails.name :billDetails.customerName}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', marginBottom: 10 }}>
                   <Text style={{ color: 'black', fontWeight: 'bold', width: '40%' }}>{translate("RMN")}</Text>
@@ -801,7 +772,7 @@ setShowLoader2(false)
                 </View>
                 <View style={{ flexDirection: 'row', marginBottom: 10 }}>
                   <Text style={{ color: 'black', fontWeight: 'bold', width: '40%' }}>{translate("Next_Recharge_Date")}</Text>
-                  <Text style={{ color: 'black', width: '60%' }}>{billDetails.nextRechargeDate}</Text>
+                  <Text style={{ color: 'black', width: '60%' }}>{billDetails.nextRechargeDate ? billDetails.nextRechargeDate :billDetails.rechargedueDate}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', marginBottom: 10 }}>
                   <Text style={{ color: 'black', fontWeight: 'bold', width: '40%' }}>{translate("Packages")}</Text>

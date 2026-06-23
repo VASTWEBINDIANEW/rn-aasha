@@ -57,8 +57,8 @@ const BalanceCard = memo(({ label, value, accentColor, align = 'left', delay = 0
   const { colorConfig, IsDealer, Loc_Data } = useSelector((state: RootState) => state.userInfo);
 
   return (
-    <Animated.View style={[styles.cardWrapper, 
-    { opacity: fadeAnim, flexDirection: isRight ? 'row-reverse' : 'row', backgroundColor:"rgba(255,255,255,0.04)",  }]}>
+    <Animated.View style={[styles.cardWrapper,
+    { opacity: fadeAnim, flexDirection: isRight ? 'row-reverse' : 'row', backgroundColor: "rgba(255,255,255,0.04)", }]}>
       <View style={[styles.card, {
         alignItems: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start'
       }]}>
@@ -96,17 +96,24 @@ const DashboardHeader = ({ refreshPress }) => {
         const response = await get({ url: APP_URLS.balanceInfo });
         setBalanceInfo(response.data[0]);
       } else {
+        // Yahan humne conditional checking laga di hai taaki bina data ke decrypt call na ho
         const decryptedData: ExtendedBalanceType = {
           adminfarmname: decryptData(data.kkkk, data.vvvv, data.adminfarmname),
           posremain: decryptData(data.kkkk, data.vvvv, data.posremain),
           remainbal: decryptData(data.kkkk, data.vvvv, data.remainbal),
           frmanems: decryptData(data.kkkk, data.vvvv, data.frmanems),
-          cmsremainbal: decryptData(data.kkkk, data.vvvv, data.cmsremainbal),
-          holdandleanbal: decryptData(data.kkkk, data.vvvv, data.holdandleanbal),
+
+          // Agar data exist karega tabhi decrypt hoga, nahi toh render nahi hoga (undefined rahega)
+          ...(data.cmsremainbal && {
+            cmsremainbal: decryptData(data.kkkk, data.vvvv, data.cmsremainbal)
+          }),
+          ...(data.holdandleanbal && {
+            holdandleanbal: decryptData(data.kkkk, data.vvvv, data.holdandleanbal)
+          }),
         };
+
         setfirmName(decryptedData.adminfarmname as string);
         setBalanceInfo(decryptedData);
-
       }
 
       const adminFarmName = decryptData(data.vvvv, data.kkkk, data.adminfarmname);
@@ -191,10 +198,37 @@ const DashboardHeader = ({ refreshPress }) => {
 
   // ─── Balance card config ──────────────────────────────────────────────────
   const balanceCards: BalanceCardProps[] = [
-    { label: translate('Main Balance'), value: balanceInfo?.remainbal, accentColor: '#81C784', align: 'left', delay: 0 },
-    { label: translate('Pos Balance'), value: balanceInfo?.posremain, accentColor: colorConfig.primaryColor, align: 'center', delay: 80 },
-    { label: translate('CMS Balance'), value: balanceInfo?.cmsremainbal, accentColor: '#FFB74D', align: 'center', delay: 160 },
-    { label: translate('Hold & Lean'), value: balanceInfo?.holdandleanbal, accentColor: '#C90909', align: 'right', delay: 240 },
+    {
+      label: translate('Main Balance'),
+      value: balanceInfo?.remainbal,
+      accentColor: '#81C784',
+      align: 'left',
+      delay: 0
+    },
+    {
+      label: translate('Pos Balance'),
+      value: balanceInfo?.posremain,
+      accentColor: colorConfig.primaryColor,
+      align: 'center',
+      delay: 80
+    },
+    // Agar IsDealer false hoga, sirf tabhi yeh niche ke dono cards list me aayenge
+    ...(!IsDealer ? [
+      {
+        label: translate('CMS Balance'),
+        value: balanceInfo?.cmsremainbal,
+        accentColor: '#FFB74D',
+        align: 'center',
+        delay: 160
+      },
+      {
+        label: translate('Hold & Lean'),
+        value: balanceInfo?.holdandleanbal,
+        accentColor: '#C90909',
+        align: 'right',
+        delay: 240
+      }
+    ] : [])
   ];
   const notifCount = notifications.length;
 
@@ -234,46 +268,45 @@ const DashboardHeader = ({ refreshPress }) => {
             )}
           </View>
 
-          {/* Right: icons + firm name + notification */}
           <View style={styles.rightGroup}>
 
 
             {Loc_Data['isGPS'] && (
-              <TouchableOpacity onLongPress={longPress} style={styles.iconBtn}>
+              <TouchableOpacity onLongPress={longPress} style={styles.notiBell}>
                 <Entypo
                   name="location"
-                  size={15}
-                  color={Loc_Data['latitude'] ? '#4FC3F7' : 'rgba(255,255,255,0.3)'}
+                  size={20}
+                  color={Loc_Data['latitude'] ? '#fff' : 'rgba(255,255,255,0.3)'}
                 />
               </TouchableOpacity>
             )}
 
-           <View>
-               <TouchableOpacity  
-              style={styles.notiBell}
+            {!IsDealer && <View>
+              <TouchableOpacity
+                style={styles.notiBell}
 
-             onPress={() => navigation.navigate({ name: "PostoMain" })}   
-                    >
-              <ToselfSvg  size={20} color="#fff" />
-            </TouchableOpacity>
-            <Text style={{fontSize:wScale(9),color:'#fff',fontWeight:'700',textAlign:'center'}}>
-              {translate('to Wallet')}
-            </Text>
-</View>
-            <TouchableOpacity
+                onPress={() => navigation.navigate({ name: "PostoMain" })}
+              >
+                <ToselfSvg size={20} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.towallet}>
+                {translate('to Wallet')}
+              </Text>
+            </View>}
+            {!IsDealer && <TouchableOpacity
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "RecentTx" })}            >
               <RecentTrSvg size={25} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity>}
+            {!IsDealer && <TouchableOpacity
               style={styles.notiBell}
 
               onPress={() => navigation.navigate({ name: "QRScanScreen" })}            >
               <QrcodSvg size={25} color="#fff" />
 
-            </TouchableOpacity>
-            <TouchableOpacity
+            </TouchableOpacity>}
+            {!IsDealer && <TouchableOpacity
               style={styles.notiRow}
               onPress={() => navigation.navigate('Notifications')}
             >
@@ -281,7 +314,7 @@ const DashboardHeader = ({ refreshPress }) => {
               <View style={styles.notiBadge}>
                 <Text style={styles.notiBadgeText}>{notifCount}</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </View>
       </View>
@@ -341,7 +374,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     maxWidth: wScale(190),
     paddingHorizontal: wScale(4),
-    marginLeft: wScale(-5)
+    marginLeft: wScale(-7)
   },
   notiRow: { flexDirection: 'row', alignItems: 'center', },
   menuview: {
@@ -398,4 +431,5 @@ const styles = StyleSheet.create({
     fontSize: wScale(14), color: '#FFFFFF',
     fontWeight: '700', letterSpacing: 0.2,
   },
+  towallet:{ fontSize: wScale(6), color: '#fff', fontWeight: '700', textAlign: 'center' ,position:'absolute',bottom:hScale(-6.8),left:wScale(7.5)}
 });

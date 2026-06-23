@@ -28,9 +28,10 @@ interface DateRangePickerProps {
   cmsStatu: boolean;
   retailerID: (id: string) => void;
   isshowRetailer?: boolean;
+  onlyFromDate :boolean
 }
 
-const DateRangePicker: React.FC<DateRangePickerProps> = ({ onDateSelected, SearchPress, status, setStatus, isStShow = false, cmsStatu = false, isshowRetailer = true, retailerID }) => {
+const DateRangePicker: React.FC<DateRangePickerProps> = ({ onDateSelected, SearchPress, status, setStatus, isStShow = false, cmsStatu = false, isshowRetailer = true, retailerID ,onlyFromDate=true }) => {
   const [fromDate, setFromDate] = useState(new Date());
   const [toDate, setToDate] = useState(new Date());
   const [isCalendarVisible, setIsCalendarVisible] = useState(false);
@@ -176,13 +177,13 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ onDateSelected, Searc
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.datePickerButton} onPress={onToDatePress}>
+         {onlyFromDate &&  <TouchableOpacity style={styles.datePickerButton} onPress={onToDatePress}>
             <Calendarsvg color='#fff' />
             <View style={{ paddingLeft: wScale(5) }}>
               <Text style={styles.buttonText}>{translate("To_Date")}</Text>
               <Text style={styles.dateText}>{toDate.toISOString().split('T')[0]}</Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity>}
 
           <TouchableOpacity style={styles.searchButton} onPress={searchHistory}>
             <SearchIcon size={28} color='#fff' />

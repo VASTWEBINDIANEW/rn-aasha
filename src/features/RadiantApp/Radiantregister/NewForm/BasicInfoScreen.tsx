@@ -32,45 +32,49 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
   const { post } = useAxiosHook();
   const { formData, updateStep, nextStep } = useFormCtx();
   const stepColor = getStepColor(STEP);
-  const formatToYYYYMMDD = (dateStr: string) => {
-    if (!dateStr) return '';
+const formatToYYYYMMDD = (dateStr: string) => {
+  if (!dateStr) return '';
 
-    try {
-      // DD/MM/YYYY
-      if (dateStr.includes('/')) {
-        const [dd, mm, yyyy] = dateStr.split('/');
-        if (!dd || !mm || !yyyy) return '';
-        return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-      }
+  try {
+    const onlyDatePart = dateStr.trim().split(' ')[0];
 
-      // YYYY-MM-DD
-      if (dateStr.includes('-')) {
-        return dateStr;
-      }
-
-      return '';
-    } catch (e) {
-      console.log("❌ Date convert error:", e);
-      return '';
-    }
-  };
-
-  const isAgeValid = (dateStr: string) => {
-    const formatted = formatToYYYYMMDD(dateStr);
-    if (!formatted) return false;
-
-    const dob = new Date(formatted);
-    const today = new Date();
-
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-      age--;
+    if (onlyDatePart.includes('/')) {
+      const [dd, mm, yyyy] = onlyDatePart.split('/');
+      if (!dd || !mm || !yyyy) return '';
+      
+      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
     }
 
-    return age >= 18;
-  };
+    if (onlyDatePart.includes('-')) {
+      return onlyDatePart;
+    }
+
+    return '';
+  } catch (e) {
+    console.log("❌ Date convert error:", e);
+    return '';
+  }
+};
+
+const isAgeValid = (dateStr: string) => {
+  const formatted = formatToYYYYMMDD(dateStr);
+  if (!formatted) return false;
+
+  const dob = new Date(formatted);
+  const today = new Date();
+
+  // Check if the date constructed is valid
+  if (isNaN(dob.getTime())) return false;
+
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+    age--;
+  }
+
+  return age >= 18;
+};
   const showToast = (msg: string) => ToastAndroid.show(msg, ToastAndroid.SHORT);
 
   const formik = useFormik({
@@ -171,23 +175,22 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
     onBlur: () => setFieldTouched(name, true),
     onChangeText: (t: string) => setFieldValue(name, t),
   });
-  const formatApiDOB = (dob: string) => {
+const formatApiDOB = (dob: string) => {
+  console.log
+  (dob,'',dob,dob,dob,)
     if (!dob) return '';
 
     try {
-      // 👉 "12-10-1979 12:00:00 AM" → "12-10-1979"
       const datePart = dob.split(' ')[0];
 
-      // DD-MM-YYYY → YYYY-MM-DD
-      if (datePart.includes('-')) {
-        const parts = datePart.split('-');
+      if (datePart.includes('/')) {
+        const parts = datePart.split('/');
 
-        if (parts[0].length === 2) {
+        if (parts[0].length <= 2) {
           const [dd, mm, yyyy] = parts;
           return `${yyyy}-${mm}-${dd}`;
         }
 
-        // already correct
         return datePart;
       }
 
@@ -263,7 +266,7 @@ const BasicInfoScreen = ({ onNext }: { onNext: () => void }) => {
             label="Date of Birth"
             placeholder="DD/MM/YYYY or YYYY-MM-DD"
             {...f('dob')}
-            editable={false}
+            editable={true}
           />
 
           {/* <SelectPicker

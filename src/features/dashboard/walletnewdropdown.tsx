@@ -9,10 +9,9 @@ import {
 } from "react-native";
 import FlotingInput from "../drawer/securityPages/FlotingInput";
 import ClosseModalSvg2 from "../drawer/svgimgcomponents/ClosseModal2";
-import { hScale, wScale } from "../../utils/styles/dimensions";
+import { hScale, SCREEN_HEIGHT, wScale } from "../../utils/styles/dimensions";
 import { useSelector } from "react-redux";
 import { RootState } from "../../reduxUtils/store";
-import { SCREEN_HEIGHT } from "@gorhom/bottom-sheet";
 import OnelineDropdownSvg from "../drawer/svgimgcomponents/simpledropdown";
 import { translate } from "../../utils/languageUtils/I18n";
 

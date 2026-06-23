@@ -35,7 +35,7 @@ const PersonalInfoTab: React.FC<Props> = (props) => {
     onStatePress, onDistrictPress,
     hasProfileData, onKycPress,
   } = props;
-
+console.log(profileData,"******************")
   const showKycBanner = hasProfileData && profileData.videokycstatus !== 'Y';
   const isNotDone     = profileData.videokycstatus === 'N';
   const kycColor      = isNotDone ? '#dc2626' : '#b45309';

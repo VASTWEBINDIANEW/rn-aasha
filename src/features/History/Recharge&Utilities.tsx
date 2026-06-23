@@ -13,6 +13,7 @@ import DateRangePicker from "../../components/DateRange";
 import NoDatafound from "../drawer/svgimgcomponents/Nodatafound";
 import AppBarSecond from "../drawer/headerAppbar/AppBarSecond";
 import SkeletonCard from "../../components/SkeletonCard"; // ✅ Alag component import
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // ─── Status config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
@@ -130,16 +131,38 @@ const TxnCard = React.memo(({
 
       <View style={card.mid}>
         <Text style={card.operator} numberOfLines={1}>{item.Operator_name}</Text>
+        
         <Text style={card.number}>{item.Recharge_number}</Text>
         <Text style={[card.time, { color: accentColor }]}>{item.Reqesttime}</Text>
       </View>
 
-      <View style={card.right}>
-        <Text style={card.amount}>₹ {item.Recharge_amount}</Text>
-        <View style={[card.pill, { backgroundColor: st.bg }]}>
-          <Text style={[card.pillText, { color: st.color }]}>{st.label}</Text>
-        </View>
-      </View>
+    <View style={card.right}>
+  {/* Mode Row: Icon + Text */}
+  <View style={styles.modeContainer}>
+   {item.RechargeMode !== ''  && <Icon 
+      name={item.RechargeMode === "Apps" ? "cellphone" : "laptop"} 
+      size={hScale(20)} 
+      color={st.bg}
+    />}
+   
+  </View>
+
+  {/* Amount */}
+  <Text style={card.amount}>₹ {item.Recharge_amount}</Text>
+
+  {/* Status Pill with Dynamic Status Icon */}
+  <View style={[card.pill, { backgroundColor: st.bg, flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+    <Icon 
+      name={
+        st.label?.toLowerCase() === 'success' ? 'check-circle' : 
+        st.label?.toLowerCase() === 'failed' ? 'close-circle' : 'clock-outline'
+      } 
+      size={12} 
+      color={st.color} 
+    />
+    <Text style={[card.pillText, { color: st.color }]}>{st.label}</Text>
+  </View>
+</View>
     </TouchableOpacity>
   );
 });
@@ -288,4 +311,11 @@ const styles = StyleSheet.create({
   emptyWrap:    { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: wScale(30) },
   emptyTitle:   { fontSize: wScale(16), fontWeight: '700', color: '#374151', marginTop: hScale(16), textAlign: 'center' },
   emptySub:     { fontSize: wScale(13), color: '#9CA3AF', marginTop: 6, textAlign: 'center', lineHeight: 20 },
+modeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4, 
+    marginBottom: 4, 
+  },
+
 });

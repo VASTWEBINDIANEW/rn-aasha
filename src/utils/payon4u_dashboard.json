@@ -1,0 +1,48 @@
+{
+  "recharge": [
+    { "name": "Mobile", "ScreenName": "RechargeScreen", "fileName": "Mobile.svg" },
+    { "name": "DTH", "ScreenName": "DthScreen", "fileName": "DTH.svg" },
+    { "name": "Electricity", "ScreenName": "ElectricityScreen", "fileName": "Electricity.svg" },
+    { "name": "Gas Cylinder", "ScreenName": "GasCylinderScreen", "fileName": "GasCylinder.svg" },
+    { "name": "Fastag", "ScreenName": "FastagScreen", "fileName": "Fastag.svg" },
+    { "name": "Loan", "ScreenName": "LoanScreen", "fileName": "Loan.svg" },
+    { "name": "Insurance", "ScreenName": "InsuranceScreen", "fileName": "Insurance.svg" },
+    { "name": "Credit Card", "ScreenName": "CreditCardScreen", "fileName": "CreditCard.svg" },
+    { "name": "Water Bill", "ScreenName": "WaterBillScreen", "fileName": "WaterBill.svg" },
+    { "name": "Prepaid Gas", "ScreenName": "PrepaidGasScreen", "fileName": "PrepaidGas.svg" },
+    { "name": "Landline", "ScreenName": "LandlineScreen", "fileName": "Landline.svg" },
+    { "name": "Education Fee", "ScreenName": "EducationFeeScreen", "fileName": "EducationFee.svg" },
+    { "name": "Broadband", "ScreenName": "BroadbandScreen", "fileName": "Broadband.svg" },
+    { "name": "Hospital", "ScreenName": "HospitalScreen", "fileName": "Hospital.svg" },
+    { "name": "Cable tv", "ScreenName": "CableTvScreen", "fileName": "Cabletv.svg" },
+    { "name": "Municipal  Tax", "ScreenName": "MunicipalTaxScreen", "fileName": "MunicipalTax.svg" },
+    { "name": "Housing Tax", "ScreenName": "HousingTaxScreen", "fileName": "HousingTax.svg" },
+    { "name": "Subscription", "ScreenName": "SubscriptionScreen", "fileName": "Subscription.svg" },
+    { "name": "View More", "ScreenName": "ViewMoreScreen", "fileName": "ViewMore.svg" },
+    { "name": "Hide More", "ScreenName": "HideMoreScreen", "fileName": "HideMore.svg" }
+  ],
+  "cms": [
+    { "name": "CMS", "ScreenName": "CmsScreen", "fileName": "CMS.svg" },
+    { "name": "My Pincode", "ScreenName": "CmsNewPin", "fileName": "My Pincode.svg" },
+    { "name": "Payouts", "ScreenName": "CrePayout", "fileName": "Payouts.svg" },
+    { "name": "About RCMS", "ScreenName": "AboutCms", "fileName": "AboutRCMS.svg" }
+  ],
+  "other": [
+    { "name": "Pan Card", "ScreenName": "PanCardScreen", "fileName": "PanCard.svg" },
+    { "name": "Gift Card", "ScreenName": "GiftCardScreen", "fileName": "GiftCard.svg" },
+    { "name": "Prepaid Card", "ScreenName": "PrepaidCardScreen", "fileName": "PrepaidCard.svg" },
+    { "name": "Business Card", "ScreenName": "BusinessCardScreen", "fileName": "BusinessCard.svg" }
+  ],
+  "travel": [
+    { "name": "Flight", "ScreenName": "FlightScreen", "fileName": "Flight.svg" },
+    { "name": "Train", "ScreenName": "TrainScreen", "fileName": "Train.svg" },
+    { "name": "Bus", "ScreenName": "BusScreen", "fileName": "Bus.svg" },
+    { "name": "Hotel", "ScreenName": "HotelScreen", "fileName": "Hotel.svg" }
+  ],
+  "financial": [
+    { "name": "Money Transfer", "ScreenName": "MoneyTransferScreen", "fileName": "MoneyTransfer.svg" },
+    { "name": "AEPS", "ScreenName": "AepsScreen", "fileName": "AEPS.svg" },
+    { "name": "M-ATM & Pos", "ScreenName": "M-ATM&PosScreen", "fileName": "M-ATM&Pos.svg" },
+    { "name": "CMS", "ScreenName": "CmsScreen", "fileName": "CMS.svg" }
+  ]
+}

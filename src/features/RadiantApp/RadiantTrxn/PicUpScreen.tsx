@@ -369,6 +369,7 @@ const PicUpScreen = () => {
       console.log("📥 API Response:", JSON.stringify(res, null, 2));
 
       if (res?.Content?.ADDINFO?.status === 'success') {
+        setDetailsModalVisible(false);
 
         await AsyncStorage.setItem('pickup_status', 'unverified');
         setCashPickupData([]);
@@ -394,22 +395,32 @@ const PicUpScreen = () => {
 
     } catch (error: any) {
 
-      // ── Timeout — backend pe submit hua hoga ──
-      if (error?.code === 'ECONNABORTED') {
+      // ✅ Timeout — backend pe data submit hua hoga, user ko inform karo
+      if (
+        error?.code === 'ECONNABORTED' ||
+        error?.message?.includes('timeout')
+      ) {
         console.log('⚠️ TIMEOUT — Backend pe submit hua hoga');
+        setTimeoutModal(true); // TimeoutAlertModal dikhao
 
-        setTimeoutModal(true);
-
-      } else {
+      } else if (error?.message) {
+        // ✅ Server se actual error aaya
         Alert.alert(
-          '❌ Error',
+          'Error',
           error?.message || 'Something went wrong.',
-          [{ text: 'OK', onPress: () => navigation.navigate('RadiantTransactionScreen') }]
+          [{ text: 'OK', onPress: () => navigation.navigate('RadiantTransactionScreen') }],
+        );
+      } else {
+        // ✅ Unknown error
+        Alert.alert(
+          'Error',
+          'Kuch gadbad hui. Dobara try karein.',
+          [{ text: 'OK', onPress: () => navigation.navigate('RadiantTransactionScreen') }],
         );
       }
 
     } finally {
-      setIsLoad(false);  // ← hamesha false hoga
+      setIsLoad(false);
       setCashPickupData([]);
       setDetailsModalVisible(false);
     }
@@ -861,6 +872,7 @@ const PicUpScreen = () => {
           Empty2: '',
           Email: CodeId ? item2?.Email : ''
         };
+        setDetailsModalVisible(false);
 
         console.log(
           "API FUNCTION => setRadiantOtp"
@@ -1802,7 +1814,7 @@ const PicUpScreen = () => {
                         <Text style={[styles.modalButtonText,]}>Cancel</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={[styles.modalButton, { backgroundColor: colorConfig.secondaryColor, }]}
-                        onPress={handleSubmit}>
+                        onPress={()=>{handleSubmit();setDetailsModalVisible(false)}}>
                         <Text style={[styles.modalButtonText, { color: '#fff' }]}>Confirm And Submit</Text>
                       </TouchableOpacity>
                     </View>

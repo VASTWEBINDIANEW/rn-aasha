@@ -1,22 +1,27 @@
+
+
+
 export const APP_URLS = {
   playUrl: 'http://play.google.com/store/apps/details?id=',
   RCEID: 'api/Radiant/RCEID',
-  appPackage: 'com.rechargedrishti',
+  appPackage: 'com.uprecharge',
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
-  baseapiurl: 'http://native.stdigipe.in/',
+  baseapiurl: 'http://native.ssvcms.in//',
   // baseWebUrl: 'vastwebindia.com/',
-  baseWebUrl: 'stdigipe.in/',
+  baseWebUrl: 'ssvcms.in//',
 
-  AppName: 'Smart Pay1',
+  AppName: 'ssvcms',
   app_logo: 'sonicswipe.png',
   cms_logo: 'radiant.png',
   DownloadAPK: '/Home/DownloadAPK',
+    dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
+
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
   current_version: 'Common/api/data/Check_Android_Current_Version?vs_no=7',
-  version: '1.0.1',
+  version: '2.0.8',
   AepsBankInfo: 'AEPS/api/data/AepsBankInfo',
   daywisecommsofuser: 'Money/api/Money/daywisecommsofuser',
   ExtracommReport: 'Money/api/Money/ExtracommReport',
@@ -232,6 +237,8 @@ export const APP_URLS = {
   ShowActualIncome: 'api/Dealer/ShowActualIncome?from=',
   DealerLedger: 'api/Dealer/DealerLedger?txt_frm_date=',
   Dealer_Daybook_Repor: 'api/Dealer/Dealer_Daybook_Report?',
+  daybook:'Retailer/api/data/Retailerdaybook?',
+
   DealerPurchaseOrderReport: 'api/Data/DealerPurchaseOrderReport?',
   ReceiveFund_by_master: 'api/Dealer/ReceiveFund_by_master?',
   ReceiveFund_by_admin: 'api/Dealer/ReceiveFund_by_admin?',
@@ -368,11 +375,3 @@ export const IMAGE_BASE_URL = 'https://cdn.jsdelivr.net/gh/Vwi-app/vwiImages@mai
 const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
 export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;
 
-
-
-
-// export const IMAGE_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/digitalindiapay/';
-export const ASSETS_BASE_URL = 'https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/assets/';  // ← add karo
-
-// const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
-// export const logoUrl = `${IMAGE_BASE_URL}${formatted}.png`;

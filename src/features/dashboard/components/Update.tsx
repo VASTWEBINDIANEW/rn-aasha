@@ -61,57 +61,62 @@ const UpdateScreen = () => {
       `First Install: ${new Date(first).toLocaleString()}\nLast Update: ${new Date(last).toLocaleString()}`
     );
   };
+const handleUpdate = async () => {
+    let fallbackUrl = ""; 
 
-  const handleUpdate = async () => {
     try {
-      if (!response) {
-        Alert.alert("Error", "Version info not found");
-        return;
-      }
+    
 
-      if (response.isgoogle) {
-        const url = `${APP_URLS.playUrl}${id}`;
-        await Linking.openURL(url);
-      } else {
-        const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
-        setIsDownloading(true);
-        setDownloadProgress(0);
+      const apkUrl = `http://${APP_URLS.baseWebUrl}${APP_URLS.DownloadAPK}`;
+      fallbackUrl = apkUrl; 
+      
+      setIsDownloading(true);
+      setDownloadProgress(0);
 
-        onReceiveNotification2({
-          notification: { title: "Downloading App Update", body: "Please Wait" },
+      onReceiveNotification2({
+        notification: { title: "Downloading App Update", body: "Please Wait" },
+      });
+
+      const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
+
+      ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
+        .fetch("GET", apkUrl)
+        .progress((received, total) => {
+          if (total > 0) {
+            const percentage = Math.floor((received / total) * 100);
+            setDownloadProgress(percentage);
+          }
+        })
+        .then((res) => {
+          setIsDownloading(false);
+          setDownloadProgress(100);
+          ReactNativeBlobUtil.android.actionViewIntent(
+            res.path(),
+            "application/vnd.android.package-archive"
+          );
+        })
+        .catch((errorMessage) => {
+          setIsDownloading(false);
+          console.log("Download error (Inner Catch):", errorMessage);
+          
+          if (apkUrl) {
+            Linking.openURL(apkUrl).catch((err) => console.log("Inner Linking Error:", err));
+          }
+          
+          Alert.alert("Update Failed", "Could not download APK.");
         });
-
-        const downloadPath = `${ReactNativeBlobUtil.fs.dirs.CacheDir}/app-update-${Date.now()}.apk`;
-
-        ReactNativeBlobUtil.config({ fileCache: true, path: downloadPath, appendExt: "apk" })
-          .fetch("GET", apkUrl)
-          .progress((received, total) => {
-            if (total > 0) {
-              const percentage = Math.floor((received / total) * 100);
-              setDownloadProgress(percentage);
-            }
-          })
-          .then((res) => {
-            setIsDownloading(false);
-            setDownloadProgress(100);
-            ReactNativeBlobUtil.android.actionViewIntent(
-              res.path(),
-              "application/vnd.android.package-archive"
-            );
-          })
-          .catch((errorMessage) => {
-            setIsDownloading(false);
-            console.log("Download error:", errorMessage);
-            Linking.openURL(apkUrl);
-            Alert.alert("Update Failed", "Could not download APK.");
-          });
-      }
+        
     } catch (error) {
       setIsDownloading(false);
+      console.log("System error (Outer Catch):", error);
+
+      if (fallbackUrl) {
+        Linking.openURL(fallbackUrl).catch((err) => console.log("Outer Linking Error:", err));
+      }
+
       Alert.alert(translate("Error"), translate("Something went wrong."));
     }
   };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar barStyle="light-content" />
@@ -120,19 +125,15 @@ const UpdateScreen = () => {
         style={styles.container}
       >
       
-        {/* Background Blobs */}
         <View style={styles.blob1} />
         <View style={styles.blob2} />
         <View style={styles.blob3} />
 
-        {/* Language Button */}
         <View style={styles.langRow}>
           <LanguageButton />
         </View>
 
-        {/* Main Content */}
         <View style={styles.content}>
-          {/* Icon Glass Card */}
           <View style={styles.iconContainer}>
             <View style={styles.iconGlass}>
               <UpdateSvg
@@ -148,7 +149,6 @@ const UpdateScreen = () => {
             {translate("A newer version of the app is available for a better experience.")}
           </Text>
 
-          {/* Version Row */}
           <View style={styles.versionRow}>
             <View style={styles.versionTag}>
               <Text style={styles.versionLabel}>{translate("Latest")}</Text>
@@ -159,7 +159,6 @@ const UpdateScreen = () => {
             </Text>
           </View>
 
-          {/* Glass Update Card */}
           <View style={styles.updateCard}>
             <Text style={styles.updateTitle}>
               🚀 {translate("What's new in this version?")}
@@ -180,9 +179,7 @@ const UpdateScreen = () => {
           </View>
         </View>
 
-        {/* Bottom Section */}
         <View style={styles.bottomSection}>
-          {/* Progress Bar (shown only when downloading) */}
           {isDownloading && (
             <View style={styles.progressWrap}>
               <View style={[styles.progressFill, { width: `${downloadProgress}%` as any }]} />
@@ -194,11 +191,11 @@ const UpdateScreen = () => {
             </Text>
           )}
 
-          {/* <DynamicButton
+          <DynamicButton
             onlong={getInstallTime}
             title={isDownloading ? `${translate("Downloading")}... ${downloadProgress}%` : translate("Update Now")}
             onPress={handleUpdate}
-          /> */}
+          />
           <Text style={styles.note}>
             {translate("You will be redirected to Google Play Store.")}
           </Text>
@@ -216,7 +213,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  // Background decorative blobs
   blob1: {
     position: "absolute",
     top: -hScale(80),
@@ -258,7 +254,6 @@ const styles = StyleSheet.create({
     paddingTop: hScale(10),
   },
 
-  // Icon with glassmorphism
   iconContainer: {
     marginBottom: hScale(24),
   },
@@ -295,7 +290,6 @@ const styles = StyleSheet.create({
     lineHeight: hScale(22),
   },
 
-  // Version Row
   versionRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -329,7 +323,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Glass Update Card
   updateCard: {
     width: "100%",
     backgroundColor: "rgba(255,255,255,0.12)",

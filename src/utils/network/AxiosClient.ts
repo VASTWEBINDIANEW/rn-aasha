@@ -2,48 +2,38 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../reduxUtils/store';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import {
-  reset,
-  setAuthToken,
-  setRefreshToken,
-  setUserId,
-} from '../../reduxUtils/store/userInfoSlice';
+import { reset, setAuthToken, setRefreshToken, setUserId } from '../../reduxUtils/store/userInfoSlice';
 import { APP_URLS } from './urls';
-import { encrypt } from '../encryptionUtils';
+
+const HEAVY_ENDPOINTS = [
+  'CashpickupSubmit',
+  'CashDeposit',
+  'Submit',
+  'hkhk2'
+];
+const HEAVY_TIMEOUT = 300000;  // 5 minutes
+const DEFAULT_TIMEOUT = 120000; // 2 minutes
+
+const getTimeoutForUrl = (url: string): number => {
+  const isHeavy = HEAVY_ENDPOINTS.some(ep => url.includes(ep));
+  return isHeavy ? HEAVY_TIMEOUT : DEFAULT_TIMEOUT;
+};
 
 const useAxiosHook = () => {
+
   const { authToken = '', refreshToken, IsDealer } = useSelector(
     (state: RootState) => state.userInfo,
   );
   const dispatch = useDispatch();
-
-  // ✅ useRef se isRefreshing persist karega re-renders ke beech
   const isRefreshing = useRef(false);
-
-  // ✅ Interceptors ke andar latest values ke liye refs
-  const authTokenRef = useRef(authToken);
-  const refreshTokenRef = useRef(refreshToken);
-  const isDealerRef = useRef(IsDealer);
-
-  useEffect(() => {
-    authTokenRef.current = authToken;
-    console.log('**AUTH_TOKEN', authToken);
-  }, [authToken]);
-
-  useEffect(() => {
-    refreshTokenRef.current = refreshToken;
-  }, [refreshToken]);
-
-  useEffect(() => {
-    isDealerRef.current = IsDealer;
-  }, [IsDealer]);
-
+useEffect(()=>{
+  console.log(authToken)
+},[])
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.stdigipe.in/',
-        // baseURL: 'http://native.skeshari.in/',
-        timeout: 120000,
+        baseURL: 'http://native.ssvcms.in/',
+        timeout: DEFAULT_TIMEOUT,
       }),
     [],
   );
@@ -52,6 +42,7 @@ const useAxiosHook = () => {
   const get = useCallback(
     async ({ url }: { url: string }) => {
       const response = await axiosInstance.get(url);
+      console.warn(response, 'getdata')
       return response.data;
     },
     [axiosInstance],
@@ -68,10 +59,14 @@ const useAxiosHook = () => {
       config?: any;
     }) => {
       try {
-        const response = await axiosInstance.post(url, data, config);
+        const timeout = getTimeoutForUrl(url);
+        const response = await axiosInstance.post(url, data, {
+          ...config,
+          timeout,
+        });
+        console.log(response, 'postdata')
         return response.data;
       } catch (e) {
-        // Alert.alert("API ERROR:", e?.response?.data || e?.message);
         throw e;
       }
     },
@@ -86,148 +81,110 @@ const useAxiosHook = () => {
     [axiosInstance],
   );
 
-  // ---------- Refresh Token (Normal) ----------
+  // ---------- Refresh Token ----------
+  const onRefreshToken = useCallback(async () => {
+    const data = {
+      refresh_token: refreshToken,
+      grant_type: 'refresh_token',
+    };
 
-  const onRefreshToken = useCallback(async (): Promise<string | null> => {
     try {
-      const data = {
-        refresh_token: refreshTokenRef.current,
-        grant_type: 'refresh_token',
-      };
-
-      const response = await axiosInstance.post(APP_URLS.getToken, data, {
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          Authorization: 'bearer',
+      const response = await post({
+        url: APP_URLS.getToken,
+        data,
+        config: {
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            Authorization: 'bearer',
+          },
         },
       });
 
-      const resData = response.data;
+      isRefreshing.current = false;
 
-      if (resData?.access_token) {
-        dispatch(setAuthToken(resData.access_token));
-        dispatch(setUserId(resData.userId));
-        dispatch(setRefreshToken(resData.refresh_token));
-        return resData.access_token; // ✅ sirf token return karo
+      if (response?.access_token) {
+        dispatch(setAuthToken(response?.access_token));
+        dispatch(setUserId(response?.userId));
+        dispatch(setRefreshToken(response?.refresh_token));
+        return response;
       }
-
-      return null;
-    } catch (e) {
-      console.log('❌ Refresh token failed:', e);
-      return null; 
-    } finally {
-      isRefreshing.current = false; 
-    }
-  }, [axiosInstance, dispatch]);
-
-  const onRefreshTokenTest = useCallback(async (): Promise<string | null> => {
-    try {
-      const encryption = encrypt(['9090909090', '123456789']);
-
-      const data = {
-        UserName: encryption.encryptedData[0],
-        Password: encryption.encryptedData[1],
-        grant_type: 'password',
-      };
-
-      const response = await axiosInstance.post(APP_URLS.getToken, data, {
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          Authorization: 'bearer',
-          value1: encryption.keyEncode,
-          value2: encryption.ivEncode,
-        },
-      });
-
-      const resData = response.data;
-
-      if (resData?.access_token) {
-        dispatch(setAuthToken(resData.access_token));
-        dispatch(setUserId(resData.userId));
-        dispatch(setRefreshToken(resData.refresh_token));
-        return resData.access_token;
-      }
-
-      return null;
-    } catch (e) {
-      console.log('❌ Refresh token test failed:', e);
-      return null;
-    } finally {
+    } catch (err) {
       isRefreshing.current = false;
     }
-  }, [axiosInstance, dispatch]);
+    return null;
+  }, [dispatch, post, refreshToken]);
 
-  // ---------- Interceptors — sirf ek baar register hote hain ----------
+  // ---------- Interceptors ----------
   useEffect(() => {
-    // ✅ Request Interceptor
-    const reqInterceptor = axiosInstance.interceptors.request.use(
+    const reqId = axiosInstance.interceptors.request.use(
       config => {
-        // ✅ authTokenRef.current use karo — stale closure se bachne ke liye
-        const token = authTokenRef.current;
-        if (token && !config.headers.Authorization) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (authToken && !config.headers.Authorization) {
+          config.headers.Authorization = `Bearer ${authToken}`;
         }
 
-        // Dealer prefix handling
         if (config.url) {
           console.log('🌐 FULL URL:', `${config.baseURL}${config.url}`);
-          console.log('📡 IsDealer:', isDealerRef.current);
-
-          if (isDealerRef.current) {
-            if (
-              config.url.startsWith('api/Radiant/') ||
-              config.url.startsWith('api/RadiantCash/')
-            ) {
-              config.url = `Dealer/${config.url}`;
-            }
+          if (
+            IsDealer &&
+            (config.url.startsWith('api/Radiant/') ||
+              config.url.startsWith('api/RadiantCash/'))
+          ) {
+            config.url = `Dealer/${config.url}`;
           }
-
-          console.log('📡 AFTER URL:', config.url);
         }
-
         return config;
       },
       error => Promise.reject(error),
     );
 
-    // ✅ Response Interceptor
-    const resInterceptor = axiosInstance.interceptors.response.use(
-      response => response,
+    const resId = axiosInstance.interceptors.response.use(
+      response => {
+        // 🔥 CASE 1: Agar Status 200 hai par body mein "Authorization has been denied" hai
+        if (response?.data?.Message === "Authorization has been denied for this request.") {
+          console.warn("⚠️ Auth Denied Message found in Success Response! Logging out...");
+          dispatch(reset());
+          return Promise.reject(response.data);
+        }
+        return response;
+      },
       async error => {
-        const status = error.response?.status;
+        console.warn('Interceptor Error:', error);
 
-        // ✅ 401 handle — isRefreshing.current check karo
-        if (status === 401 && !isRefreshing.current) {
+        const errorMessage = error.response?.data?.Message;
+        
+        // 🔥 CASE 2: Agar error body mein explicitly yeh Message mil jaye
+        if (errorMessage === "Authorization has been denied for this request.") {
+          console.warn("⚠️ Auth Denied Message found in Error Response! Logging out...");
+          dispatch(reset());
+          return Promise.reject(error.response?.data || error);
+        }
+
+        // Standard 401 token refresh logic
+        if (error.response?.status === 401 && !isRefreshing.current) {
           isRefreshing.current = true;
 
-          const newToken = await onRefreshToken();
+          const response = await onRefreshToken();
 
-          if (newToken) {
-            // ✅ Original request retry with new token
-            error.config.headers.Authorization = `Bearer ${newToken}`;
+          if (response) {
+            error.config.headers.Authorization = `Bearer ${response?.access_token}`;
             return axiosInstance(error.config);
           } else {
-            // ✅ Refresh bhi fail → logout/reset
+            console.warn("⚠️ Refresh token failed. Logging out...");
             dispatch(reset());
             return Promise.reject(error);
           }
         }
 
-        // Non-401 errors — server data agar hai to reject karo
-        if (error.response?.data) {
-          return Promise.reject(error.response.data);
-        }
-
+        if (error.response?.data) return Promise.reject(error.response.data);
         return Promise.reject(error);
       },
     );
 
-    // ✅ Cleanup — component unmount pe interceptors eject karo (memory leak se bachao)
     return () => {
-      axiosInstance.interceptors.request.eject(reqInterceptor);
-      axiosInstance.interceptors.response.eject(resInterceptor);
+      axiosInstance.interceptors.request.eject(reqId);
+      axiosInstance.interceptors.response.eject(resId);
     };
-  }, [axiosInstance, onRefreshToken, dispatch]);
+  }, [authToken, IsDealer, onRefreshToken, dispatch]);
 
   return { get, post, put };
 };

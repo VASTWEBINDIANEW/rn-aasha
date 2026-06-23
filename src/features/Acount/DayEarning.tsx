@@ -166,6 +166,27 @@ const DayEarningReport = () => {
           titlestyle={styles.appBarTitle}
         />
 
+
+
+       <View style={{
+  marginHorizontal: wScale(14),
+  marginTop: hScale(12),
+  marginBottom: hScale(6),
+  backgroundColor: '#EFF6FF',     // light blue bg
+  borderLeftWidth: 3,
+  borderLeftColor: primary,        // theme color left border
+  borderRadius: wScale(8),
+  paddingHorizontal: wScale(12),
+  paddingVertical: hScale(8),
+}}>
+  <Text style={{
+    fontSize: wScale(12),
+    color: '#1D4ED8',
+    fontWeight: '600',
+  }}>
+   `{ 'ℹ️ '+ translate('Data for the current day will not be displayed.')}`
+  </Text>
+</View>
         {/* Date Range Picker */}
         <DateRangePicker
           onDateSelected={(from, to) => setSelectedDate({ from, to })}
@@ -179,6 +200,8 @@ const DayEarningReport = () => {
           cmsStatu={false}
           onlyFromDate={false}
         />
+
+        
       </LinearGradient>
 
       {/* List */}

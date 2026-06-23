@@ -55,6 +55,8 @@ const DealerRecentTra = () => {
             <View style={[styles.separator2, { backgroundColor: colorConfig.secondaryColor }]} />
 
             <Text style={styles.description}>{translate('Description')}: {item.Description}</Text>
+                        <Text style={styles.description}>{translate('Firmname')}: {item.Firmname}</Text>
+
             <View style={styles.balanceContainer}>
                 <View style={styles.balanceItem}>
                     <Text style={styles.label}>{translate('Pre Bal')}</Text>
@@ -99,7 +101,9 @@ const DealerRecentTra = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: wScale(5)
+        paddingHorizontal: wScale(5),
+                paddingBottom:hScale(150)
+
     },
     card: {
         backgroundColor: 'white',

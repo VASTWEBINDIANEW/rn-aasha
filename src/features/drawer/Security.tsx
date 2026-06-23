@@ -33,8 +33,7 @@ const Security = () => {
         navigation.navigate("ChangeForgotPin");
         break;
       case "3":
-        {
-        }
+       
         navigation.navigate("MobileDeviceReg");
 
         break;

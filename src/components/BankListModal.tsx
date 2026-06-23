@@ -113,7 +113,7 @@ const BankListModal = ({
                       {item?.[labelKey]?.charAt(0).toUpperCase()}
                     </Text>
                   </View>
-                  <Text style={styles.itemText}>{item?.[labelKey] ?? "N/A"}</Text>
+                  <Text style={styles.itemText}>{item?.[labelKey ? labelKey :'bankName'] ?? "N/A"}</Text>
                 </TouchableOpacity>
               )}
             />

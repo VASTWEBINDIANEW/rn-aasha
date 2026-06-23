@@ -242,7 +242,7 @@ console.log(txnId);
 {/* {"payUParam": 
 {"MerchantSalt": "yYZJyUfKJeeYAlq8vGrJb4LU4PbFB9Iq",
  "Merchantid": "8727162", 
- "Merchantkey": "ZXEmEi", "Message": "Successfully", "Privatekey": "", "Response": "Success", "Status": "Success", "TYPE": "OTHER", "USERID": "0d51104e-98ae-4d90-ba8b-3fe9ef3e2bb7", "email": "sj63028@gmail.com", "mobile": "9812363043", "name": "Sanjay", "txnfailureUrl": "https://www.smartpaymoney.in/Response/GatewayResponse", "txnid": "83e2d4da-2b42-4b", "txnsuccessUrl": "https://www.smartpaymoney.in/Response/GatewayResponse"}} */}
+ "Merchantkey": "ZXEmEi", "Message": "Successfully", "Privatekey": "", "Response": "Success", "Status": "Success", "TYPE": "OTHER", "USERID": "0d51104e-98ae-4d90-ba8b-3fe9ef3e2bb7", "email": "sj63028@gmail.com", "mobile": "9812363043", "name": "Sanjay", "txnfailureUrl": "https://www.onclick.in/Response/GatewayResponse", "txnid": "83e2d4da-2b42-4b", "txnsuccessUrl": "https://www.onclick.in/Response/GatewayResponse"}} */}
           {/* <Button
             title="CORE-PG"
             onPress={() =>

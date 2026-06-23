@@ -10,8 +10,8 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     BackHandler,
-    AsyncStorage,
     Platform,
+    
     KeyboardAvoidingView,
     ToastAndroid,
 } from 'react-native';
@@ -33,6 +33,7 @@ import DownloadSvg from '../drawer/svgimgcomponents/DownloadSvg';
 import ShareSvg from '../drawer/svgimgcomponents/sharesvg';
 import PaymentQR from './PaymentQR';
 import { useNavigation } from '../../utils/navigation/NavigationService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UpiQrCodes = ({ route }) => {
     const { colorConfig } = useSelector((state: RootState) => state.userInfo);

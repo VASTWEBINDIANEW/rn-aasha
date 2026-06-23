@@ -75,7 +75,9 @@ const RechargeHistory = ({ route }) => {
         url:
           operator_type == "DTH"
             ? url
-            : `${APP_URLS.dispute}id=${Idno}&comment=${disputeReason}&mobileno=${Recharge_number}&optname=${Operator_name}&amount=${Recharge_amount}`,
+:`${APP_URLS.dispute}id=${Idno}&txtregion=${disputeReason}`
+
+            // : `${APP_URLS.dispute}id=${Idno}&comment=${disputeReason}&mobileno=${Recharge_number}&optname=${Operator_name}&amount=${Recharge_amount}`,
       });
       console.log(
         "******************",

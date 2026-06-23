@@ -61,7 +61,7 @@ const QRCodePage = ({ route }) => {
         setIntervalId(countdown);
     };
 
-    const handleButtonClick = () => {
+    const handleButtonclick = () => {
         if (intervalId) {
             clearInterval(intervalId);
             setIntervalId(null);
@@ -161,7 +161,7 @@ const QRCodePage = ({ route }) => {
                         )}
                     </View>
                     {/* //<DynamicButton title="Check Status" onPress={() => { paymentresp2(Txnid) }} styleoveride={styles.option} /> */}
-                    {/* <DynamicButton title="Stop Timer" onPress={handleButtonClick} styleoveride={styles.option} /> */}
+                    {/* <DynamicButton title="Stop Timer" onPress={handleButtonclick} styleoveride={styles.option} /> */}
                 </View>
             </ScrollView>
         </SafeAreaView>

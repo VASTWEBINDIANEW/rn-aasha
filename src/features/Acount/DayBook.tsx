@@ -101,44 +101,84 @@ const RetailerCard = React.memo(({
   );
 });
 
-// ─── Dealer Card ──────────────────────────────────────────────────────────────
+// ─── Dealer DayBook Card ──────────────────────────────────────────────────────
+// Response: api/Dealer/Dealer_Daybook_Report → Report.DayBookLive[]
 
-const DealerCard = React.memo(({ item, themeColor }: { item: any; themeColor: string }) => (
-  <View style={styles.dealerCard}>
-    <View style={[styles.dealerAccent, { backgroundColor: themeColor }]} />
-    <View style={styles.dealerBody}>
-      <View style={styles.dealerHeaderRow}>
-        <View>
-          <Text style={styles.particularLabel}>{translate("Particular")}</Text>
-          <Text style={[styles.dealerType, { color: themeColor }]}>{item.Type}</Text>
+const DealerDayBookCard = React.memo(({
+  item,
+  fromDate,
+  toDate,
+  themeColor,
+  secondaryColor,
+}: {
+  item: any;
+  fromDate: string;
+  toDate: string;
+  themeColor: string;
+  secondaryColor: string;
+}) => {
+  const diffColor = item.DIFF < 0 ? '#B91C1C' : '#15803D';
+  const diffBg    = item.DIFF < 0 ? '#FEE2E2' : '#DCFCE7';
+
+  return (
+    <View style={styles.retailerCard}>
+      {/* ── Gradient Header: Dealer Info ── */}
+      <LinearGradient
+        colors={[themeColor, secondaryColor]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.dealerGradientHeader}
+      >
+        <View style={styles.dealerInfoBlock}>
+          <Text style={styles.dealerNameText}>{item.DealerName}</Text>
+          <Text style={styles.dealerFarmText}>{item.FarmName}</Text>
+          <Text style={styles.dealerEmailText}>{item.Email}</Text>
         </View>
-        <View style={styles.earnCol}>
-          <Text style={styles.particularLabel}>{translate("Earn")}</Text>
-          <Text style={[styles.earnAmount, { color: themeColor }]}>₹{item.Amount}</Text>
+        <View style={styles.dealerDateRangeBlock}>
+          <View style={styles.dateBlock}>
+            <Text style={styles.dateBlockLabel}>{translate("From")}</Text>
+            <Text style={styles.dateBlockValue}>{fromDate}</Text>
+          </View>
+          <View style={styles.dealerDateSep} />
+          <View style={[styles.dateBlock, { alignItems: 'flex-end' }]}>
+            <Text style={styles.dateBlockLabel}>{translate("To")}</Text>
+            <Text style={styles.dateBlockValue}>{toDate}</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      {/* ── Balance Summary Row ── */}
+      <View style={styles.dealerBalRow}>
+        <View style={styles.dealerBalCol}>
+          <Text style={styles.dealerBalLabel}>{translate("Opening Balance")}</Text>
+          <Text style={[styles.dealerBalValue, { color: themeColor }]}>₹{item.openbal}</Text>
+        </View>
+        <View style={styles.statDivider} />
+        <View style={styles.dealerBalCol}>
+          <Text style={styles.dealerBalLabel}>{translate("Close Balance")}</Text>
+          <Text style={[styles.dealerBalValue, { color: '#15803D' }]}>₹{item.closebal}</Text>
         </View>
       </View>
 
-      <View style={styles.dealerDivider} />
+      {/* ── Transaction Rows ── */}
+      <View style={styles.retailerCardBody}>
+        <FinancialRow label={translate("Recharge")}       value={item.RCH} />
+        <FinancialRow label={translate("Purchase")}       value={item.PURCHASE} />
+        <FinancialRow label={translate("AEPS")}           value={item.AEPS} />
+        <FinancialRow label={translate("IMPS")}           value={item.IMPS} />
+        <FinancialRow label={translate("Fund Transfer")}  value={item.FUNDTRANSFER} />
+        <FinancialRow label={translate("PAN")}            value={item.PAN} />
+        <FinancialRow label={translate("Old Day Refund")} value={item.OLDDAYREFUND} />
+        <FinancialRow label={translate("Old Day Failed")} value={item.OLDDAYFAILED} />
 
-      <View style={styles.dealerStatsRow}>
-        <View style={styles.dealerStat}>
-          <Text style={styles.statLabel}>{translate("Total Success")}</Text>
-          <Text style={[styles.statValue, { color: '#15803D' }]}>₹{item.TotalSuccess}</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.dealerStat}>
-          <Text style={styles.statLabel}>{translate("Total Pending")}</Text>
-          <Text style={[styles.statValue, { color: '#92400E' }]}>₹{item.TotalPending}</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.dealerStat}>
-          <Text style={styles.statLabel}>{translate("Total Failed")}</Text>
-          <Text style={[styles.statValue, { color: '#B91C1C' }]}>₹{item.TotalFailed}</Text>
+        <View style={[styles.diffRow, { backgroundColor: diffBg }]}>
+          <Text style={styles.diffLabel}>{translate("Other Difference")}</Text>
+          <Text style={[styles.diffValue, { color: diffColor }]}>₹{item.DIFF}</Text>
         </View>
       </View>
     </View>
-  </View>
-));
+  );
+});
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
@@ -162,24 +202,42 @@ const fetchData = useCallback(async (from: string, to: string) => {
   try {
     const formattedFrom = new Date(from).toISOString().split('T')[0];
     const formattedTo   = new Date(to).toISOString().split('T')[0];
-    const url = `${APP_URLS.daybook}from=${formattedFrom}&to=${formattedTo}`;
 
-    // ✅ Logic: API call aur 2.5 second ka wait ek sath shuru honge
-    // Dono khatam hone ke baad hi aage badhega
-    const [response] = await Promise.all([
-      get({ url }),
-      new Promise(resolve => setTimeout(resolve, 2500)) // 2.5 seconds delay
-    ]);
+    if (IsDealer) {
+      // ✅ Dealer API → api/Dealer/Dealer_Daybook_Report
+     const url = `${APP_URLS.dealerDaybook}txt_frm_date=${formattedFrom}&to=${formattedTo}`;
 
-    setInforeport(response?.data || []);
-    setDays(Number(response?.durations || 0));
+
+      const [response] = await Promise.all([
+        get({ url }),
+        new Promise(resolve => setTimeout(resolve, 2500)),
+      ]);
+
+      // Response: { Report: { DayBookLive: [...] | null, DayBook_Old: [...] | null } }
+      // DayBookLive → aaj ka data, DayBook_Old → purana data
+      // Dono merge karo, jo bhi null na ho
+      const liveData = response?.Report?.DayBookLive || [];
+      const oldData  = response?.Report?.DayBook_Old  || [];
+      setInforeport([...liveData, ...oldData]);
+    } else {
+      // ✅ Retailer API → existing daybook endpoint
+      const url = `${APP_URLS.daybook}from=${formattedFrom}&to=${formattedTo}`;
+
+      const [response] = await Promise.all([
+        get({ url }),
+        new Promise(resolve => setTimeout(resolve, 2500)),
+      ]);
+
+      setInforeport(response?.data || []);
+      setDays(Number(response?.durations || 0));
+    }
   } catch (e) {
     console.error('DayBookReport fetch error:', e);
     setInforeport([]);
   } finally {
-    setLoading(false); 
+    setLoading(false);
   }
-}, [get]); 
+}, [get, IsDealer]); 
   useEffect(() => {
     fetchData(selectedDate.from, selectedDate.to);
   }, []);
@@ -198,8 +256,16 @@ const fetchData = useCallback(async (from: string, to: string) => {
   );
 
   const renderDealer = useCallback(
-    ({ item }: { item: any }) => <DealerCard item={item} themeColor={primary} />,
-    [primary],
+    ({ item }: { item: any }) => (
+      <DealerDayBookCard
+        item={item}
+        fromDate={fromDate}
+        toDate={toDate}
+        themeColor={primary}
+        secondaryColor={secondary}
+      />
+    ),
+    [fromDate, toDate, primary, secondary],
   );
 
   return (
@@ -216,6 +282,25 @@ const fetchData = useCallback(async (from: string, to: string) => {
           title={translate("Day Book")}
           titlestyle={styles.appBarTitle}
         />
+        <View style={{
+  marginHorizontal: wScale(14),
+  marginTop: hScale(12),
+  marginBottom: hScale(6),
+  backgroundColor: '#EFF6FF',     // light blue bg
+  borderLeftWidth: 3,
+  borderLeftColor: primary,        // theme color left border
+  borderRadius: wScale(8),
+  paddingHorizontal: wScale(12),
+  paddingVertical: hScale(8),
+}}>
+  <Text style={{
+    fontSize: wScale(12),
+    color: '#1D4ED8',
+    fontWeight: '600',
+  }}>
+    ℹ️ Only single day data will be shown for Day Book.
+  </Text>
+</View>
         <DateRangePicker
           onDateSelected={(from, to) => setSelectedDate({ from, to })}
           SearchPress={(from, to) => fetchData(from, to)}
@@ -249,7 +334,7 @@ const fetchData = useCallback(async (from: string, to: string) => {
             <FlatList
               data={inforeport}
               renderItem={renderDealer}
-              keyExtractor={item => item.Type}
+              keyExtractor={item => item.rch_from ?? item.DealerName}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
             />
@@ -426,59 +511,68 @@ const styles = StyleSheet.create({
   diffLabel: { fontSize: wScale(13), color: '#3C3C43', fontWeight: '600' },
   diffValue: { fontSize: wScale(14), fontWeight: '800' },
 
-  // ── Dealer Card ───────────────────────────────────────────────────────────
-  dealerCard: {
-    backgroundColor: '#FFF',
-    borderRadius: wScale(18),
-    overflow: 'hidden',
-    marginBottom: hScale(12),
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-      },
-      android: { elevation: 2 },
-    }),
+  // ── Dealer DayBook Card ───────────────────────────────────────────────────
+  dealerGradientHeader: {
+    paddingHorizontal: wScale(18),
+    paddingVertical: hScale(16),
+    gap: hScale(10),
   },
-  dealerAccent: { height: hScale(3) },
-  dealerBody: { padding: wScale(16) },
-  dealerHeaderRow: {
+  dealerInfoBlock: {
+    gap: hScale(2),
+  },
+  dealerNameText: {
+    fontSize: wScale(15),
+    color: '#FFF',
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  dealerFarmText: {
+    fontSize: wScale(12),
+    color: 'rgba(255,255,255,0.85)',
+    fontWeight: '600',
+  },
+  dealerEmailText: {
+    fontSize: wScale(10),
+    color: 'rgba(255,255,255,0.65)',
+    fontWeight: '500',
+  },
+  dealerDateRangeBlock: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: wScale(10),
+    paddingHorizontal: wScale(14),
+    paddingVertical: hScale(8),
   },
-  particularLabel: {
+  dealerDateSep: {
+    width: StyleSheet.hairlineWidth,
+    height: hScale(24),
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  dealerBalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: wScale(16),
+    paddingVertical: hScale(14),
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F2F2F7',
+  },
+  dealerBalCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: hScale(3),
+  },
+  dealerBalLabel: {
     fontSize: wScale(10),
     color: '#8E8E93',
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: hScale(3),
+    letterSpacing: 0.4,
   },
-  dealerType: { fontSize: wScale(16), fontWeight: '800' },
-  earnCol: { alignItems: 'flex-end' },
-  earnAmount: { fontSize: wScale(18), fontWeight: '800', letterSpacing: -0.3 },
-  dealerDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E5EA',
-    marginVertical: hScale(12),
-  },
-  dealerStatsRow: { flexDirection: 'row', alignItems: 'center' },
-  dealerStat: { flex: 1, alignItems: 'center', gap: hScale(3) },
-  statLabel: {
-    fontSize: wScale(9),
-    color: '#8E8E93',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    textAlign: 'center',
-  },
-  statValue: { fontSize: wScale(14), fontWeight: '800' },
-  statDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: hScale(30),
-    backgroundColor: '#E5E5EA',
+  dealerBalValue: {
+    fontSize: wScale(18),
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
 });
