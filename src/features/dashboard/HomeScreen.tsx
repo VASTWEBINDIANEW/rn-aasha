@@ -28,24 +28,16 @@ import QrcodSvg from '../drawer/svgimgcomponents/QrcodSvg';
 import FastImage from "react-native-fast-image";
 import { getAssetSource } from "../../utils/network/NetWorkImages";
 
-// ─── Glow Orbs (same as ReportScreen / AccReportScreen) ──────────────────────
+// ─── Glow Orbs — soft, minimal ambient glow for a clean modern backdrop ───────
 const GlowOrbs = ({ primaryColor }: { primaryColor: string }) => (
   <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
     <View style={[styles.orb, {
-      top: -80, left: -80, width: 240, height: 240,
-      backgroundColor: `${primaryColor}70`,
+      top: -90, right: -70, width: 240, height: 240,
+      backgroundColor: `${primaryColor}3A`,
     }]} />
     <View style={[styles.orb, {
-      top: 200, right: -100, width: 280, height: 280,
-      backgroundColor: `${primaryColor}28`,
-    }]} />
-    <View style={[styles.orb, {
-      top: 500, left: 20, width: 180, height: 180,
-      backgroundColor: "rgba(5,150,105,0.15)",
-    }]} />
-    <View style={[styles.orb, {
-      bottom: 100, right: 10, width: 200, height: 200,
-      backgroundColor: "rgba(219,39,119,0.14)",
+      top: 320, left: -90, width: 220, height: 220,
+      backgroundColor: "rgba(255,255,255,0.06)",
     }]} />
   </View>
 );
@@ -68,29 +60,19 @@ const GlassSection = ({
   );
 
   return (
-    <View style={styles.glassSection}>
-      
-      {/* Glass fill */}
-      <LinearGradient
-        colors={["rgba(13, 8, 8, 0.13)", "rgba(255,255,255,0.04)"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
+    <View style={styles.card}>
 
-      {/* Top shimmer */}
-      <LinearGradient
-        colors={[
-          colorConfig.secondaryColor,
-          colorConfig.secondaryColor,
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.sectionTopShimmer}
-      />
+      {/* Soft translucent fill */}
+      <View style={styles.cardFill} />
+
+      {/* Thin brand accent line on top */}
+      <View style={[styles.cardTopLine, { backgroundColor: colorConfig.primaryColor }]} />
 
       <View style={styles.sectionTitleRow}>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <View style={styles.titleWithAccent}>
+          <View style={[styles.titleAccent, { backgroundColor: colorConfig.primaryColor }]} />
+          <Text style={styles.sectionTitle}>{title}</Text>
+        </View>
         {rightElement}
       </View>
 
@@ -158,13 +140,14 @@ const HomeScreen = () => {
   const scaleValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    const zoomInOut = () => {
+    const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(scaleValue, { toValue: 1,   duration: 1000, useNativeDriver: true }),
         Animated.timing(scaleValue, { toValue: 0.8, duration: 1000, useNativeDriver: true }),
-      ]).start(() => zoomInOut());
-    };
-    zoomInOut();
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
   }, [scaleValue]);
 
   const Newssms = async () => {
@@ -353,29 +336,23 @@ const HomeScreen = () => {
 
         {/* ── Quick Access ── */}
         {APP_URLS.AppName !== "Divyanshi Pay" && (
-          <View style={styles.glassSection}>
-            <LinearGradient
-              colors={[colorConfig.secondaryColor, colorConfig.secondaryColor]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
-            <LinearGradient
-              colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
-              start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-              style={styles.sectionTopShimmer}
-            />
+          <View style={styles.card}>
+            <View style={styles.cardFill} />
+            <View style={[styles.cardTopLine, { backgroundColor: colorConfig.primaryColor }]} />
 
             <View style={styles.quickAccessHeader}>
               <View style={styles.qaLeft}>
-                <Text style={styles.qaHi}>{translate("Hi.")}</Text>
-                <Text style={styles.qaName} numberOfLines={1} ellipsizeMode="tail">
-                  {FirmDet}
-                </Text>
-                <Text style={styles.qaHi}>{translate("Your_Quick_Access")}</Text>
+                <View style={styles.qaGreetRow}>
+                  <Text style={styles.qaHi}>{translate("Hi.")}</Text>
+                  <Text style={styles.qaName} numberOfLines={1} ellipsizeMode="tail">
+                    {FirmDet}
+                  </Text>
+                </View>
+                <Text style={styles.qaSub}>{translate("Your_Quick_Access")}</Text>
               </View>
               <Pressable
                 onPress={() => navigation.navigate({ name: "QuickAccessScreen" })}
-                style={[styles.editBtn, { backgroundColor: `${colorConfig.secondaryColor}90` }]}
+                style={[styles.editBtn, { backgroundColor: `${colorConfig.primaryColor}40` }]}
               >
                 <LottieView
                   autoPlay loop
@@ -549,40 +526,55 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
 
-  glassSection: {
-    borderRadius:   18,
+  card: {
+    borderRadius:   20,
     overflow:       "hidden",
     borderWidth:    1,
-    borderColor:    "rgba(255,255,255,0.18)",
-    marginVertical: hScale(6),
+    borderColor:    "rgba(255,255,255,0.22)",
+    marginVertical: hScale(7),
     position:       "relative",
+    paddingBottom:  hScale(4),
   },
-  sectionTopShimmer: {
-    position:              "absolute",
+  cardFill: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.10)",
+  },
+  cardTopLine: {
+    position: "absolute",
     top: 0, left: 0, right: 0,
-    height:                hScale(32),
-    borderTopLeftRadius:   18,
-    borderTopRightRadius:  18,
+    height: hScale(3),
+    opacity: 0.9,
   },
   sectionTitleRow: {
     flexDirection:  "row",
     justifyContent: "space-between",
     alignItems:     "center",
-    paddingTop:     hScale(5),
+    paddingTop:     hScale(12),
     paddingHorizontal: wScale(14),
     paddingRight:   wScale(12),
   },
+  titleWithAccent: {
+    flexDirection: "row",
+    alignItems:    "center",
+    flex:          1,
+  },
+  titleAccent: {
+    width:        wScale(4),
+    height:       wScale(16),
+    borderRadius: wScale(2),
+    marginRight:  wScale(8),
+  },
   sectionTitle: {
     fontSize:   wScale(15),
-    color:      "rgba(255,255,255,0.95)",
+    color:      "rgba(255,255,255,0.96)",
     fontWeight: "700",
-    textShadowColor:  "rgba(0,0,0,0.4)",
+    textShadowColor:  "rgba(0,0,0,0.35)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
     letterSpacing:    0.3,
   },
   sectionContent: {
-    paddingTop: hScale(10),
+    paddingTop: hScale(8),
   },
 
   quickAccessHeader: {
@@ -590,27 +582,33 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems:     "center",
     paddingHorizontal: wScale(14),
-    paddingTop:     hScale(5),
+    paddingTop:     hScale(12),
     paddingBottom:  hScale(4),
-    backgroundColor: "rgba(255,255,255,0.05)",
   },
   qaLeft: {
-    flexDirection: "row",
-    alignItems:    "center",
-    flexWrap:      "wrap",
+    flexDirection: "column",
     flex:          1,
   },
+  qaGreetRow: {
+    flexDirection: "row",
+    alignItems:    "center",
+  },
   qaHi: {
-    fontSize:   wScale(13),
-    color:      "rgba(255,255,255,0.85)",
-    marginRight: wScale(4),
+    fontSize:   wScale(14),
+    color:      "rgba(255,255,255,0.9)",
+    marginRight: wScale(5),
   },
   qaName: {
-    fontSize:   wScale(13),
+    fontSize:   wScale(15),
     color:      "#fff",
     fontWeight: "bold",
-    maxWidth:   wScale(130),
-    marginRight: wScale(4),
+    maxWidth:   wScale(170),
+  },
+  qaSub: {
+    fontSize:   wScale(11),
+    color:      "rgba(255,255,255,0.65)",
+    marginTop:  hScale(2),
+    letterSpacing: 0.2,
   },
   editBtn: {
     height:        wScale(28),
