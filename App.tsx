@@ -13,7 +13,7 @@ import { store, persistor } from './src/reduxUtils/store';
 import RNBootSplash from 'react-native-bootsplash';
 import { AppContainer } from './src/AppContainer';
 import { navigationRef } from './src/utils/navigation/NavigationService';
-import { setUnlocked } from './src/reduxUtils/store/userInfoSlice';
+import { clearOtaUpdate, setOtaUpdate, setUnlocked } from './src/reduxUtils/store/userInfoSlice';
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
@@ -26,7 +26,6 @@ import useAxiosHook from './src/utils/network/AxiosClient';
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-  const {get} = useAxiosHook()
   // ── State add karo AppContent ke andar ──
   const [otaProgress, setOtaProgress] = useState(0);
   const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
@@ -38,13 +37,14 @@ const AppContent = () => {
     `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
   console.log('OTA URL:', VERSION_URL);
+  const {get} = useAxiosHook()
 const fetchOtaDetails = async () => {
   try {
     // const documentSnapshot = await firestore()
     //   .collection('otaData')
     //   .doc('otadata')
-    //   .collection('imagedata')
-    //   .doc('data')
+    //   .collection('rechargedrishti')
+    //   .doc('ota')
     //   .get();
 
     // if (!documentSnapshot.exists) {
@@ -54,6 +54,8 @@ const fetchOtaDetails = async () => {
 
     // return documentSnapshot.data();
 
+
+    
           const version = await get({ url: APP_URLS.current_version });
 console.log(version)
 
@@ -69,50 +71,104 @@ console.log(version)
     return null;
   }
 };
-  const isDev = process.env.NODE_ENV === 'development'; 
+// const checkOta = async () => {
+//   try {
+//     const data = await fetchOtaDetails();
 
-const checkOta = async () => {
+//     if (!data) {
+//       return;
+//     }
 
-// if(isDev) return;
+//     const installed =
+//       Number(await OtUpdate.getCurrentVersion()) || 0;
+
+//     const latest = Number(data.version);
+
+//     console.log('Installed Version:', installed);
+//     console.log('Firebase Version:', latest);
+//     console.log('Bundle URL:', data.url);
+
+//     if (!latest || isNaN(latest)) {
+//       return;
+//     }
+
+//     if (
+//       latest > installed &&
+//       data.status === true &&
+//       data.url
+//     ) {
+//       console.log('🚀 New OTA update found');
+
+//       startUpdate({
+//         version: latest,
+//         bundle_url: data.url,
+//       });
+//     } else {
+//       //Alert.alert('✅ Already latest version');
+//     }
+//   } catch (error) {
+//     console.log('OTA Check Failed:', error);
+//   }
+// };
+
+  // ✅ START UPDATE
+ 
+//  const checkOta = async () => {
+//   try {
+//     const data = await fetchOtaDetails();
+//     if (!data) return;
+
+//     const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
+//     const latest = Number(data.version);
+
+//     console.log('Installed:', installed, 'Latest:', latest);
+
+//     if (!latest || isNaN(latest)) return;
+
+//     if (latest > installed && data.status === true) {
+//       dispatch(setOtaUpdate(latest));
+//     } else {
+//       dispatch(clearOtaUpdate());
+//     }
+//   } catch (error) {
+//     console.log('OTA Check Failed:', error);
+//   }
+// };
+ const checkOta = async (isResume = false) => {
   try {
     const data = await fetchOtaDetails();
-console.log(data,'@@@@@@@@@@@@')
-    if (!data) {
-      return;
-    }
+    if (!data) return;
 
-    const installed =
-      Number(await OtUpdate.getCurrentVersion()) || 0;
-
+    const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
     const latest = Number(data.version);
 
-    console.log('Installed Version:', installed);
-    console.log('Firebase Version:', latest);
-    console.log('Bundle URL:', data.url);
+    console.log('Installed:', installed, 'Latest:', latest, 'isResume:', isResume);
 
-    if (!latest || isNaN(latest)) {
-      return;
-    }
+    if (!latest || isNaN(latest)) return;
 
-    if (
-      latest > installed &&
-      data.url
-    ) {
-      console.log('🚀 New OTA update found');
+    if (latest > installed && data.status === true && data.url) {
+      dispatch(setOtaUpdate(latest));
 
-      startUpdate({
-        version: latest,
-        bundle_url: data.url,
-      });
+      if (isResume) {
+        // ✅ Background se aaya — sirf Redux
+        console.log('🔔 Background check — Redux updated only');
+      } else {
+        // ✅ App open hua — auto update shuru
+        console.log('🚀 App opened + update found → auto update starting...');
+        await startUpdate({
+          version: latest,
+          bundle_url: data.url,
+        });
+      }
     } else {
-      //Alert.alert('✅ Already latest version');
+      console.log('✅ Already on latest version');
+      dispatch(clearOtaUpdate());
     }
   } catch (error) {
     console.log('OTA Check Failed:', error);
   }
 };
 
-  // ✅ START UPDATE
   const startUpdate = async (data: any) => {
     if (isUpdating.current) {
       console.log('OTA already running');
@@ -170,23 +226,20 @@ console.log(data,'@@@@@@@@@@@@')
 
   // ✅ APP RESUME CHECK
 useEffect(() => {
-  console.log('🚀 App Started → checking OTA');
-  checkOta();
+  // ✅ App pehli baar open — auto update
+  checkOta(false);
 
-  const subscription = AppState.addEventListener(
-    'change',
-    nextAppState => {
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        console.log('🔄 App Resumed → checking OTA');
-        checkOta();
-      }
-
-      appState.current = nextAppState;
-    },
-  );
+  const subscription = AppState.addEventListener('change', nextAppState => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      // ✅ App running me background se aaya — sirf Redux
+      console.log('🔄 App resumed → background check only');
+      checkOta(true);
+    }
+    appState.current = nextAppState;
+  });
 
   return () => subscription.remove();
 }, []);

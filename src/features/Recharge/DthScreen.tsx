@@ -283,56 +283,40 @@ console.log(custparam)
   const { latitude , longitude } = useLocationHook();
 
 
-  const onRechargePress = useCallback(async () => {
+const onRechargePress = useCallback(async () => {
+  console.log([
+    latitude, longitude,
+    userId,
+    consumerNo,
+    optcode,
+    Amount,
+    Loc_Data['latitude'], Loc_Data['longitude'],
+    'city',
+    'address',
+    'postcode',
+    'mobileNetwork',
+    "ip",
+    '57bea5094fd9082d',
+  ]);
+  console.log(Loc_Data);
 
-    console.log([
+  setBottomSheetVisible(false);
+  setBottomSheetVisible2(false);
+  setShowLoader(true);
 
-      latitude,longitude,
-      userId,
-      consumerNo,
-      optcode,
-      Amount,
-      Loc_Data['latitude'],Loc_Data['longitude'],
+  let status = "";
+  let Message = "";
 
-      'city',
-      'address',
-      'postcode',
-      'mobileNetwork',
-      "ip",
-      '57bea5094fd9082d',
-    ]);
-console.log(Loc_Data)
-    ;
-
-    setBottomSheetVisible(false);
-    setBottomSheetVisible2(false);
-    setShowLoader(true);
-    let status, Message;
-     Message='';
-     status="";
+  try {
     const mobileNetwork = await getNetworkCarrier();
     const ip = await getMobileIp();
+
     const encryption = await encrypt([
       userId,
       consumerNo,
       optcode,
       Amount,
-      Loc_Data['latitude'],Loc_Data['longitude'],
-
-      'city',
-      'address',
-      'postcode',
-      mobileNetwork,
-      ip,
-      '57bea5094fd9082d',
-    ]);
-    console.log([
-      userId,
-      consumerNo,
-      optcode,
-      Amount,
-      latitude ??'0.000',
-    longitude??'0.111',
+      Loc_Data['latitude'], Loc_Data['longitude'],
       'city',
       'address',
       'postcode',
@@ -348,81 +332,157 @@ console.log(Loc_Data)
     const ip1 = encodeURIComponent(encryption.encryptedData[10]);
     const em = '57bea5094fd9082d';
     const devtoken = encodeURIComponent(encryption.encryptedData[6]);
-
     const Latitude = encodeURIComponent(encryption.encryptedData[4]);
     const Longitude = encodeURIComponent(encryption.encryptedData[5]);
     const ModelNo = encodeURIComponent(encryption.encryptedData[11]);
     const City = devtoken;
-
     const PostalCode = encodeURIComponent(encryption.encryptedData[8]);
     const InternetTYPE = encodeURIComponent(encryption.encryptedData[9]);
     const Addresss = encodeURIComponent(encryption.encryptedData[7]);
-
     const value1 = encodeURIComponent(encryption.keyEncode);
     const value2 = encodeURIComponent(encryption.ivEncode);
 
     const url = `${APP_URLS.rechTask}rd=${rd}&n=${n1}&ok=${ok1}&amn=${amn}&pc=${accnumhint}&bu=${accnumhint2}&acno&lt&ip=${ip1}&mc&em=${em}&offerprice&commAmount&Devicetoken=${devtoken}&Latitude=${Latitude}&Longitude=${Longitude}&ModelNo=${ModelNo}&City=${City}&PostalCode=${PostalCode}&InternetTYPE=${InternetTYPE}&Addresss=${Addresss}&value1=${value1}&value2=${value2}`;
 
-    try {
-      const res = await post({
-        url: url,
-      });
-      console.log(res,'******************123');
-        if(res.status == 'False'){
-              ToastAndroid.showWithGravity(
-                res.message,
-                ToastAndroid.SHORT,
-                ToastAndroid.BOTTOM
-              );
-              setShowLoader(false);
-              return;
-            }
-      status = res.Response;
-      Message = res.Message;
-      await recenttransactions();
-    } catch (error) {
-      console.error("Recharge failed:", error);
-      status = "Failed";
-      Message = "Recharge failed, please try again";
+    const res = await post({ url });
+    console.log(res, '******************123');
+
+    if (res.status == 'False') {
+      ToastAndroid.showWithGravity(
+        res.message,
+        ToastAndroid.SHORT,
+        ToastAndroid.BOTTOM
+      );
+      setShowLoader(false);
+      return;
     }
 
+    status = res.Response;
+    Message = res.Message;
+    await recenttransactions();
+
+    // ✅ Success navigate
     navigation.navigate('Rechargedetails', {
-      mobileNumber: consumerNo ?? '',        // Default to an empty string if null or undefined
-      Amount: Amount ?? 0,                   // Default to 0 if Amount is null or undefined
-      operator: selectedOpt ?? 'N/A',        // Default to 'N/A' if selectedOpt is null or undefined
-      status: status ?? 'Unknown',          // Default to 'Unknown' if status is null or undefined
-      id: reqId ?? '',                       // Default to an empty string if reqId is null or undefined
-      reqTime: reqTime ?? new Date().toISOString(),  // Default to current time if reqTime is null or undefined
-      Message: Message ?? 'No message available'     // Default to 'No message available' if Message is null or undefined
+      mobileNumber: consumerNo ?? '',
+      Amount: Amount ?? 0,
+      operator: selectedOpt ?? 'N/A',
+      status: status ?? 'Unknown',
+      id: reqId ?? '',
+      reqTime: reqTime ?? new Date().toISOString(),
+      Message: Message ?? 'No message available',
     });
-    
 
-    
-
-
-    // if (!res.ok) {
-    //   Alert.alert(res['Response'], res['Message'], [{ text: 'OK', onPress: () => { } }]);
-
-    // }
     setconsumerNo('');
     setselectedOpt('Select Your Operator');
     setAmount('');
-    setIsinfo(false)
-    setShowLoader(false);
-    Message()
+    setIsinfo(false);
 
-  }, [
-    Amount,
-    getMobileIp,
-    getNetworkCarrier,
-    latitude,
-    longitude,
-    consumerNo,
-    optcode,
-    post,
-    userId,
-  ]);
-  const [modalVisible, setModalVisible] = useState(false);
+  } catch (error) {
+    console.error("Recharge failed:", error);
+
+    const isTimeout =
+      error?.message?.toLowerCase().includes("timeout") ||
+      error?.message?.toLowerCase().includes("network") ||
+      error?.code === "ECONNABORTED";
+
+    if (isTimeout) {
+      console.log("Timeout detected! Checking history...");
+      try {
+        await recenttransactions();
+
+        setconsumerNo('');
+        setselectedOpt('Select Your Operator');
+        setAmount('');
+        setIsinfo(false);
+
+        // navigation.navigate('Rechargedetails', {
+        //   mobileNumber: consumerNo ?? '',
+        //   Amount: Amount ?? 0,
+        //   operator: selectedOpt ?? 'N/A',
+        //   status: 'Pending',
+        //   id: reqId ?? '',
+        //   reqTime: reqTime ?? new Date().toISOString(),
+        //   Message: 'Request delayed due to network. Please check your history.',
+        // });
+   Alert.alert(
+          "⚠️ Request Pending",
+          "We did not receive a response due to a network issue.\nYour recharge may have been processed.\n\nPlease check the details screen.",
+          [
+            {
+              text: "View Details",
+              onPress: () => {
+                // navigation.navigate("Rechargedetails", {
+                //   Amount,
+                //   rechType: ispost ? "Postpaid" : "Prepaid",
+                //   operator,
+                //   mobileNumber,
+                //   status: latest?.Response || "Pending",
+                //   reqTime: latest?.Reqesttime || 'N/A',
+                //   Message: "Request delayed due to network. Please check your history.",
+                //   reqId: latest?.Request_ID || 'N/A',
+                //   idno: latest?.Idno || 'N/A',
+                // });
+
+              navigation.navigate("RechargeUtilitisR")
+              },
+            },
+            {
+              text: "Later",
+              style: "cancel",
+              onPress: () => {
+                // User stays on current screen
+              },
+            },
+          ],
+          { cancelable: false }
+        );
+        return;
+      } catch (historyError) {
+        console.error("History fetch failed after timeout:", historyError);
+      }
+    }
+
+    // ✅ Normal error navigate
+    navigation.navigate('Rechargedetails', {
+      mobileNumber: consumerNo ?? '',
+      Amount: Amount ?? 0,
+      operator: selectedOpt ?? 'N/A',
+      status: 'Failed',
+      id: reqId ?? '',
+      reqTime: reqTime ?? new Date().toISOString(),
+      Message: 'Recharge failed, please try again.',
+    });
+
+    setconsumerNo('');
+    setselectedOpt('Select Your Operator');
+    setAmount('');
+    setIsinfo(false);
+
+  } finally {
+    setShowLoader(false);
+  }
+
+}, [
+  Amount,
+  getMobileIp,
+  getNetworkCarrier,
+  latitude,
+  longitude,
+  consumerNo,
+  optcode,
+  post,
+  userId,
+  Loc_Data,
+  accnumhint,
+  accnumhint2,
+  selectedOpt,
+  reqId,
+  reqTime,
+  navigation,
+  recenttransactions,
+]);
+
+const [modalVisible, setModalVisible] = useState(false);
   const [billDetails, setBillDetails] = useState([]);
   const [monthlyRecharge, setMonthlyRecharge] = useState('');
   const [status, setstatus] = useState();

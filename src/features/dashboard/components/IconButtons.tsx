@@ -31,13 +31,11 @@ import {
 const loader = [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
 const MAX_ITEMS = 4;
 
-// ─── SVG fetch cache — एक बार fetch होने के बाद मेमोरी से तुरंत लोड होगा ───
 const svgCache: Record<string, string> = {};
 
-// ─── Remote Fallback URL (लोकल require एसेट्स पूरी तरह हटा दिए गए हैं) ───
-const REMOTE_FALLBACK_URL = `http://native.${APP_URLS.baseWebUrl}//SvgOperatorImage/exclamation-mark.png`;
+// ─── Remote Fallback URL (Double slash & protocol fixed) ───
+const REMOTE_FALLBACK_URL = `http://native.${APP_URLS.baseWebUrl}/SvgOperatorImage/exclamation-mark.png`;
 
-// ─── Per-item SVG Component ────────────────────────────────────────────────
 interface TrackedSvgIconProps {
   item: sectionData;
   section: string;
@@ -67,14 +65,18 @@ const TrackedSvgIcon = memo(({
       return;
     }
 
-    // HTTP to HTTPS secure protocol auto-conversion
-    const secureSvgUrl = item.svg.startsWith('http://') 
-      ? item.svg.replace('http://', 'https://') 
-      : item.svg;
+    // 🛑 FIX 1: Agar unique recharges ka personal domain hai jo SSL support nahi karta,
+    // toh usey HTTP hi rehne do warna conversion block kar dega request.
+    let secureSvgUrl = item.svg;
+    if (!item.svg.includes("uniquerechargesrs.in") && item.svg.startsWith('http://')) {
+      secureSvgUrl = item.svg.replace('http://', 'https://');
+    }
+
+    // 🛑 FIX 2: Spaces ko %20 mein convert karna zaroori hai taaki URL valid rahe
+    secureSvgUrl = secureSvgUrl.replace(/ /g, "%20");
 
     let cancelled = false;
 
-    // 🔥 Added Custom User-Agent & Accept headers to avoid 403 blocks
     fetch(secureSvgUrl, {
       method: 'GET',
       headers: {
@@ -89,7 +91,6 @@ const TrackedSvgIcon = memo(({
       .then(xml => {
         if (cancelled) return;
         
-        // Block HTML error responses returning instead of actual raw xml
         if (xml.trim().startsWith('<html') || xml.trim().startsWith('<!DOCTYPE html')) {
           throw new Error("Server returned an HTML page instead of valid SVG payload.");
         }
@@ -100,14 +101,15 @@ const TrackedSvgIcon = memo(({
       })
       .catch(err => {
         if (cancelled) return;
-        setFailed(true); // Trigger immediate fallback
+        // Debug ke liye accurate logger console add kiya hai
+        console.warn(`❌ SVG Fetch Failed for [${item.name}]:`, err.message, "URL:", secureSvgUrl);
+        setFailed(true); 
         logSvgError(item.name, item.svg, err);
       });
 
     return () => { cancelled = true; };
   }, [item.svg]);
 
-  // इमेज सोर्स लॉजिक: पहले Redux का logoUrl चेक करेगा, खाली होने पर फॉलबैक यूआरएल लेगा
   const imageSource = fallbackLogoUrl 
     ? { uri: fallbackLogoUrl, priority: FastImage.priority.normal } 
     : { uri: REMOTE_FALLBACK_URL, priority: FastImage.priority.normal };
@@ -131,7 +133,7 @@ const TrackedSvgIcon = memo(({
       <View style={styles.InputImage}>
         <FastImage 
           source={imageSource} 
-          style={[styles.defaultImageStyle, { opacity: 0.6 }]} 
+          style={[styles.defaultImageStyle, { opacity: 0.3 }]} 
           resizeMode={FastImage.resizeMode.contain}
         />
       </View>
@@ -143,14 +145,13 @@ const TrackedSvgIcon = memo(({
     <View style={styles.InputImage}>
       <SvgXml
         xml={xmlContent}
-        height={wScale(50)}
-        width={wScale(50)}
+        height={wScale(40)} // Perfomant sizing adjustment
+        width={wScale(40)}
       />
     </View>
   );
 });
 
-// ─── Main Component ──────────────────────────────────────────────────────────
 const IconButtons = ({
   getItem,
   isQuickAccess,
@@ -230,8 +231,8 @@ const IconButtons = ({
         </View>
       )}
       numColumns={4}
-      estimatedItemSize={20}
-      renderItem={({ item, index }: { item: sectionData; index: number }) => (
+      estimatedItemSize={40}
+      renderItem={({ item }: { item: sectionData }) => (
         <TouchableOpacity
           onPress={() => {
             if (comingSoon.includes(item.ScreenName)) {
@@ -283,8 +284,8 @@ const styles = StyleSheet.create({
     justifyContent:"center",
   },
   defaultImageStyle: {
-    width: wScale(50),  
-    height: wScale(50), 
+    width: wScale(42),  
+    height: wScale(42), 
   },
   textPlaceholder: {
     width: wScale(40),
@@ -297,5 +298,6 @@ const styles = StyleSheet.create({
     color:     "white",
     textAlign: "center",
     fontSize:  wScale(12),
+    marginTop: hScale(4),
   },
 });

@@ -18,10 +18,13 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useLocationHook } from '../../../hooks/useLocationHook';
 import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import { setRceIdStatus } from '../../../reduxUtils/store/userInfoSlice';
+import { clearOtaUpdate, setRceIdStatus } from '../../../reduxUtils/store/userInfoSlice';
 import { translate } from '../../../utils/languageUtils/I18n';
 import RecentTrSvg from '../../drawer/svgimgcomponents/RecentTrSvg';
 import ToselfSvg from '../../drawer/svgimgcomponents/ToselfSvg';
+import firestore from '@react-native-firebase/firestore';
+import ReactNativeBlobUtil from 'react-native-blob-util';
+import OtUpdate from 'react-native-ota-hot-update';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ExtendedBalanceType extends BalanceType {
@@ -73,7 +76,7 @@ const BalanceCard = memo(({ label, value, accentColor, align = 'left', delay = 0
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const DashboardHeader = ({ refreshPress }) => {
-  const { colorConfig, IsDealer, Loc_Data } = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig, IsDealer, Loc_Data  ,otaHasUpdate, otaLatestVersion} = useSelector((state: RootState) => state.userInfo);
   const { get, post } = useAxiosHook();
   const [balanceInfo, setBalanceInfo] = useState<ExtendedBalanceType | undefined>();
   const [firmname, setfirmName] = useState<string>('');
@@ -184,7 +187,71 @@ const DashboardHeader = ({ refreshPress }) => {
       requestNotifPermission();
     }
   };
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [progress, setProgress] = useState(0);
+const fetchOtaDetails = async () => {
+  try {
+    // const doc = await firestore()
+    //   .collection('otaData')
+    //   .doc('otadata')
+    //   .collection('rechargedrishti')
+    //   .doc('ota')
+    //   .get();
+    // if (!doc.exists) return null;
+    // return doc.data();
+       const version = await get({ url: APP_URLS.current_version });
+console.log(version)
 
+  return {
+      version: version.otaVersion,
+      url: version.bundleUrl,
+      status: true, // true/false
+      currentVersion: version.currentversion ,
+      message: version.message,
+    };
+
+  } catch (e) {
+    console.log('Firestore OTA error:', e);
+    return null;
+  }
+};
+
+  const handleUpdatePress = async () => {
+    if (isUpdating || !otaLatestVersion) return;
+
+    const data = await fetchOtaDetails();
+    if (!data?.url) return;
+
+    setIsUpdating(true);
+    setProgress(0);
+
+    try {
+      await OtUpdate.downloadBundleUri(
+        ReactNativeBlobUtil,
+        data.url,
+        Number(otaLatestVersion),
+        {
+          restartAfterInstall: true,
+          restartDelay: 1500,
+          updateSuccess() {
+            dispatch(clearOtaUpdate());
+            setIsUpdating(false);
+          },
+          updateFail() {
+            setIsUpdating(false);
+          },
+          progress(received, total) {
+            if (total > 0) {
+              setProgress(Math.floor((received / total) * 100));
+            }
+          },
+        },
+      );
+    } catch (e) {
+      console.log('OTA update error:', e);
+      setIsUpdating(false);
+    }
+  };
   useFocusEffect(
     useCallback(() => {
       getData();
@@ -238,6 +305,7 @@ const DashboardHeader = ({ refreshPress }) => {
         {/* ── Top Row ── */}
         <View style={styles.topRow}>
 
+  
           {/* Left: Menu + Brand */}
           <View style={styles.leftGroup}>
             {APP_URLS.AppName === 'STdigiPe' ? (
@@ -318,7 +386,20 @@ const DashboardHeader = ({ refreshPress }) => {
           </View>
         </View>
       </View>
-
+   {otaHasUpdate && (
+        <TouchableOpacity
+          style={styles.updateBanner}
+          onPress={handleUpdatePress}
+          disabled={isUpdating}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.updateText}>
+            {isUpdating
+              ? `⬇ Downloading... ${progress}%`
+              : `🔄 Update Available v${otaLatestVersion} — Tap to Update`}
+          </Text>
+        </TouchableOpacity>
+      )}
       {/* ── 4 Balance Cards ── */}
       <View style={styles.cardsRow}>
         {balanceCards.map((card, i) => (
@@ -352,7 +433,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-
+    updateBanner: {
+    backgroundColor: '#000000',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
   // ── Left ──
   menuBtn: { padding: wScale(3) },
   menuImg: { width: wScale(26), height: wScale(17), resizeMode: 'contain' },

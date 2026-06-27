@@ -153,12 +153,12 @@ const DynamicButton: React.FC<DynamicButtonProps> = ({
       ]}
     >
       {/* Soft shadow glow layer */}
-      <View
+      {/* <View
         style={[
           styles.glowLayer,
           { backgroundColor: primaryColor },
         ]}
-      />
+      /> */}
 
       <LinearGradient
         style={styles.gradient}

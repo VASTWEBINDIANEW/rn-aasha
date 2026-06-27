@@ -13,6 +13,8 @@ import {
   Platform,
   Modal,
 } from 'react-native';
+import { Image as CompressorImage } from 'react-native-compressor';
+
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -268,35 +270,53 @@ useEffect(() => {
   setDisplayUri(doc.uri);
 }, [doc.uri, doc.base64]);
   // ── Gallery se image pick ─────────────────────────────
-  const handleImage = async (res: any) => {
-    if (res.didCancel || !res.assets?.[0]) return;
-    const asset = res.assets[0];
-    setLoading(true);
-    try {
-      const base64 = await toBase64(asset.uri);
-      onPick({ base64, uri: asset.uri, name: asset.fileName ?? 'doc' });
-      setPreviewVisible(true);
-    } catch {
-      toast('Could not read image');
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleImage = async (res: any) => {
+  if (res.didCancel || !res.assets?.[0]) return;
+  const asset = res.assets[0];
+  setLoading(true);
+  try {
+    // ✅ Compress pehle
+    const compressedUri = await CompressorImage.compress(asset.uri, {
+      quality: 0.4,
+      maxWidth: 1000,
+      maxHeight: 1000,
+      output: 'jpg',
+    });
 
-  // ── Vision Camera se capture ──────────────────────────
-  const handleVisionCapture = async (uri: string) => {
-    setCameraVisible(false);
-    setLoading(true);
-    try {
-      const base64 = await toBase64(uri);
-      onPick({ base64, uri, name: 'photo.jpg' });
-      setPreviewVisible(true);
-    } catch {
-      toast('Could not read image');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const base64 = await toBase64(compressedUri); // 
+    onPick({ base64, uri: compressedUri, name: asset.fileName ?? 'doc' });
+    setPreviewVisible(true);
+  } catch (err) {
+    console.error('Compress error:', err);
+    toast('Could not read image');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleVisionCapture = async (uri: string) => {
+  setCameraVisible(false);
+  setLoading(true);
+  try {
+    // ✅ Compress pehle, phir base64
+    const compressedUri = await CompressorImage.compress(uri, {
+      quality: 0.4,
+      maxWidth: 1000,
+      maxHeight: 1000,
+      output: 'jpg',
+    });
+
+    const base64 = await toBase64(compressedUri); // ✅ compressed URI se
+    onPick({ base64, uri: compressedUri, name: 'photo.jpg' });
+    setPreviewVisible(true);
+  } catch (err) {
+    console.error('Capture error:', err);
+    toast('Could not read image');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ── Camera open ───────────────────────────────────────
   const pickFromCamera = async () => {

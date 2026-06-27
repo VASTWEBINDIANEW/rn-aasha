@@ -372,7 +372,7 @@ const { ContactPicker } = NativeModules;
       console.log(url);
       const response = await post({ url: url });
       console.log(
-        "id1111111111111111111111111111111111111111111111111111111",
+        "RechargePin",
         response,
       );
       setrecharegepin(response);
@@ -745,12 +745,12 @@ const onRechargePress = useCallback(async () => {
   setShowLoader(true);
 
   try {
-    // Collect device and network info
+    // 1. Collect device and network info
     const Model = await getMobileDeviceId();
     const mobileNetwork = await getNetworkCarrier();
     const ip = await getMobileIp();
 
-    // Encrypt sensitive details
+    // 2. Encrypt sensitive details
     const encryption = encrypt([
       userId,
       mobileNumber,
@@ -766,34 +766,36 @@ const onRechargePress = useCallback(async () => {
       "57bea5094fd9082d",
     ]);
 
+    // 3. Destructure Encrypted Data
     const [
       rd, n1, ok1, , Latitude1, Longitude1,
       devtoken, Addresss, PostalCode, InternetTYPE, ip1, ModelNo
     ] = encryption.encryptedData.map(encodeURIComponent);
 
     const url = `${APP_URLS.rechTask}rd=${rd}&n=${n1}&ok=${ok1}&amn=${Amount}&pc=&bu=&acno=&lt=&ip=${ip1}&mc=&em=${Model}&offerprice=&commAmount=&Devicetoken=${devtoken}&Latitude=${Latitude1}&Longitude=${Longitude1}&ModelNo=${ModelNo}&City=${devtoken}&PostalCode=${PostalCode}&InternetTYPE=${InternetTYPE}&Addresss=${Addresss}&value1=${encodeURIComponent(encryption.keyEncode)}&value2=${encodeURIComponent(encryption.ivEncode)}&circle=${state}`;
-    
+
     console.log('Recharge URL:', url);
 
-    let status = "Failed";
-    let Message = "Recharge failed, please try again";
+    let status = "Pending";
+    let Message = "Recharge Pending, check report";
 
-    // 🔄 Recharge API Call
+    // 4. Recharge API Call
     const res = await post({ url });
     console.log(res, 'Recharge Response');
 
-    if (res?.status === 'False') {
+    if (res?.status === 'False' || res?.status === false) {
       ToastAndroid.showWithGravity(
-        res.message,
+        res.message || "Recharge failed from operator.",
         ToastAndroid.SHORT,
         ToastAndroid.BOTTOM
       );
+      status = "Failed";
     } else {
       status = res?.Response || "Success";
       Message = res?.Message || res?.message || "Recharge successful";
     }
 
-    // 🧹 Clear input fields
+    // 5. Clear input fields
     setMobileNumber("");
     setOperator("Select Operator & Circle");
     setState("");
@@ -801,15 +803,14 @@ const onRechargePress = useCallback(async () => {
     setAmount("");
     setIsFocused(false);
 
-    // 🕒 Fetch latest transaction details
+    // 6. Fetch latest transaction details
     const url2 = `${APP_URLS.recenttransaction}pageindex=1&pagesize=5&retailerid=${userId}&fromdate=${formattedDate}&todate=${formattedDate}&role=Retailer&rechargeNo=ALL&status=ALL&OperatorName=ALL&portno=ALL`;
-   console.log("&&&&&&&&&&&",url2)
-   
-   
-    const recent = await get({ url: url2 });
+    console.log("History URL:", url2);
 
+    const recent = await get({ url: url2 });
     const latest = recent?.[0] || {};
 
+    // 7. Navigate to Recharge Details Screen
     navigation.navigate("Rechargedetails", {
       Amount,
       rechType: ispost ? "Postpaid" : "Prepaid",
@@ -823,12 +824,92 @@ const onRechargePress = useCallback(async () => {
     });
 
   } catch (error) {
-    console.error("Recharge failed:", error);
+    console.error("Recharge caught error:", error);
+
+    const isTimeout =
+      error?.message?.toLowerCase().includes("timeout") ||
+      error?.message?.toLowerCase().includes("network") ||
+      error?.code === "ECONNABORTED";
+
+    if (isTimeout) {
+      console.log("Timeout detected! Checking history in background...");
+
+      try {
+        // Fetch latest transaction from history
+        const url2 = `${APP_URLS.recenttransaction}pageindex=1&pagesize=5&retailerid=${userId}&fromdate=${formattedDate}&todate=${formattedDate}&role=Retailer&rechargeNo=ALL&status=ALL&OperatorName=ALL&portno=ALL`;
+        const recent = await get({ url: url2 });
+        const latest = recent?.[0] || {};
+
+        // Clear input fields
+        setMobileNumber("");
+        setOperator("Select Operator & Circle");
+        setState("");
+        setCircle('');
+        setAmount("");
+        setIsFocused(false);
+
+        // Hide loader before showing alert
+        setShowLoader(false);
+
+        // ✅ Show alert — navigate on button press
+        Alert.alert(
+          "⚠️ Request Pending",
+          "We did not receive a response due to a network issue.\nYour recharge may have been processed.\n\nPlease check the details screen.",
+          [
+            {
+              text: "View Details",
+              onPress: () => {
+                // navigation.navigate("Rechargedetails", {
+                //   Amount,
+                //   rechType: ispost ? "Postpaid" : "Prepaid",
+                //   operator,
+                //   mobileNumber,
+                //   status: latest?.Response || "Pending",
+                //   reqTime: latest?.Reqesttime || 'N/A',
+                //   Message: "Request delayed due to network. Please check your history.",
+                //   reqId: latest?.Request_ID || 'N/A',
+                //   idno: latest?.Idno || 'N/A',
+                // });
+
+              navigation.navigate("RechargeUtilitisR")
+              },
+            },
+            {
+              text: "Later",
+              style: "cancel",
+              onPress: () => {
+                // User stays on current screen
+              },
+            },
+          ],
+          { cancelable: false }
+        );
+
+        return; // Prevent finally from calling setShowLoader again
+      } catch (historyError) {
+        console.error("History fetch failed after timeout:", historyError);
+
+        // History also failed — show simple alert
+        setShowLoader(false);
+
+        Alert.alert(
+          "⚠️ Network Error",
+          "Could not fetch response or transaction history.\nPlease check your transaction history manually.",
+          [{ text: "OK", style: "cancel" }],
+          { cancelable: false }
+        );
+
+        return;
+      }
+    }
+
+    // Normal error (non-timeout)
     ToastAndroid.showWithGravity(
-      "Recharge failed. Please check your network or try again.",
-      ToastAndroid.SHORT,
+      "Recharge failed. Please try again.",
+      ToastAndroid.LONG,
       ToastAndroid.BOTTOM
     );
+
   } finally {
     setShowLoader(false);
   }
@@ -836,19 +917,23 @@ const onRechargePress = useCallback(async () => {
 }, [
   Amount,
   getMobileIp,
+  getMobileDeviceId,
   getNetworkCarrier,
   latitude,
   longitude,
   mobileNumber,
   operatorcode,
   post,
+  get,
   userId,
   state,
   ispost,
   operator,
   navigation,
-  Loc_Data
+  Loc_Data,
+  formattedDate,
 ]);
+
 
 
 
@@ -1353,9 +1438,19 @@ const Recenttransactionlist = () => {
             ]}
             lastlabel={"Transaction Amount"}
             lastvalue={Amount}
-            onRechargedetails={() => {
-              onRechargePress();
-            }}
+          onRechargedetails={() => {
+                         if (recharegepin) {   // ✅ PIN required
+              navigation.navigate("RechargePin", {
+                onPinSet: (userPin) => {
+                  console.log("Returned PIN:", userPin);
+
+                  // yaha recharge call
+                  onRechargePress(userPin);
+                }
+              });
+            } else {
+              onRechargePress(""); }// ❌ PIN not required
+             }}
             isLoading2={showLoader}
             Lottieimg={require('../../utils/lottieIcons/profile2.json')}
           />

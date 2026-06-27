@@ -456,7 +456,7 @@ const SecurityChequeScreen = ({ onNext }: { onNext: (step: number) => void }) =>
         };
 
         console.log('📤 InsertForm9 URL:', APP_URLS.InsertForm9Update);
-        console.log('📦 InsertForm9 REQUEST:', JSON.stringify({ ...payload, CheckCopy: '[base64]' }, null, 2));
+        console.log('📦 InsertForm9 REQUEST:', JSON.stringify({ ...payload, CheckCopy: payload }, null, 2));
 
         const res = await post({ url: APP_URLS.InsertForm9Update, data: payload });
         console.log('📥 InsertForm9 RESPONSE:', JSON.stringify(res, null, 2));
