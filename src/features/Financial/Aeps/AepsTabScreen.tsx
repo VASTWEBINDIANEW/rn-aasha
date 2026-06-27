@@ -128,7 +128,7 @@ const AepsTabScreen = () => {
        
       const url = activeAepsLine
         ? 'AEPS/api/Nifi/data/AepsStatusCheck'
-        : 'AEPS/api/  /AepsStatusCheck';
+        : 'AEPS/api/data/AepsStatusCheck';
       const response = await get({ url });
       if (response?.Response === 'Success') {
         setUserStatus('Success');
