@@ -80,6 +80,7 @@ payutxnid:null,
   signUpId: null,
   signUpPassword: null,
   logoUrl: '',
+  allPermissionsGranted: null as boolean | null, // 🔥 Naya state for permission check (null = abhi check ho raha hai)
 };
 
 const userInfoSlice = createSlice({
@@ -153,7 +154,7 @@ clearOtaUpdate: (state) => {
     setSignUpId: (state, action) => { state.signUpId = action.payload; },
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
     setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
-
+    setAllPermissionsGranted: (state, action) => { state.allPermissionsGranted = action.payload; },
     reset: () => initialState,
   },
 });
@@ -205,6 +206,7 @@ export const {
   setLogoUrl ,
     setOtaUpdate,
   clearOtaUpdate,
+  setAllPermissionsGranted,
 } = userInfoSlice.actions;
 
 export default userInfoSlice.reducer;

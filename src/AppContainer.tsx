@@ -4,6 +4,7 @@ import { RootState } from './reduxUtils/store';
 import useAxiosHook from './utils/network/AxiosClient';
 import { APP_URLS } from './utils/network/urls';
 import {
+  setAllPermissionsGranted,
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
@@ -62,6 +63,7 @@ export const AppContainer = () => {
     loginId,
     isFingerprintEnabled,
     unLocked,
+    allPermissionsGranted,
     isDemoUser: reduxIsDemoUser
   } = useSelector((state: RootState) => state.userInfo);
 
@@ -71,9 +73,6 @@ export const AppContainer = () => {
   const [pkgmiss, setpkgmiss] = useState(false);
   const [pkg, setpkg] = useState('');
   const isDemo = reduxIsDemoUser || DemoConfig.demoNumbers.includes(loginId);
-  
-  // 🔥 Naya State Permissions ke liye (null matlab abhi check ho raha hai)
-  const [allPermissionsGranted, setAllPermissionsGranted] = useState<boolean | null>(null);
 
   // Firebase Init
   const firebaseConfig = {
@@ -86,7 +85,7 @@ export const AppContainer = () => {
 
   try { getApp(); } catch (e) { initializeApp(firebaseConfig, 'aircharge'); }
 
-  // 🔥 Permission Check Effect
+  // 🔥 Permission Check Effect — sirf initial check karta hai, request nahi karta
   useEffect(() => {
     const checkPermissions = async () => {
       if (Platform.OS === 'android') {
@@ -95,22 +94,32 @@ export const AppContainer = () => {
         const mic = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
 
         if (camera && location && mic) {
-          setAllPermissionsGranted(true);
+          dispatch(setAllPermissionsGranted(true));
         } else {
-          setAllPermissionsGranted(false);
+          dispatch(setAllPermissionsGranted(false));
         }
       } else {
         // iOS ya dusre platform ke liye default true maan rahe hain abhi ke liye
-        setAllPermissionsGranted(true); 
+        dispatch(setAllPermissionsGranted(true));
       }
     };
 
     checkPermissions();
   }, []);
 
+  // 🔑 FIX: Ab ye effect sirf tabhi aage badhega jab allPermissionsGranted true ho.
+  // Isse initAppAndLocation() ka location request PermissionScreen ke requestMultiple()
+  // ke saath race/conflict nahi karega.
   useEffect(() => {
     const init = async () => {
       await fetchAppData();
+
+      // Permissions abhi granted nahi hain — PermissionScreen khud sab handle karega,
+      // yahan se koi separate permission request mat chalao
+      if (!allPermissionsGranted) {
+        setIsLoading(false);
+        return;
+      }
 
       if (authToken) {
         if (isDemo) {
@@ -131,7 +140,7 @@ export const AppContainer = () => {
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        if (authToken && !isDemo) {
+        if (authToken && !isDemo && allPermissionsGranted) {
           checkGPSOnResume();
         }
       }
@@ -139,7 +148,7 @@ export const AppContainer = () => {
     });
 
     return () => subscription.remove();
-  }, [authToken]);
+  }, [authToken, allPermissionsGranted]); // 🔑 allPermissionsGranted dependency mein add kiya
 
   const checkGPSOnResume = async () => {
     try {
@@ -190,33 +199,37 @@ export const AppContainer = () => {
     return () => subscriber();
   }, []);
 
+  // 🔑 FIX: Ab yahan se dobara PermissionsAndroid.request() nahi chalta,
+  // kyunki is function tak tabhi pahunchte hain jab allPermissionsGranted
+  // already true ho chuka hai (PermissionScreen se). Sirf GPS enabled hai
+  // ya nahi wo check karke device info fetch karta hai.
   const initAppAndLocation = async () => {
-    let granted = false;
+    try {
+      const isEnabled = await LocationModule.isLocationEnabled();
 
-    if (Platform.OS === 'android') {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      granted = result === PermissionsAndroid.RESULTS.GRANTED;
-    } else {
-      granted = true;
+      if (!isEnabled) {
+        const status = await LocationModule.requestGPSEnabling();
+
+        if (status !== "ENABLED") {
+          Alert.alert(
+            translate('Location Required'),
+            translate('Please enable GPS to continue.'),
+            [
+              {
+                text: 'Retry',
+                onPress: () => initAppAndLocation(),
+              }
+            ]
+          );
+          return;
+        }
+      }
+
+      fetchDeviceInfo(false);
+    } catch (e) {
+      console.log('GPS Check Error', e);
+      fetchDeviceInfo(false);
     }
-
-    if (!granted) {
-      Alert.alert(
-        translate('Location Required'),
-        translate('Please allow location to continue.'),
-        [
-          {
-            text: 'Retry',
-            onPress: () => initAppAndLocation(),
-          }
-        ]
-      );
-      return;
-    }
-
-    fetchDeviceInfo(false);
   };
 
   const fetchDeviceInfo = async (skipLocation: boolean) => {
@@ -226,7 +239,7 @@ export const AppContainer = () => {
       const bundleId = DeviceInfo.getBundleId();
 
       setpkg(bundleId);
-      
+
       let locData = {
         latitude: '0',
         longitude: '0',
@@ -289,9 +302,9 @@ export const AppContainer = () => {
           labelColor: res.LABLECOLOR,
         }));
       }
-      
+
       const version = await get({ url: APP_URLS.current_version });
-      
+
       if (version) {
         dispatch(setLogoUrl(version.Logo));
         dispatch(setVersionData(version));
@@ -300,20 +313,20 @@ export const AppContainer = () => {
         setUpdate(isUpToDate);
       }
 
-      const bundleId = DeviceInfo.getBundleId(); 
+      const bundleId = DeviceInfo.getBundleId();
 
       if (version?.PackageName) {
         const mismatch = bundleId !== version.PackageName;
         setpkgmiss(mismatch);
       }
       registerNotification();
-    } catch (e) { 
-      console.log('❌ API Error', e); 
+    } catch (e) {
+      console.log('❌ API Error', e);
     }
   };
 
   const [connectionLost, setConnectionLost] = useState(false);
-  
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const isDisconnected = !state.isConnected;
@@ -323,33 +336,24 @@ export const AppContainer = () => {
     return () => unsubscribe();
   }, []);
 
-  // --- RENDER LOGIC (Priority Based) --- 
+  // --- RENDER LOGIC (Priority Based) ---
   const renderMainContent = () => {
-    // 1. Agar abhi permission check ho rahi hai
-    // if (allPermissionsGranted === null) {
-    //   return (
-    //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //    <ShowLoader/>
-    //     </View>
-    //   );
-    // }
-
-    // 2. Agar ek bhi permission baaki hai toh yeh screen dikhao
-    if (allPermissionsGranted === false) {
-      return (
-        <PermissionScreen 
-          onSuccess={(status: boolean) => setAllPermissionsGranted(status)} 
-        />
-      );
-    }
-
-    // 3. Baaki ka pura normal flow
     if (connectionLost) {
       return <ConnectionLost onRetry={() => console.log('retry')} />;
     }
 
     if (!update) {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
+    }
+
+    if (allPermissionsGranted === false) {
+      return (
+        <PermissionScreen
+          onSuccess={(status: boolean) =>
+            dispatch(setAllPermissionsGranted(status))
+          }
+        />
+      );
     }
 
     if (!authToken) {
@@ -369,3 +373,5 @@ export const AppContainer = () => {
     </SafeWrapper>
   );
 };
+
+export default AppContainer;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   Platform,
   ActivityIndicator,
+  InteractionManager,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../reduxUtils/store';
@@ -60,10 +61,25 @@ const PermissionScreen = ({ onSuccess }: any) => {
     mic: 'unchecked',
   });
 
+  // 🔑 Guard against StrictMode double-invoke / re-mount re-trigger
+  const hasStartedRef = useRef(false);
+
   const allGranted = PERMISSIONS_LIST.every(item => statuses[item.key] === 'granted');
 
+  // 🔑 SINGLE effect — pehle wala duplicate hata diya, InteractionManager wale
+  // effect ko hi keep kiya kyunki wo timing-safe hai (transition complete hone ka wait karta hai)
   useEffect(() => {
-    autoRequestPermissionsOneByOne();
+    if (hasStartedRef.current) {
+      console.log('⏭️ Auto-request already ran once, skipping duplicate run');
+      return;
+    }
+    hasStartedRef.current = true;
+
+    const interactionHandle = InteractionManager.runAfterInteractions(() => {
+      autoRequestAllPermissions();
+    });
+
+    return () => interactionHandle.cancel();
   }, []);
 
   useEffect(() => {
@@ -75,45 +91,84 @@ const PermissionScreen = ({ onSuccess }: any) => {
     }
   }, [allGranted, onSuccess]);
 
-  const autoRequestPermissionsOneByOne = async () => {
-    if (Platform.OS !== 'android') return; 
+  const autoRequestAllPermissions = async () => {
+    if (Platform.OS !== 'android') {
+      console.log('⚠️ iOS detected — skipping Android auto-request logic');
+      return;
+    }
 
-    let currentStatuses = { ...statuses };
+    console.log('🚀 Starting auto permission request flow...');
 
+    const alreadyGrantedMap: Record<string, boolean> = {};
     for (const item of PERMISSIONS_LIST) {
-      const isAlreadyGranted = await PermissionsAndroid.check(item.androidPermission as any);
-      
-      if (isAlreadyGranted) {
-        currentStatuses[item.key] = 'granted';
-      } else {
-        try {
-          const result = await PermissionsAndroid.request(item.androidPermission as any, {
-            title: `${item.label} Permission`,
-            message: item.description,
-            buttonPositive: 'Allow',
-            buttonNegative: 'Deny',
-          });
+      const granted = await PermissionsAndroid.check(item.androidPermission as any);
+      alreadyGrantedMap[item.key] = granted;
+      console.log(`🔍 ${item.label}: already granted = ${granted}`);
+    }
 
-          if (result === PermissionsAndroid.RESULTS.GRANTED) {
-            currentStatuses[item.key] = 'granted';
-          } else if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-            currentStatuses[item.key] = 'blocked';
-          } else {
-            currentStatuses[item.key] = 'denied';
-          }
-        } catch (error) {
-          console.warn('Auto Request Error:', error);
-          currentStatuses[item.key] = 'denied';
+    setStatuses(prev => {
+      const updated = { ...prev };
+      PERMISSIONS_LIST.forEach(item => {
+        if (alreadyGrantedMap[item.key]) {
+          updated[item.key] = 'granted';
         }
-      }
-      setStatuses({ ...currentStatuses });
+      });
+      return updated;
+    });
+
+    const permissionsToRequest = PERMISSIONS_LIST
+      .filter(item => !alreadyGrantedMap[item.key])
+      .map(item => item.androidPermission);
+
+    if (permissionsToRequest.length === 0) {
+      console.log('✅ Sab permissions pehle se hi granted the');
+      return;
+    }
+
+    console.log('📋 Requesting:', permissionsToRequest);
+
+    try {
+      const results = await PermissionsAndroid.requestMultiple(permissionsToRequest as any);
+      console.log('📥 requestMultiple results:', results);
+
+      setStatuses(prev => {
+        const updated = { ...prev };
+        PERMISSIONS_LIST.forEach(item => {
+          const result = results[item.androidPermission];
+          if (result) {
+            updated[item.key] =
+              result === PermissionsAndroid.RESULTS.GRANTED
+                ? 'granted'
+                : result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN
+                ? 'blocked'
+                : 'denied';
+          }
+        });
+        return updated;
+      });
+
+      // 🔑 Verification pass — check karo koi silently skip to nahi hua
+      setTimeout(async () => {
+        for (const item of PERMISSIONS_LIST) {
+          const isGranted = await PermissionsAndroid.check(item.androidPermission as any);
+          setStatuses(prev => {
+            if (isGranted && prev[item.key] !== 'granted') {
+              console.log(`🔄 Late-detected grant for ${item.label}`);
+              return { ...prev, [item.key]: 'granted' };
+            }
+            return prev;
+          });
+        }
+      }, 500);
+    } catch (err) {
+      console.warn('❌ requestMultiple error:', err);
     }
   };
 
   const handleCardPress = async (item: PermissionItem) => {
     const currentStatus = statuses[item.key];
 
-    if (currentStatus === 'granted') return; 
+    if (currentStatus === 'granted') return;
 
     if (currentStatus === 'blocked') {
       showSettingsAlert(item.label);
@@ -122,12 +177,15 @@ const PermissionScreen = ({ onSuccess }: any) => {
 
     try {
       const result = await PermissionsAndroid.request(item.androidPermission as any);
-      
+
       setStatuses(prev => ({
         ...prev,
-        [item.key]: 
-          result === PermissionsAndroid.RESULTS.GRANTED ? 'granted' : 
-          result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN ? 'blocked' : 'denied'
+        [item.key]:
+          result === PermissionsAndroid.RESULTS.GRANTED
+            ? 'granted'
+            : result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN
+            ? 'blocked'
+            : 'denied',
       }));
     } catch (err) {
       console.warn('Manual request error:', err);
@@ -169,17 +227,17 @@ const PermissionScreen = ({ onSuccess }: any) => {
                 isRed && { backgroundColor: '#FFF5F5', borderColor: '#FF4D4D', borderWidth: 1.5 },
               ]}
               onPress={() => handleCardPress(item)}
-              activeOpacity={0.7} // Click feel dene ke liye opacity kam ki
+              activeOpacity={0.7}
             >
-              {/* Left Icon Badge */}
-              <View style={[
-                styles.iconBadge, 
-                { backgroundColor: isGranted ? `${colorConfig.primaryColor}15` : isRed ? '#FFEAEA' : '#F0F2F5' }
-              ]}>
+              <View
+                style={[
+                  styles.iconBadge,
+                  { backgroundColor: isGranted ? `${colorConfig.primaryColor}15` : isRed ? '#FFEAEA' : '#F0F2F5' },
+                ]}
+              >
                 <Text style={styles.iconText}>{item.icon}</Text>
               </View>
 
-              {/* Text Content */}
               <View style={styles.textContainer}>
                 <Text style={[styles.permissionLabel, { color: isRed ? '#CC0000' : colorConfig.primaryColor }]}>
                   {item.label}
@@ -187,10 +245,16 @@ const PermissionScreen = ({ onSuccess }: any) => {
                 <Text style={[styles.permissionDesc, isRed && { color: '#CC0000' }]}>
                   {item.description}
                 </Text>
-                
-                {/* 🔥 VISUAL CTA BUTTON: User ko yahan se samajh aayega ki click karna hai */}
-                {status === 'denied' && (
-                  <View style={styles.actionBtnBadge}>
+
+                {/* 🔑 Ab 'unchecked' aur 'denied' dono states pe "Tap to Allow" dikhega,
+                    taaki user ko turant pata chale khud tap karna hai */}
+                {(status === 'unchecked' || status === 'denied') && (
+                  <View
+                    style={[
+                      styles.actionBtnBadge,
+                      { backgroundColor: status === 'denied' ? '#FF4D4D' : colorConfig.primaryButtonColor },
+                    ]}
+                  >
                     <Text style={styles.actionBtnText}>Tap to Allow ➔</Text>
                   </View>
                 )}
@@ -201,14 +265,13 @@ const PermissionScreen = ({ onSuccess }: any) => {
                 )}
               </View>
 
-              {/* Status Indicator (Right side) */}
               <View
                 style={[
                   styles.statusCircle,
                   { borderColor: colorConfig.primaryColor },
                   isGranted && { backgroundColor: colorConfig.primaryColor, borderColor: colorConfig.primaryColor },
                   isRed && styles.statusCircleRed,
-                  status === 'unchecked' && { borderColor: '#E0E0E0' }
+                  status === 'unchecked' && { borderColor: '#E0E0E0' },
                 ]}
               >
                 {isGranted && <Text style={styles.statusIcon}>✓</Text>}
@@ -219,13 +282,10 @@ const PermissionScreen = ({ onSuccess }: any) => {
         })}
       </ScrollView>
 
-      {/* Bottom Area */}
       <View style={[styles.bottomContainer, { backgroundColor: colorConfig.primaryColor }]}>
         {!allGranted ? (
           <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>
-              Please click the red buttons above to proceed
-            </Text>
+            <Text style={styles.instructionText}>Please tap the cards above to allow permissions</Text>
           </View>
         ) : (
           <View style={styles.autoRedirectContainer}>
@@ -247,7 +307,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF', 
+    backgroundColor: '#FFFFFF',
     padding: 16,
     marginBottom: 16,
     borderRadius: 16,
@@ -260,8 +320,6 @@ const styles = StyleSheet.create({
   textContainer: { flex: 1, paddingRight: 12 },
   permissionLabel: { fontSize: 17, fontWeight: '700', marginBottom: 4 },
   permissionDesc: { fontSize: 13, lineHeight: 18, color: '#666666' },
-  
-  // 🔥 NAYA CTA BUTTON STYLE
   actionBtnBadge: {
     backgroundColor: '#FF4D4D',
     alignSelf: 'flex-start',
@@ -275,18 +333,21 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  actionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  // -------------------------
-
+  actionBtnText: { color: 'green', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
   statusCircle: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-  statusCircleRed: { backgroundColor: '#FF4D4D', borderColor: '#FF4D4D' }, 
+  statusCircleRed: { backgroundColor: '#FF4D4D', borderColor: '#FF4D4D' },
   statusIcon: { color: '#FFFFFF', fontWeight: '800', fontSize: 14, marginTop: Platform.OS === 'ios' ? 1 : -1 },
-  bottomContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 24, paddingTop: 16, paddingBottom: Platform.OS === 'ios' ? 34 : 24, alignItems: 'center', justifyContent: 'center' },
+  bottomContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   instructionContainer: { paddingVertical: 18 },
   instructionText: { color: 'rgba(255,255,255,0.8)', fontSize: 15, fontWeight: '700', textAlign: 'center' },
   autoRedirectContainer: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18 },
