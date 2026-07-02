@@ -22,6 +22,7 @@ import DeviceInfo from "react-native-device-info";
 import ReactNativeBlobUtil from "react-native-blob-util";
 import { onReceiveNotification2 } from "../../../utils/NotificationService";
 import LanguageButton from "../../../components/LanguageButton";
+import { setLogoUrl } from "../../../reduxUtils/store/userInfoSlice";
 
 const UpdateScreen = () => {
   const { colorConfig, logoUrl } = useSelector((state: RootState) => state.userInfo);
@@ -117,6 +118,8 @@ const handleUpdate = async () => {
       Alert.alert(translate("Error"), translate("Something went wrong."));
     }
   };
+
+  useEffect(()=>{getInstallTime},[])
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar barStyle="light-content" />

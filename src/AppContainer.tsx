@@ -46,6 +46,8 @@ import ConnectionLost from './components/ConnectionLost';
 import { translate } from './utils/languageUtils/I18n';
 import BlockedMessageAnimated from './features/dashboard/components/Pkgmiss';
 import firestore from '@react-native-firebase/firestore';
+import PermissionScreen from './components/PermissionScreen';
+import ShowLoader from './components/ShowLoder';
 
 export const AppContainer = () => {
   const { LocationModule } = NativeModules;
@@ -69,6 +71,9 @@ export const AppContainer = () => {
   const [pkgmiss, setpkgmiss] = useState(false);
   const [pkg, setpkg] = useState('');
   const isDemo = reduxIsDemoUser || DemoConfig.demoNumbers.includes(loginId);
+  
+  // 🔥 Naya State Permissions ke liye (null matlab abhi check ho raha hai)
+  const [allPermissionsGranted, setAllPermissionsGranted] = useState<boolean | null>(null);
 
   // Firebase Init
   const firebaseConfig = {
@@ -80,6 +85,28 @@ export const AppContainer = () => {
   };
 
   try { getApp(); } catch (e) { initializeApp(firebaseConfig, 'aircharge'); }
+
+  // 🔥 Permission Check Effect
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (Platform.OS === 'android') {
+        const camera = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
+        const location = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        const mic = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+
+        if (camera && location && mic) {
+          setAllPermissionsGranted(true);
+        } else {
+          setAllPermissionsGranted(false);
+        }
+      } else {
+        // iOS ya dusre platform ke liye default true maan rahe hain abhi ke liye
+        setAllPermissionsGranted(true); 
+      }
+    };
+
+    checkPermissions();
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -125,7 +152,6 @@ export const AppContainer = () => {
         if (status === "ENABLED") {
           fetchDeviceInfo(false);
         } else {
-          // user cancel kare toh 2 sec baad fir check
           setTimeout(() => {
             checkGPSOnResume();
           }, 2000);
@@ -151,20 +177,14 @@ export const AppContainer = () => {
               const data = documentSnapshot.data();
               const status = data?.isAllowed ?? false;
               setAllowed(status);
-              console.log('User allowed status:', status);
             } else {
               setAllowed(false);
-              console.log('Document does not exist');
             }
           } catch (error) {
-            console.log('Firestore read error:', error);
             setAllowed(false);
           }
         },
-        error => {
-          console.log('Snapshot listener error:', error);
-          setAllowed(false);
-        }
+        error => setAllowed(false)
       );
 
     return () => subscriber();
@@ -205,9 +225,6 @@ export const AppContainer = () => {
       const ip = await getIpAddress();
       const bundleId = DeviceInfo.getBundleId();
 
-      console.log('====================================');
-      console.log("Bundle ID:", bundleId);
-      console.log('====================================');
       setpkg(bundleId);
       
       let locData = {
@@ -234,7 +251,6 @@ export const AppContainer = () => {
           locData = loc;
           setLocationAllowed(true);
         } catch (e) {
-          console.log("Location Error", e);
           const status = await LocationModule.requestGPSEnabling();
           if (status === "ENABLED") {
             fetchDeviceInfo(false);
@@ -264,8 +280,6 @@ export const AppContainer = () => {
   const fetchAppData = async () => {
     try {
       const res = await get({ url: APP_URLS.getColors });
-
-      console.log('🎨 Color Config:', res);
       if (res) {
         dispatch(setColorConfig({
           primaryColor: res.BACKGROUNDCOLOR1,
@@ -277,13 +291,10 @@ export const AppContainer = () => {
       }
       
       const version = await get({ url: APP_URLS.current_version });
-      console.log('====================================');
-      console.log("Server Version Response:", version);
-      console.log('====================================');
       
       if (version) {
         dispatch(setLogoUrl(version.Logo));
-        dispatch(setVersionData(version)); // पूरे डेटा को Redux में डाला ताकि UpdateBox लिंक रीड कर सके
+        dispatch(setVersionData(version));
 
         const isUpToDate = APP_URLS.version === version.currentversion;
         setUpdate(isUpToDate);
@@ -294,10 +305,6 @@ export const AppContainer = () => {
       if (version?.PackageName) {
         const mismatch = bundleId !== version.PackageName;
         setpkgmiss(mismatch);
-
-        console.log('📦 LOCAL PACKAGE:', bundleId);
-        console.log('🌐 SERVER PACKAGE:', version.PackageName);
-        console.log('❗ PACKAGE MISMATCH:', mismatch);
       }
       registerNotification();
     } catch (e) { 
@@ -310,17 +317,7 @@ export const AppContainer = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const isDisconnected = !state.isConnected;
-
-      setConnectionLost(prev => {
-        if (prev === isDisconnected) return prev; 
-        return isDisconnected;
-      });
-
-      if (isDisconnected) {
-        console.log("Internet Disconnected ❌");
-      } else {
-        console.log("Internet Connected ✅");
-      }
+      setConnectionLost(prev => prev === isDisconnected ? prev : isDisconnected);
     });
 
     return () => unsubscribe();
@@ -328,32 +325,37 @@ export const AppContainer = () => {
 
   // --- RENDER LOGIC (Priority Based) --- 
   const renderMainContent = () => {
-    // अगर पैकेज मिसमैच ब्लॉक को एक्टिवेट करना चाहते हैं तो इसे अनकमेंट कर सकते हैं
-    // if (pkgmiss) {
+    // 1. Agar abhi permission check ho rahi hai
+    // if (allPermissionsGranted === null) {
     //   return (
-    //     <BlockedMessageAnimated
-    //       message={'Invalid application package detected.\nContact developer.'}
-    //       bubbleCount={15}
-    //     />
+    //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //    <ShowLoader/>
+    //     </View>
     //   );
     // }
 
+    // 2. Agar ek bhi permission baaki hai toh yeh screen dikhao
+    if (allPermissionsGranted === false) {
+      return (
+        <PermissionScreen 
+          onSuccess={(status: boolean) => setAllPermissionsGranted(status)} 
+        />
+      );
+    }
+
+    // 3. Baaki ka pura normal flow
     if (connectionLost) {
       return <ConnectionLost onRetry={() => console.log('retry')} />;
     }
 
-    // 🔥 GOOGLE & APP NAME BYPASS BLOCKS REMOVED HERE TOO
-    // सीधे चेक होगा: अगर ऐप अपडेटेड नहीं है (!update), तो अपडेट बॉक्स दिखाओ
     if (!update) {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
     }
 
-    // Priority 2: Not Logged In
     if (!authToken) {
       return <AuthNavigator />;
     }
 
-    // Priority 3: Biometric Auth
     if (isFingerprintEnabled && !unLocked) {
       return <BiometricAuth />;
     }

@@ -14,7 +14,7 @@
 
 // class MainActivity : ReactActivity() {
 
-//     override fun getMainComponentName(): String = "globalmultisolution"
+//     override fun getMainComponentName(): String = "pemudra"
 
 //     override fun createReactActivityDelegate(): ReactActivityDelegate =
 //         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
@@ -106,7 +106,7 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 class MainActivity : ReactActivity() {
 
-    override fun getMainComponentName(): String = "globalmultisolution"
+    override fun getMainComponentName(): String = "pemudra"
 
     override fun createReactActivityDelegate(): ReactActivityDelegate =
         DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)

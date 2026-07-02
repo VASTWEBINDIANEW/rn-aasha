@@ -319,7 +319,7 @@ const CustomDrawerContent = (props: any) => {
           </Text>
           <View style={[styles.versionPill,{backgroundColor:`${colorConfig.primaryColor}1D`,}]}>
             <Text style={[styles.versionText,{color:colorConfig.primaryColor,}]}>
-              v{latestVersion?.currentversion ?? '—'}
+              v{latestVersion?.currentversion ?? '—'}/ ota-{latestVersion.otaVersion}
             </Text>
           </View>
         </View>

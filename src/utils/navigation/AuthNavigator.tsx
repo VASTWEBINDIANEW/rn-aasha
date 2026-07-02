@@ -5,6 +5,7 @@ import LoginScreen from '../../features/login/LoginScreen';
 import SignUpScreen from '../../features/signup/SignUpScreen';
 import PlaneGameScreen from '../../test';
 import LanguageSettings from '../../features/drawer/settingPages/LanguageSettings';
+import PermissionScreen from '../../components/PermissionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,9 +17,10 @@ export const AuthNavigator = () => {
         gestureEnabled: false,
       }}
       initialRouteName="LoginScreen">
+      {/* <Stack.Screen name="PermissionScreen" component={PermissionScreen} /> */}
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
-        <Stack.Screen name="LanguageSettings" component={LanguageSettings} />
+      <Stack.Screen name="LanguageSettings" component={LanguageSettings} />
     </Stack.Navigator>
   );
 };
