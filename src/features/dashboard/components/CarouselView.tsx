@@ -2,10 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View, Dimensions, StyleSheet } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { SvgUri } from "react-native-svg";
-import Animated, {
-  useSharedValue, useAnimatedStyle, withSpring,
-} from "react-native-reanimated";
-import LinearGradient from "react-native-linear-gradient";
 import { hScale, wScale } from "../../../utils/styles/dimensions";
 import { APP_URLS } from "../../../utils/network/urls";
 import useAxiosHook from "../../../utils/network/AxiosClient";
@@ -13,25 +9,51 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxUtils/store";
 
 const { width: screenWidth } = Dimensions.get("window");
-const CARD_W = screenWidth * 0.86;
-const CARD_H = hScale(110); // ← छोटा किया
+const CARD_W = screenWidth * 0.92;
+const CARD_H = hScale(110);
 
-// ─── Dot ──────────────────────────────────────────────────────────────────────
-const PaginationDot = ({ isActive, primaryColor, secondaryColor }) => {
-  const w = useSharedValue(isActive ? wScale(16) : wScale(5));
-  useEffect(() => {
-    w.value = withSpring(isActive ? wScale(16) : wScale(5), { damping: 14, stiffness: 120 });
-  }, [isActive]);
-  const style = useAnimatedStyle(() => ({ width: w.value }));
-  return (
-    <Animated.View
-      style={[styles.dot, style, {
+// ─── Retry config for image HEAD-check ─────────────────────────────────────
+const MAX_RETRIES = 2;
+const RETRY_DELAYS_MS = [800, 2000];
+const CHECK_TIMEOUT_MS = 8000;
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+const checkImageWithRetry = async (
+  url: string,
+  attempt = 0
+): Promise<boolean> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, { method: "HEAD", signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return true;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (attempt < MAX_RETRIES) {
+      await delay(RETRY_DELAYS_MS[attempt] ?? 1500);
+      return checkImageWithRetry(url, attempt + 1);
+    }
+    return false;
+  }
+};
+
+// ─── Dot (plain, no spring animation) ──────────────────────────────────────
+const PaginationDot = ({ isActive, primaryColor, secondaryColor }) => (
+  <View
+    style={[
+      styles.dot,
+      {
+        width: isActive ? wScale(16) : wScale(5),
         backgroundColor: isActive ? primaryColor : secondaryColor,
         opacity: isActive ? 1 : 0.4,
-      }]}
-    />
-  );
-};
+      },
+    ]}
+  />
+);
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const CarouselView = () => {
@@ -59,70 +81,46 @@ const CarouselView = () => {
   useEffect(() => {
     sliderImages.forEach((item: any) => {
       if (!item.images) return;
-      fetch(item.images, { method: "HEAD" })
-        .then(r => setValidImages(p => ({ ...p, [item.idno]: r.ok })))
-        .catch(()  => setValidImages(p => ({ ...p, [item.idno]: false })));
+      checkImageWithRetry(item.images).then((ok) =>
+        setValidImages((p) => ({ ...p, [item.idno]: ok }))
+      );
     });
   }, [sliderImages]);
 
   const slides = sliderImages.filter((item: any) => validImages[item.idno] === true);
 
   if (!loading && slides.length === 0) return null;
-  if (loading) return (
-    <View style={[styles.skCard, { borderColor: "rgba(255,255,255,0.15)" }]}>
-      <LinearGradient
-        colors={[`${colorConfig.primaryColor}22`, `${colorConfig.primaryColor}08`]}
-        style={StyleSheet.absoluteFillObject}
+  if (loading) {
+    return (
+      <View
+        style={[
+          styles.skCard,
+          { borderColor: "rgba(255,255,255,0.15)", backgroundColor: `${colorConfig.primaryColor}15` },
+        ]}
       />
-    </View>
-  );
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
-      {/* frame */}
-      <View style={styles.frame}>
-        <LinearGradient
-          colors={["rgba(255,255,255,0.10)", "rgba(255,255,255,0.02)"]}
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
-        <LinearGradient
-          colors={["rgba(255,255,255,0.38)", "rgba(255,255,255,0)"]}
-          start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-          style={styles.frameShimmer}
-        />
-
+      <View style={[styles.frame, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
         <Carousel
           loop
           width={screenWidth}
           height={CARD_H}
           autoPlay
           autoPlayInterval={3200}
-          mode="parallax"
-          modeConfig={{ parallaxScrollingScale: 0.88, parallaxScrollingOffset: 48 }}
-          scrollAnimationDuration={900}
+          scrollAnimationDuration={600}
           data={slides}
           onSnapToItem={setActiveIndex}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <View style={styles.slideOuter}>
-              <View style={[
-                styles.card,
-                index === activeIndex && { shadowColor: colorConfig.primaryColor, elevation: 10 },
-              ]}>
-                <LinearGradient
-                  colors={["rgba(255,255,255,0.16)", "rgba(255,255,255,0.04)"]}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-                  style={StyleSheet.absoluteFillObject}
-                />
-                <LinearGradient
-                  colors={["rgba(255,255,255,0.5)", "rgba(255,255,255,0)"]}
-                  start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-                  style={styles.cardShimmer}
-                />
+              <View style={styles.card}>
                 <SvgUri
-                  width="100%" height="100%"
+                  width="100%"
+                  height="100%"
                   uri={item.images}
-                  onError={() => setValidImages(p => ({ ...p, [item.idno]: false }))}
+                  onError={() => setValidImages((p) => ({ ...p, [item.idno]: false }))}
                 />
               </View>
             </View>
@@ -132,10 +130,6 @@ const CarouselView = () => {
         {/* dots */}
         <View style={styles.dotsRow}>
           <View style={styles.dotsPill}>
-            <LinearGradient
-              colors={["rgba(255,255,255,0.22)", "rgba(255,255,255,0.08)"]}
-              style={StyleSheet.absoluteFillObject}
-            />
             {slides.map((_, i) => (
               <PaginationDot
                 key={i}
@@ -161,10 +155,6 @@ const styles = StyleSheet.create({
     borderColor:   "rgba(255,255,255,0.16)",
     paddingBottom: hScale(8),
   },
-  frameShimmer: {
-    position: "absolute", top: 0, left: 0, right: 0,
-    height: hScale(20), borderTopLeftRadius: 16, borderTopRightRadius: 16, zIndex: 1,
-  },
 
   slideOuter: { flex: 1, justifyContent: "center", alignItems: "center" },
   card: {
@@ -173,23 +163,16 @@ const styles = StyleSheet.create({
     overflow:      "hidden",
     borderWidth:   1,
     borderColor:   "rgba(255,255,255,0.22)",
-    // shadowOffset:  { width: 0, height: 4 },
-    // shadowOpacity: 0.4,
-    // shadowRadius:  10,
-  },
-  cardShimmer: {
-    position: "absolute", top: 0, left: 0, right: 0,
-    height: hScale(22), borderTopLeftRadius: 14, borderTopRightRadius: 14, zIndex: 1,
   },
 
   dotsRow:  { alignItems: "center", marginTop: hScale(4) },
   dotsPill: {
     flexDirection:     "row",
     alignItems:        "center",
-    overflow:          "hidden",
     borderRadius:      20,
     borderWidth:       1,
     borderColor:       "rgba(255,255,255,0.2)",
+    backgroundColor:   "rgba(255,255,255,0.12)",
     paddingHorizontal: wScale(1),
     paddingVertical:   hScale(3),
   },

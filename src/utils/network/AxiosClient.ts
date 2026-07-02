@@ -225,7 +225,7 @@ const getTimeoutForUrl = (url) => {
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'https://native.pemudra.com/',
+        baseURL: 'https://native.himanshusrecharge.co.in//',
       }),
     [],
   );
@@ -269,6 +269,7 @@ const post = useCallback(
     try {
       const timeout = getTimeoutForUrl(url);
       const response = await axiosInstance.post(url, data, { ...config, timeout });
+      console.log(response, 'postdata');
       return response.data;
     } catch (e) {
       throw e;
