@@ -13,6 +13,8 @@ const initialState = {
     provider: '',
     status: false,
   },
+  otaHasUpdate: false,
+  otaLatestVersion: null as number | null,
   colorConfig: {
     primaryColor: '#3A7DFF',
     secondaryColor: '#9D5B87',
@@ -129,7 +131,15 @@ const userInfoSlice = createSlice({
     setActiveAepsLine: (state, action) => { state.activeAepsLine = action.payload; },
     setDeviceInfo: (state, action) => { state.deviceInfo = action.payload; },
     setIsPartial: (state, action) => { state.isPartial = action.payload; },
-
+// reducers mein add karo
+setOtaUpdate: (state, action) => {
+  state.otaHasUpdate = true;
+  state.otaLatestVersion = action.payload;
+},
+clearOtaUpdate: (state) => {
+  state.otaHasUpdate = false;
+  state.otaLatestVersion = null;
+},
     setPartialAmounts: (state, action) => {
       const { total, current } = action.payload;
       state.totalPartialAmount = total;
@@ -192,7 +202,9 @@ export const {
   setUnlocked,
   setSignUpId,
   setSignUpPassword,
-  setLogoUrl
+  setLogoUrl ,
+    setOtaUpdate,
+  clearOtaUpdate,
 } = userInfoSlice.actions;
 
 export default userInfoSlice.reducer;

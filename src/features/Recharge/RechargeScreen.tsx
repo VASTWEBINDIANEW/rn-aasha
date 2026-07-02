@@ -300,7 +300,7 @@ const RechargeScreen = () => {
   const color2 = `${colorConfig.primaryColor}40`;
   const color3 = `${colorConfig.primaryColor}10`;
   const [loading, setLoading] = useState(true);
-  const { get, post } = useAxiosHook();
+  const { get, post ,post2} = useAxiosHook();
 const { ContactPicker } = NativeModules;
 
 
@@ -780,7 +780,7 @@ const onRechargePress = useCallback(async () => {
     let Message = "Recharge Pending, check report";
 
     // 4. Recharge API Call
-    const res = await post({ url });
+    const res = await post2({ url });
     console.log(res, 'Recharge Response');
 
     if (res?.status === 'False' || res?.status === false) {
@@ -874,13 +874,13 @@ const onRechargePress = useCallback(async () => {
               navigation.navigate("RechargeUtilitisR")
               },
             },
-            {
-              text: "Later",
-              style: "cancel",
-              onPress: () => {
-                // User stays on current screen
-              },
-            },
+            // {
+            //   text: "Later",
+            //   style: "cancel",
+            //   onPress: () => {
+            //     // User stays on current screen
+            //   },
+            // },
           ],
           { cancelable: false }
         );

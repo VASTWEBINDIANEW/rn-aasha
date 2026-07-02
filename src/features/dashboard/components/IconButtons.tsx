@@ -1,5 +1,5 @@
 // features/dashboard/components/IconButtons.tsx
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -19,108 +19,150 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { APP_URLS } from "../../../utils/network/urls";
 import useAxiosHook from "../../../utils/network/AxiosClient";
 import { translate } from "../../../utils/languageUtils/I18n";
-import FastImage from "react-native-fast-image"; 
-import {
-  logSectionDataReceived,
-  logIconRender,
-  logSvgSuccess,
-  logSvgError,
-  logSvgMissingUrl,
-} from "../../../utils/SvgLogger";
+import FastImage from "react-native-fast-image";
 
 const loader = [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }];
 const MAX_ITEMS = 4;
 
+// ─── SVG fetch cache — एक बार fetch होने के बाद मेमोरी से तुरंत लोड होगा ───
 const svgCache: Record<string, string> = {};
 
-// ─── Remote Fallback URL (Double slash & protocol fixed) ───
-const REMOTE_FALLBACK_URL = `http://native.${APP_URLS.baseWebUrl}/SvgOperatorImage/exclamation-mark.png`;
+// ─── Retry config ─────────────────────────────────────────────────────────
+const MAX_RETRIES = 2;
+const RETRY_DELAYS_MS = [800, 2000]; // हर retry attempt के बीच gap
+const FETCH_TIMEOUT_MS = 10000;
 
+// ─── Remote Fallback URL (लोकल require एसेट्स पूरी तरह हटा दिए गए हैं) ───
+const REMOTE_FALLBACK_URL = `http://native.${APP_URLS.baseWebUrl}//SvgOperatorImage/exclamation-mark.png`;
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+// ─── Retry + Timeout wrapper for SVG fetch ─────────────────────────────────
+const fetchSvgWithRetry = async (
+  url: string,
+  isCancelled: () => boolean,
+  attempt = 0
+): Promise<string> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "image/svg+xml, application/xml, text/xml, */*",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+    const xml = await res.text();
+
+    // Block HTML error responses returning instead of actual raw xml
+    if (xml.trim().startsWith("<html") || xml.trim().startsWith("<!DOCTYPE html")) {
+      throw new Error("Server returned an HTML page instead of valid SVG payload.");
+    }
+    if (!xml.trim()) {
+      throw new Error("Empty SVG payload");
+    }
+
+    return xml;
+  } catch (err) {
+    clearTimeout(timeoutId);
+
+    if (isCancelled()) throw err; // component unmount ho gaya, retry ka koi fayda nahi
+
+    if (attempt < MAX_RETRIES) {
+      await delay(RETRY_DELAYS_MS[attempt] ?? 1500);
+      if (isCancelled()) throw err;
+      return fetchSvgWithRetry(url, isCancelled, attempt + 1);
+    }
+
+    throw err;
+  }
+};
+
+// ─── Per-item SVG Component ────────────────────────────────────────────────
 interface TrackedSvgIconProps {
   item: sectionData;
   section: string;
-  fallbackLogoUrl?: string; 
+  fallbackLogoUrl?: string;
+  refreshTick?: number;
+  index?: number;
 }
 
 const TrackedSvgIcon = memo(({
   item,
   section,
   fallbackLogoUrl,
+  refreshTick = 0,
+  index = 0,
 }: TrackedSvgIconProps) => {
   const [xmlContent, setXmlContent] = useState<string | null>(null);
   const [failed,     setFailed]     = useState(false);
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
+    cancelledRef.current = false;
+    setFailed(false);
+    setXmlContent(null);
+
     if (!item.svg) {
-      logSvgMissingUrl(item.name, section);
       setFailed(true);
       return;
     }
 
-    logIconRender(item.name, item.svg, section);
-
     if (svgCache[item.svg]) {
       setXmlContent(svgCache[item.svg]);
-      logSvgSuccess(item.name, item.svg);
       return;
     }
 
-    // 🛑 FIX 1: Agar unique recharges ka personal domain hai jo SSL support nahi karta,
-    // toh usey HTTP hi rehne do warna conversion block kar dega request.
-    let secureSvgUrl = item.svg;
-    if (!item.svg.includes("uniquerechargesrs.in") && item.svg.startsWith('http://')) {
-      secureSvgUrl = item.svg.replace('http://', 'https://');
-    }
+    // HTTP to HTTPS secure protocol auto-conversion
+    const secureSvgUrl = item.svg.startsWith("http://")
+      ? item.svg.replace("http://", "https://")
+      : item.svg;
 
-    // 🛑 FIX 2: Spaces ko %20 mein convert karna zaroori hai taaki URL valid rahe
-    secureSvgUrl = secureSvgUrl.replace(/ /g, "%20");
+    // App open hote hi ek saath 15-20 icons fetch na hon (server rate-limit se bachne ke liye)
+    // thoda stagger delay index ke hisaab se, max 1.2s
+    const staggerDelay = Math.min(index * 120, 1200);
 
-    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelledRef.current) return;
+      fetchSvgWithRetry(secureSvgUrl, () => cancelledRef.current)
+        .then((xml) => {
+          if (cancelledRef.current) return;
+          svgCache[item.svg] = xml;
+          setXmlContent(xml);
+        })
+        .catch(() => {
+          if (cancelledRef.current) return;
+          setFailed(true); // सभी retries fail होने के बाद ही fallback दिखेगा
+        });
+    }, staggerDelay);
 
-    fetch(secureSvgUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'image/svg+xml, application/xml, text/xml, */*',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36',
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        return res.text();
-      })
-      .then(xml => {
-        if (cancelled) return;
-        
-        if (xml.trim().startsWith('<html') || xml.trim().startsWith('<!DOCTYPE html')) {
-          throw new Error("Server returned an HTML page instead of valid SVG payload.");
-        }
+    return () => {
+      cancelledRef.current = true;
+      clearTimeout(timer);
+    };
+    // refreshTick change hone par (manual pull-to-refresh) pehle fail hue icons bhi
+    // dobara try honge, chahe item.svg same ho
+  }, [item.svg, refreshTick]);
 
-        svgCache[item.svg] = xml;
-        setXmlContent(xml);
-        logSvgSuccess(item.name, item.svg);
-      })
-      .catch(err => {
-        if (cancelled) return;
-        // Debug ke liye accurate logger console add kiya hai
-        console.warn(`❌ SVG Fetch Failed for [${item.name}]:`, err.message, "URL:", secureSvgUrl);
-        setFailed(true); 
-        logSvgError(item.name, item.svg, err);
-      });
-
-    return () => { cancelled = true; };
-  }, [item.svg]);
-
-  const imageSource = fallbackLogoUrl 
-    ? { uri: fallbackLogoUrl, priority: FastImage.priority.normal } 
+  // इमेज सोर्स लॉजिक: पहले Redux का logoUrl चेक करेगा, खाली होने पर फॉलबैक यूआरएल लेगा
+  const imageSource = fallbackLogoUrl
+    ? { uri: fallbackLogoUrl, priority: FastImage.priority.normal }
     : { uri: REMOTE_FALLBACK_URL, priority: FastImage.priority.normal };
 
   // 1. ERROR/MISSING STATE
   if (failed || (!xmlContent && !item.svg)) {
     return (
       <View style={styles.InputImage}>
-        <FastImage 
-          source={imageSource} 
-          style={styles.defaultImageStyle} 
+        <FastImage
+          source={imageSource}
+          style={styles.defaultImageStyle}
           resizeMode={FastImage.resizeMode.contain}
         />
       </View>
@@ -131,9 +173,9 @@ const TrackedSvgIcon = memo(({
   if (!xmlContent) {
     return (
       <View style={styles.InputImage}>
-        <FastImage 
-          source={imageSource} 
-          style={[styles.defaultImageStyle, { opacity: 0.3 }]} 
+        <FastImage
+          source={imageSource}
+          style={[styles.defaultImageStyle, { opacity: 0.6 }]}
           resizeMode={FastImage.resizeMode.contain}
         />
       </View>
@@ -145,13 +187,14 @@ const TrackedSvgIcon = memo(({
     <View style={styles.InputImage}>
       <SvgXml
         xml={xmlContent}
-        height={wScale(40)} // Perfomant sizing adjustment
-        width={wScale(40)}
+        height={wScale(50)}
+        width={wScale(50)}
       />
     </View>
   );
 });
 
+// ─── Main Component ──────────────────────────────────────────────────────────
 const IconButtons = ({
   getItem,
   isQuickAccess,
@@ -161,17 +204,12 @@ const IconButtons = ({
   showViewMoreButton = false,
   setViewMoreStatus = (p0: (prev: any) => boolean) => {},
   buttonTitle = "",
+  refreshTick = 0,
 }) => {
   const { isDemoUser, logoUrl } = useSelector((state: RootState) => state.userInfo);
   const { post }                = useAxiosHook();
   const navigation              = useNavigation();
   const [Radius1,               setRadius1] = useState(0);
-
-  useEffect(() => {
-    if (buttonData?.length > 0) {
-      logSectionDataReceived(section, buttonData.length, buttonData[0]?.svg);
-    }
-  }, [buttonData, section]);
 
   useEffect(() => {
     (async () => {
@@ -206,8 +244,8 @@ const IconButtons = ({
     "FlightScreen", "TrainScreen", "HotelScreen", "BusScreen",
   ];
 
-  const loaderImageSource = logoUrl 
-    ? { uri: logoUrl, priority: FastImage.priority.low } 
+  const loaderImageSource = logoUrl
+    ? { uri: logoUrl, priority: FastImage.priority.low }
     : { uri: REMOTE_FALLBACK_URL, priority: FastImage.priority.low };
 
   return (
@@ -219,9 +257,9 @@ const IconButtons = ({
           {loader.map((item) => (
             <View key={item.id} style={styles.element}>
               <View style={styles.InputImage}>
-                <FastImage 
-                  source={loaderImageSource} 
-                  style={[styles.defaultImageStyle, { opacity: 0.3 }]} 
+                <FastImage
+                  source={loaderImageSource}
+                  style={[styles.defaultImageStyle, { opacity: 0.3 }]}
                   resizeMode={FastImage.resizeMode.contain}
                 />
               </View>
@@ -231,8 +269,9 @@ const IconButtons = ({
         </View>
       )}
       numColumns={4}
-      estimatedItemSize={40}
-      renderItem={({ item }: { item: sectionData }) => (
+      estimatedItemSize={20}
+      extraData={[buttonData, refreshTick]}
+      renderItem={({ item, index }: { item: sectionData; index: number }) => (
         <TouchableOpacity
           onPress={() => {
             if (comingSoon.includes(item.ScreenName)) {
@@ -253,8 +292,14 @@ const IconButtons = ({
           }}
           style={styles.element}
         >
-          <TrackedSvgIcon item={item} section={section} fallbackLogoUrl={logoUrl} />
-          
+          <TrackedSvgIcon
+            item={item}
+            section={section}
+            fallbackLogoUrl={logoUrl}
+            refreshTick={refreshTick}
+            index={index}
+          />
+
           <Text style={styles.screeitemname} numberOfLines={2}>
             {translate(item.name)}
           </Text>
@@ -284,8 +329,8 @@ const styles = StyleSheet.create({
     justifyContent:"center",
   },
   defaultImageStyle: {
-    width: wScale(42),  
-    height: wScale(42), 
+    width: wScale(50),
+    height: wScale(50),
   },
   textPlaceholder: {
     width: wScale(40),
@@ -298,6 +343,5 @@ const styles = StyleSheet.create({
     color:     "white",
     textAlign: "center",
     fontSize:  wScale(12),
-    marginTop: hScale(4),
   },
 });

@@ -1,4 +1,4 @@
-// package com.globalmultisolution
+// package com.pemudra
 
 // import android.Manifest
 // import android.app.Activity
@@ -89,7 +89,7 @@
 //         }
 //     }
 // }
-package com.globalmultisolution
+package com.pemudra
 
 import android.Manifest
 import android.app.Activity

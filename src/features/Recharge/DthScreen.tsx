@@ -426,13 +426,13 @@ const onRechargePress = useCallback(async () => {
               navigation.navigate("RechargeUtilitisR")
               },
             },
-            {
-              text: "Later",
-              style: "cancel",
-              onPress: () => {
-                // User stays on current screen
-              },
-            },
+            // {
+            //   text: "Later",
+            //   style: "cancel",
+            //   onPress: () => {
+            //     // User stays on current screen
+            //   },
+            // },
           ],
           { cancelable: false }
         );

@@ -17,12 +17,16 @@ import { clearOtaUpdate, setOtaUpdate, setUnlocked } from './src/reduxUtils/stor
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { Alert, AppState } from 'react-native';
+import { Alert, AppState, Linking } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
 import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
 import firestore from '@react-native-firebase/firestore';
 import useAxiosHook from './src/utils/network/AxiosClient';
+
+// ─── Jis screen pe hone par auto-update allowed hai ──────────────────────────
+const AUTO_UPDATE_SCREEN = 'DashboardScreen';
+
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
@@ -33,141 +37,119 @@ const AppContent = () => {
   const authToken = useSelector((state: any) => state.userInfo.authToken);
   const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
+  // ── Jab update mil jaye lekin user Dashboard pe na ho, yahan queue hoga ──
+  const pendingOtaRef = useRef<{ version: number; bundle_url: string } | null>(null);
   const VERSION_URL =
     `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
   console.log('OTA URL:', VERSION_URL);
   const {get} = useAxiosHook()
-const fetchOtaDetails = async () => {
-  try {
-    // const documentSnapshot = await firestore()
-    //   .collection('otaData')
-    //   .doc('otadata')
-    //   .collection('rechargedrishti')
-    //   .doc('ota')
-    //   .get();
 
-    // if (!documentSnapshot.exists) {
-    //   console.log('OTA document not found');
-    //   return null;
-    // }
+  const fetchOtaDetails = async () => {
+    try {
+      const version = await get({ url: APP_URLS.current_version });
+      console.log(version)
 
-    // return documentSnapshot.data();
+      return {
+        version: version.otaVersion,
+        url: version.bundleUrl,
+        status: true, // true/false
+        currentVersion: version.currentversion,
+        message: version.message,
+      };
+    } catch (error) {
+      console.log('Firestore Error:', error);
+      return null;
+    }
+  };
 
+  // ✅ Current route DashboardScreen hai ya nahi check karo
+  // const isOnDashboardScreen = () => {
+  //   if (!navigationRef.isReady()) return false;
+  //   return navigationRef.getCurrentRoute()?.name === AUTO_UPDATE_SCREEN;
+  // };
 
+  // // ✅ Agar update pending hai aur ab user Dashboard pe hai, to start karo
+  // const tryStartPendingOta = () => {
+  //   if (!pendingOtaRef.current) return;
+  //   if (isUpdating.current) return;
+
+  //   if (isOnDashboardScreen()) {
+  //     const data = pendingOtaRef.current;
+  //     pendingOtaRef.current = null;
+  //     console.log('🚀 User is on DashboardScreen → starting OTA update now...');
+  //     startUpdate(data);
+  //   } else {
+  //     console.log(
+  //       `⏳ OTA update pending — waiting for DashboardScreen (current: ${
+  //         navigationRef.isReady() ? navigationRef.getCurrentRoute()?.name : 'not ready'
+  //       })`
+  //     );
+  //   }
+  // };
+// ✅ Current route DashboardScreen hai ya nahi check karo
+  const isOnDashboardScreen = () => {
+    // If using standard ref, access via .current
+    const navigation = navigationRef?.current ? navigationRef.current : navigationRef;
     
-          const version = await get({ url: APP_URLS.current_version });
-console.log(version)
+    if (!navigation || typeof navigation.isReady !== 'function' || !navigation.isReady()) {
+      return false;
+    }
+    return navigation.getCurrentRoute()?.name === AUTO_UPDATE_SCREEN;
+  };
 
-  return {
-      version: version.otaVersion,
-      url: version.bundleUrl,
-      status: true, // true/false
-      currentVersion: version.currentversion ,
-      message: version.message,
-    };
-  } catch (error) {
-    console.log('Firestore Error:', error);
-    return null;
-  }
-};
-// const checkOta = async () => {
-//   try {
-//     const data = await fetchOtaDetails();
+  // ✅ Agar update pending hai aur ab user Dashboard pe hai, to start karo
+  const tryStartPendingOta = () => {
+    if (!pendingOtaRef.current) return;
+    if (isUpdating.current) return;
 
-//     if (!data) {
-//       return;
-//     }
+    const navigation = navigationRef?.current ? navigationRef.current : navigationRef;
 
-//     const installed =
-//       Number(await OtUpdate.getCurrentVersion()) || 0;
+    if (isOnDashboardScreen()) {
+      const data = pendingOtaRef.current;
+      pendingOtaRef.current = null;
+      console.log('🚀 User is on DashboardScreen → starting OTA update now...');
+      startUpdate(data);
+    } else {
+      console.log(
+        `⏳ OTA update pending — waiting for DashboardScreen (current: ${
+          navigation && typeof navigation.isReady === 'function' && navigation.isReady()
+            ? navigation.getCurrentRoute()?.name 
+            : 'not ready'
+        })`
+      );
+    }
+  };
+  const checkOta = async (isResume = false) => {
+    try {
+      const data = await fetchOtaDetails();
+      if (!data) return;
 
-//     const latest = Number(data.version);
+      const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
+      const latest = Number(data.version);
 
-//     console.log('Installed Version:', installed);
-//     console.log('Firebase Version:', latest);
-//     console.log('Bundle URL:', data.url);
+      console.log('Installed:', installed, 'Latest:', latest, 'isResume:', isResume);
 
-//     if (!latest || isNaN(latest)) {
-//       return;
-//     }
+      if (!latest || isNaN(latest)) return;
 
-//     if (
-//       latest > installed &&
-//       data.status === true &&
-//       data.url
-//     ) {
-//       console.log('🚀 New OTA update found');
+      if (latest > installed && data.status === true && data.url) {
+        dispatch(setOtaUpdate(latest));
 
-//       startUpdate({
-//         version: latest,
-//         bundle_url: data.url,
-//       });
-//     } else {
-//       //Alert.alert('✅ Already latest version');
-//     }
-//   } catch (error) {
-//     console.log('OTA Check Failed:', error);
-//   }
-// };
-
-  // ✅ START UPDATE
- 
-//  const checkOta = async () => {
-//   try {
-//     const data = await fetchOtaDetails();
-//     if (!data) return;
-
-//     const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-//     const latest = Number(data.version);
-
-//     console.log('Installed:', installed, 'Latest:', latest);
-
-//     if (!latest || isNaN(latest)) return;
-
-//     if (latest > installed && data.status === true) {
-//       dispatch(setOtaUpdate(latest));
-//     } else {
-//       dispatch(clearOtaUpdate());
-//     }
-//   } catch (error) {
-//     console.log('OTA Check Failed:', error);
-//   }
-// };
- const checkOta = async (isResume = false) => {
-  try {
-    const data = await fetchOtaDetails();
-    if (!data) return;
-
-    const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-    const latest = Number(data.version);
-
-    console.log('Installed:', installed, 'Latest:', latest, 'isResume:', isResume);
-
-    if (!latest || isNaN(latest)) return;
-
-    if (latest > installed && data.status === true && data.url) {
-      dispatch(setOtaUpdate(latest));
-
-      if (isResume) {
-        // ✅ Background se aaya — sirf Redux
-        console.log('🔔 Background check — Redux updated only');
-      } else {
-        // ✅ App open hua — auto update shuru
-        console.log('🚀 App opened + update found → auto update starting...');
-        await startUpdate({
+        // Update queue mein daalo, sirf DashboardScreen pe hone par hi start hoga
+        pendingOtaRef.current = {
           version: latest,
           bundle_url: data.url,
-        });
+        };
+        tryStartPendingOta();
+      } else {
+        console.log('✅ Already on latest version');
+        dispatch(clearOtaUpdate());
+        pendingOtaRef.current = null;
       }
-    } else {
-      console.log('✅ Already on latest version');
-      dispatch(clearOtaUpdate());
+    } catch (error) {
+      console.log('OTA Check Failed:', error);
     }
-  } catch (error) {
-    console.log('OTA Check Failed:', error);
-  }
-};
+  };
 
   const startUpdate = async (data: any) => {
     if (isUpdating.current) {
@@ -194,6 +176,8 @@ console.log(version)
           updateSuccess() {
             console.log('✅ OTA Updated:', data.version);
             setOtaStatus('success');
+                    dispatch(clearOtaUpdate());
+
           },
 
           updateFail(error) {
@@ -211,45 +195,90 @@ console.log(version)
           },
         }
       );
-    } catch (error) {
-      console.log('OTA error:', error);
+    } catch (e: any) {
       setOtaStatus('failed');
+      const errorText = `
+      OTA Update Exception Traced
+      
+      Message: ${e?.message || "N/A"}
+      Code: ${e?.code || "N/A"}
+      
+      Stack Trace:
+      ${e?.stack || "N/A"}
+      
+      Full Log JSON:
+      ${JSON.stringify(e, null, 2)}
+      `;
+
+      Alert.alert(
+        "OTA Update Error Triggered",
+        "Something went wrong while processing the update file.",
+        [
+          {
+            text: "Share Report via WhatsApp",
+            onPress: async () => {
+              const phone = "917414088555";
+              const url = `https://wa.me/${phone}?text=${encodeURIComponent(errorText)}`;
+              try {
+                await Linking.openURL(url);
+              } catch (err) {
+                Alert.alert("Error", "WhatsApp is not installed on this device.");
+              }
+            },
+          },
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+        ]
+      );
     } finally {
       isUpdating.current = false;
+      // agar isi beech koi aur update queue hua ho aur ab Dashboard pe ho, use bhi try karo
+      tryStartPendingOta();
     }
   };
 
-  // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
     dispatch(setUnlocked(false));
   }, [language, authToken]);
 
   // ✅ APP RESUME CHECK
-useEffect(() => {
-  // ✅ App pehli baar open — auto update
-  checkOta(false);
+  useEffect(() => {
+    // ✅ App pehli baar open — check karo, start sirf Dashboard pe hone par hoga
+    checkOta(false);
 
-  const subscription = AppState.addEventListener('change', nextAppState => {
-    if (
-      appState.current.match(/inactive|background/) &&
-      nextAppState === 'active'
-    ) {
-      // ✅ App running me background se aaya — sirf Redux
-      console.log('🔄 App resumed → background check only');
-      checkOta(true);
-    }
-    appState.current = nextAppState;
-  });
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('🔄 App resumed → checking OTA again');
+        checkOta(true);
+      }
+      appState.current = nextAppState;
+    });
 
-  return () => subscription.remove();
-}, []);
+    return () => subscription.remove();
+  }, []);
+
+  // ✅ Navigation change hone par bhi check karo — user Dashboard pe aaya to pending update start ho jaye
+  const handleNavigationStateChange = () => {
+    tryStartPendingOta();
+  };
+
   return (
     <>
       <OtaUpdateModal status={otaStatus} progress={otaProgress} />
       <NavigationContainer
         key={language}
         ref={navigationRef}
-        onReady={() => RNBootSplash.hide({ fade: true })}
+        onReady={() => {
+          RNBootSplash.hide({ fade: true });
+          // App load hote hi agar starting route hi Dashboard hai to turant check karo
+          tryStartPendingOta();
+        }}
+        onStateChange={handleNavigationStateChange}
       >
 
         <AppContainer />

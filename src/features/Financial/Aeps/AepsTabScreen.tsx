@@ -108,24 +108,25 @@ const AepsTabScreen = () => {
 
   }, [activeService]);
 
+
   // ── API: AEPS status ──
   const CheckAeps = useCallback(async () => {
 
-   const provider =
-        activeAepsLine?.provider;
+    const provider =
+      activeAepsLine?.provider;
 
-      console.log(
-        'Current Provider:',
-        provider
-      );
+    console.log(
+      'Current Provider:',
+      provider
+    );
 
-      if (provider === 'CHAGANS') {
-          setUserStatus('Success');
-          return;
-      }
+    if (provider === 'CHAGANS') {
+      setUserStatus('Success');
+      return;
+    }
 
     try {
-       
+
       const url = activeAepsLine
         ? 'AEPS/api/Nifi/data/AepsStatusCheck'
         : 'AEPS/api/data/AepsStatusCheck';
@@ -248,6 +249,9 @@ const AepsTabScreen = () => {
     try {
 
       setIsProcessing(true);
+      setIsProcessing(true);
+      isApiCalling.current = true;
+      setShowRegisterButton(false);
 
       isApiCalling.current = true;
 
@@ -387,7 +391,7 @@ const AepsTabScreen = () => {
         message === 'REQUIREDEKYC'
       ) {
 
-        setShowRegisterButton(true);
+        setShowRegisterButton(message === 'REQUIREDEKYC');
         console.log(
           'eKYC required. Showing register button.'
         );
@@ -456,7 +460,15 @@ const AepsTabScreen = () => {
     get,
     CheckAeps
   ]);
-
+  useEffect(() => {
+    if (prevLineRef.current !== activeAepsLine || UserStatus === '') {
+      setUserStatus('');
+      setShowRegisterButton(false);
+      setShowEkycModal(false);
+      CheckEkyc();
+      prevLineRef.current = activeAepsLine;
+    }
+  }, [activeAepsLine, CheckEkyc]);
   useEffect(() => {
     if (prevLineRef.current !== activeAepsLine || UserStatus === '') {
       CheckEkyc();
@@ -575,21 +587,34 @@ const AepsTabScreen = () => {
                 {translate('checking_status') || 'Checking Status…'}
               </Text>
             </View>
+          ) : showRegisterButton ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                marginHorizontal: 20,
+                marginTop: 20,
+                backgroundColor: '#1FAA59',
+                paddingVertical: 14,
+                borderRadius: 14,
+                alignItems: 'center',
+              }}
+              onPress={RegisterMerchant}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>
+                Register Merchant
+              </Text>
+            </TouchableOpacity>
           ) : UserStatus === 'Success' ? (
-
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-
               <Text style={styles.sectionLabel}>{translate('Choose a Service')}</Text>
-
               <View style={styles.grid}>
                 {SERVICES.map((item) => (
                   <ServiceCard key={item.key} item={item} />
                 ))}
               </View>
-
               <Text style={styles.footerNote}>
                 {'🔒 '}{translate('Transactions are secured via biometric authentication') ||
                   'Transactions are secured via biometric authentication'}
@@ -645,8 +670,8 @@ const AepsTabScreen = () => {
           </Modal>
 
 
-          {
-            showRegisterButton && (
+          {/* {
+            showRegisterButton &&  activeAepsLine?.provider === 'CHAGANS'?(
 
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -674,8 +699,8 @@ const AepsTabScreen = () => {
                 </Text>
 
               </TouchableOpacity>
-            )
-          }
+            ):null
+          } */}
         </View>
       )}
     </AepsContext.Provider>

@@ -201,7 +201,7 @@ const AddedMoneyROTRReport = () => {
           retailerID={() => {}}
           setSearchnumber={() => {}}
           cmsStatu={false}
-          onlyFromDate={false}
+          onlyFromDate={true}
         />
       </LinearGradient>
 

@@ -695,32 +695,32 @@ const provider =
       console.error('Error retrieving data from AsyncStorage:', error);
     }
   };
-  useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', backHandler);
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backHandler);
-    };
-  }, []);
+  // useEffect(() => {
+  //   BackHandler.addEventListener('hardwareBackPress', backHandler);
+  //   return () => {
+  //     BackHandler.removeEventListener('hardwareBackPress', backHandler);
+  //   };
+  // }, []);
   const backHandler = () => {
-    Alert.alert(
-      null,
-      "Do you really want to cancel ?",
-      [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: () => {
-            navigation.navigate('Dashboard');
+    // Alert.alert(
+    //   null,
+    //   "Do you really want to cancel ?",
+    //   [
+    //     {
+    //       text: "Cancel",
+    //       onPress: () => console.log("Cancel Pressed"),
+    //       style: "cancel"
+    //     },
+    //     {
+    //       text: "OK",
+    //       onPress: () => {
+    //         navigation.navigate('Dashboard');
 
-            //  sendResponse('User cancelled');
-          }
-        }
-      ]
-    );
+    //         //  sendResponse('User cancelled');
+    //       }
+    //     }
+    //   ]
+    // );
     return true;
   };
   return (

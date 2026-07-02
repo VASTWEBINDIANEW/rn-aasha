@@ -1,4 +1,4 @@
-package com.globalmultisolution
+package com.pemudra
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -14,11 +14,11 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.modules.network.ReactCookieJarContainer
 
-import com.globalmultisolution.AepsPackage
-import com.globalmultisolution.upi.UpiPackage
-import com.globalmultisolution.location.LocationPackage
-import com.globalmultisolution.security.SecurityPackage
-import com.globalmultisolution.ContactPicker.ContactPickerPackage
+import com.pemudra.AepsPackage
+import com.pemudra.upi.UpiPackage
+import com.pemudra.location.LocationPackage
+import com.pemudra.security.SecurityPackage
+import com.pemudra.ContactPicker.ContactPickerPackage
 import com.otahotupdate.OtaHotUpdate
 
 class MainApplication : Application(), ReactApplication {

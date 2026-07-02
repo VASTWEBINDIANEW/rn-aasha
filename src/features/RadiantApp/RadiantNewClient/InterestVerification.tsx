@@ -7,7 +7,7 @@ import { RootState } from '../../../reduxUtils/store';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '../../../utils/navigation/NavigationService';
 import { FontFamily } from '../../../utils/styles/theme';
-import { getAssetSource } from "../../../utils/network/NetWorkImages";
+import { getAssetSource, getImageSource2 } from "../../../utils/network/NetWorkImages";
 import FastImage from "react-native-fast-image";
 
 const InterestVerification = () => {
@@ -24,7 +24,7 @@ const InterestVerification = () => {
             <Text style={styles.subHeading}>{translate("CMS_SERVICES")}</Text>
 
             <FastImage
-                source={getAssetSource('Radiant2.jpg')}
+                source={getImageSource2('Radiant2.jpg')}
                 style={styles.logo}
                 resizeMode={'cover'}
             />

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import LinearGradient from 'react-native-linear-gradient';
 import { SvgXml } from 'react-native-svg';
@@ -35,35 +35,35 @@ const AppBarSecond = ({
   );
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const {get}= useAxiosHook()
-const fetchOtaDetails = async () => {
-  try {
-    // const doc = await firestore()
-    //   .collection('otaData')
-    //   .doc('otadata')
-    //   .collection('rechargedrishti')
-    //   .doc('ota')
-    //   .get();
-    // if (!doc.exists) return null;
-    // return doc.data();
+  const { get } = useAxiosHook()
+  const fetchOtaDetails = async () => {
+    try {
+      // const doc = await firestore()
+      //   .collection('otaData')
+      //   .doc('otadata')
+      //   .collection('rechargedrishti')
+      //   .doc('ota')
+      //   .get();
+      // if (!doc.exists) return null;
+      // return doc.data();
 
 
-          const version = await get({ url: APP_URLS.current_version });
-console.log(version)
+      const version = await get({ url: APP_URLS.current_version });
+      console.log(version)
 
-  return {
-      version: version.otaVersion,
-      url: version.bundleUrl,
-      status: true, // true/false
-      currentVersion: version.currentversion ,
-      message: version.message,
-    };
+      return {
+        version: version.otaVersion,
+        url: version.bundleUrl,
+        status: true, // true/false
+        currentVersion: version.currentversion,
+        message: version.message,
+      };
 
-  } catch (e) {
-    console.log('Firestore OTA error:', e);
-    return null;
-  }
-};
+    } catch (e) {
+      console.log('Firestore OTA error:', e);
+      return null;
+    }
+  };
   // ── Network State ──────────────────────────────────────────────────────────
   const [netInfo, setNetInfo] = useState<{
     type: string;
@@ -87,11 +87,11 @@ console.log(version)
     if (netInfo.type === 'wifi') return { label: 'WiFi', color: '#34C759' };
     if (netInfo.type === 'cellular') {
       switch (netInfo.generation) {
-        case '5g': return { label: '5G',   color: '#34C759' };
-        case '4g': return { label: '4G',   color: '#30D158' };
-        case '3g': return { label: '3G',   color: '#FF9500' };
-        case '2g': return { label: '2G⚠',  color: '#FF3B30' };
-        default:   return { label: 'Cell', color: '#FF9500' };
+        case '5g': return { label: '5G', color: '#34C759' };
+        case '4g': return { label: '4G', color: '#30D158' };
+        case '3g': return { label: '3G', color: '#FF9500' };
+        case '2g': return { label: '2G⚠', color: '#FF3B30' };
+        default: return { label: 'Cell', color: '#FF9500' };
       }
     }
     return { label: '...', color: '#8E8E93' };
@@ -103,44 +103,176 @@ console.log(version)
   const [isUpdating, setIsUpdating] = useState(false);
   const [progress, setProgress] = useState(0);
 
+//   const handleUpdatePress = async () => {
+//     if (isUpdating || !otaLatestVersion) return;
+
+//     const data = await fetchOtaDetails();
+//     if (!data?.url) return;
+
+//     setIsUpdating(true);
+//     setProgress(0);
+
+//     try {
+//       await OtUpdate.downloadBundleUri(
+//         ReactNativeBlobUtil,
+//         data.url,
+//         Number(otaLatestVersion),
+//         {
+//           restartAfterInstall: true,
+//           restartDelay: 1500,
+//           updateSuccess() {
+//             dispatch(clearOtaUpdate());
+//             setIsUpdating(false);
+//           },
+//           updateFail() {
+//             setIsUpdating(false);
+//           },
+//           progress(received, total) {
+//             if (total > 0) {
+//               setProgress(Math.floor((received / total) * 100));
+//             }
+//           },
+//         },
+//       );
+//     }
+//     //   console.log('OTA update error:', e);
+//     //   setIsUpdating(false);
+//     // }
+
+//     catch (e: any) {
+//       const errorText = `
+// OTA Update Error
+
+// Message: ${e?.message || "N/A"}
+
+// Code: ${e?.code || "N/A"}
+
+// Stack:
+// ${e?.stack || "N/A"}
+
+// Full Error:
+// ${JSON.stringify(e, null, 2)}
+// `;
+
+//       Alert.alert(
+//         "OTA Update Error",
+//         errorText,
+//         [
+//           {
+//             text: "Share WhatsApp",
+//             onPress: async () => {
+//               const phone = "917414088555"; // Country code +91
+//               const url = `https://wa.me/${phone}?text=${encodeURIComponent(errorText)}`;
+
+//               try {
+//                 await Linking.openURL(url);
+//               } catch (err) {
+//                 Alert.alert("Error", "WhatsApp is not installed.");
+//               }
+//             },
+//           },
+//           {
+//             text: "Cancel",
+//             style: "cancel",
+//           },
+//         ]
+//       );
+
+//       setIsUpdating(false);
+//     }
+//   };
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  
   const handleUpdatePress = async () => {
-    if (isUpdating || !otaLatestVersion) return;
+  if (isUpdating || !otaLatestVersion) return;
 
-    const data = await fetchOtaDetails();
-    if (!data?.url) return;
+  // 1. Double check network connectivity before proceeding
+  if (!netInfo.isConnected) {
+    Alert.alert("Network Error", "Please connect to a stable internet connection to update.");
+    return;
+  }
 
-    setIsUpdating(true);
-    setProgress(0);
+  const data = await fetchOtaDetails();
+  if (!data?.url) {
+    Alert.alert("Update Error", "Could not fetch update bundle URL from server.");
+    return;
+  }
 
-    try {
-      await OtUpdate.downloadBundleUri(
-        ReactNativeBlobUtil,
-        data.url,
-        Number(otaLatestVersion),
+  setIsUpdating(true);
+  setProgress(0);
+
+  try {
+    await OtUpdate.downloadBundleUri(
+      ReactNativeBlobUtil,
+      data.url,
+      Number(otaLatestVersion),
+      {
+        restartAfterInstall: true, // Forces immediate app restart
+        restartDelay: 1500,        // Gives OS time to finish file operations
+        
+        updateSuccess() {
+          console.log("OTA Update downloaded and applied successfully.");
+          dispatch(clearOtaUpdate());
+          setIsUpdating(false);
+        },
+        
+        updateFail() {
+          setIsUpdating(false);
+          Alert.alert(
+            "Installation Failed",
+            "The update could not be applied. This usually happens due to low storage space or an interrupted connection. Please clear some space and try again."
+          );
+        },
+        
+        progress(received, total) {
+          if (total > 0) {
+            setProgress(Math.floor((received / total) * 100));
+          }
+        },
+      },
+    );
+  } catch (e: any) {
+    // Structured error logging for affected users
+    const errorText = `
+OTA Update Exception Traced
+
+Message: ${e?.message || "N/A"}
+Code: ${e?.code || "N/A"}
+
+Stack Trace:
+${e?.stack || "N/A"}
+
+Full Log JSON:
+${JSON.stringify(e, null, 2)}
+`;
+
+    Alert.alert(
+      "OTA Update Error Triggered",
+      "Something went wrong while processing the update file.",
+      [
         {
-          restartAfterInstall: true,
-          restartDelay: 1500,
-          updateSuccess() {
-            dispatch(clearOtaUpdate());
-            setIsUpdating(false);
-          },
-          updateFail() {
-            setIsUpdating(false);
-          },
-          progress(received, total) {
-            if (total > 0) {
-              setProgress(Math.floor((received / total) * 100));
+          text: "Share Report via WhatsApp",
+          onPress: async () => {
+            const phone = "917414088555";
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(errorText)}`;
+            try {
+              await Linking.openURL(url);
+            } catch (err) {
+              Alert.alert("Error", "WhatsApp is not installed on this device.");
             }
           },
         },
-      );
-    } catch (e) {
-      console.log('OTA update error:', e);
-      setIsUpdating(false);
-    }
-  };
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+    setIsUpdating(false);
+  }
+};
   const handleBack = () => {
     if (onPressBack) onPressBack();
     else navigation.goBack();

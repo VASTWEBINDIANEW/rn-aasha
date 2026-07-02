@@ -80,11 +80,11 @@ const LoginScreen = () => {
 // (Agar Vite use kar rahe hain toh: const isDev = import.meta.env.DEV;)
 
 const [userEmail, setUserEmail] = useState(
-  signUpId || (isDev ? '9993827541' : '')
+  signUpId || (isDev ? '9878053747' : '')
 );
 
 const [userPassword, setUserPassword] = useState(
-  signUpPassword || (isDev ? '60051771' : '')
+  signUpPassword || (isDev ? '142536' : '')
 );
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');

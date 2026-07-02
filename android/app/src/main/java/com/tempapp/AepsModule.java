@@ -1,4 +1,4 @@
-package com.globalmultisolution;
+package com.pemudra;
 
 import android.app.Activity;
 import android.content.Intent;
