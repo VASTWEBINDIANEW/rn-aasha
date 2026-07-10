@@ -1,4 +1,4 @@
-package com.pemudra.location;
+package com.worldpayone.location;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

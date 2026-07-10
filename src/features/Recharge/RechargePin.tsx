@@ -1,505 +1,155 @@
 import { translate } from "../../utils/languageUtils/I18n";
-// import React, { useState, useRef, useEffect } from 'react';
-// import {
-//   View,
-//   Text,
-//   StyleSheet,
-//   TouchableOpacity,
-//   TextInput,
-//   Alert,
-//   Animated,
-//   StatusBar,
-// } from 'react-native';
-// import { useNavigation, useRoute } from '@react-navigation/native';
-// import Icon from 'react-native-vector-icons/Ionicons';
 
-// const PIN_LENGTH = 4;
-
-// const RechargePin = () => {
-//   const [pin, setPin] = useState('');
-//   const [showPin, setShowPin] = useState(false); // 👁️ toggle
-//   const shakeAnim = useRef(new Animated.Value(0)).current;
-//   const inputRef = useRef(null);
-
-//   const navigation = useNavigation();
-//   const route = useRoute();
-//   const { onPinSet } = route.params || {};
-
-// //   useEffect(() => {
-// //     setTimeout(() => {
-// //       inputRef.current?.focus();
-// //     }, 300);
-// //   }, []);
-
-//   const handleChange = (val) => {
-//     if (val.length <= PIN_LENGTH) {
-//       setPin(val);
-//     }
-//   };
-
-//   const shake = () => {
-//     Animated.sequence([
-//       Animated.timing(shakeAnim, { toValue: 12, duration: 50, useNativeDriver: true }),
-//       Animated.timing(shakeAnim, { toValue: -12, duration: 50, useNativeDriver: true }),
-//       Animated.timing(shakeAnim, { toValue: 12, duration: 50, useNativeDriver: true }),
-//       Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-//     ]).start();
-//   };
-
-//   const savePin = () => {
-//     if (pin.length < PIN_LENGTH) {
-//       shake();
-//       Alert.alert('Invalid PIN', 'Please enter 4 digit PIN');
-//       return;
-//     }
-
-//     if (onPinSet) {
-//       onPinSet(pin);
-//     }
-
-//     navigation.goBack();
-//   };
-
-//   return (
-//     <View style={styles.safeArea}>
-//       <StatusBar barStyle="light-content" />
-
-//       <View style={styles.container}>
-//         {/* Header */}
-//         <View style={styles.header}>
-//           <Text style={styles.title}>{translate("Secure_Recharge")}</Text>
-//           <Text style={styles.subTitle}>{translate("Enter_your_4digit_PIN_to_continue")}</Text>
-//         </View>
-
-//         {/* Hidden Input */}
-//         <TextInput
-//           ref={inputRef}
-//           value={pin}
-//           onChangeText={handleChange}
-//           keyboardType="number-pad"
-//           maxLength={PIN_LENGTH}
-//           style={styles.hiddenInput}
-//         />
-
-//         {/* PIN Boxes */}
-//         <TouchableOpacity
-//           activeOpacity={1}
-//           onPress={() => inputRef.current?.focus()}
-//         >
-//           <Animated.View style={[styles.pinContainer, { transform: [{ translateX: shakeAnim }] }]}>
-//             {[...Array(PIN_LENGTH)].map((_, i) => (
-//               <View
-//                 key={i}
-//                 style={[
-//                   styles.pinBox,
-//                   pin[i] && styles.activePinBox
-//                 ]}
-//               >
-//                 <Text style={styles.pinDot}>
-//                   {pin[i] ? (showPin ? pin[i] : '●') : ''}
-//                 </Text>
-//               </View>
-//             ))}
-//           </Animated.View>
-//         </TouchableOpacity>
-
-//         {/* 👁️ Eye Toggle */}
-//         <TouchableOpacity
-//           style={styles.eyeBtn}
-//           onPress={() => setShowPin(!showPin)}
-//         >
-//           <Icon
-//             name={showPin ? 'eye-off-outline' : 'eye-outline'}
-//             size={22}
-//             color="#4DA3FF"
-//           />
-//           <Text style={styles.eyeText}>
-//             {showPin ? 'Hide PIN' : 'Show PIN'}
-//           </Text>
-//         </TouchableOpacity>
-
-//         {/* Button */}
-//         <TouchableOpacity
-//           style={[
-//             styles.button,
-//             pin.length < PIN_LENGTH && styles.disabledBtn
-//           ]}
-//           activeOpacity={0.85}
-//           onPress={savePin}
-//         >
-//           <Text style={styles.btnText}>{translate("Confirm_PIN")}</Text>
-//         </TouchableOpacity>
-
-//         {/* Footer */}
-//         <Text style={styles.footerText}>{translate("Your_PIN_is_encrypted_and_secure")}</Text>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default RechargePin;
-
-// /* ================== STYLES ================== */
-
-// const styles = StyleSheet.create({
-//   safeArea: {
-//     flex: 1,
-//     backgroundColor: '#0B1220',
-//   },
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#0B1220',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     paddingHorizontal: 24,
-//   },
-
-//   header: {
-//     marginBottom: 45,
-//     alignItems: 'center',
-//   },
-//   title: {
-//     fontSize: 30,
-//     fontWeight: '700',
-//     color: '#E5F0FF',
-//     letterSpacing: 0.5,
-//   },
-//   subTitle: {
-//     fontSize: 14,
-//     color: '#8FA3BF',
-//     marginTop: 10,
-//   },
-
-//  hiddenInput: {
-//   position: 'absolute',
-//   opacity: 0,
-//   width: 1,
-//   height: 1,
-//   left: -100,   // offscreen
-// },
-
-//   pinContainer: {
-//     flexDirection: 'row',
-//     marginBottom: 18,
-//   },
-//   pinBox: {
-//     width: 60,
-//     height: 60,
-//     borderRadius: 14,
-//     marginHorizontal: 10,
-//     backgroundColor: '#0F1A2E',
-//     borderWidth: 1.2,
-//     borderColor: '#1F2A44',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   activePinBox: {
-//     borderColor: '#4DA3FF',
-//     shadowColor: '#4DA3FF',
-//     shadowOffset: { width: 0, height: 0 },
-//     shadowOpacity: 0.6,
-//     shadowRadius: 10,
-//     elevation: 8,
-//   },
-//   pinDot: {
-//     fontSize: 24,
-//     color: '#4DA3FF',
-//     fontWeight: '700',
-//   },
-
-//   eyeBtn: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: 35,
-//   },
-//   eyeText: {
-//     marginLeft: 8,
-//     color: '#4DA3FF',
-//     fontSize: 13,
-//     fontWeight: '600',
-//   },
-
-//   button: {
-//     marginTop: 5,
-//     width: '80%',
-//     backgroundColor: '#4DA3FF',
-//     paddingVertical: 15,
-//     borderRadius: 16,
-//     alignItems: 'center',
-//     shadowColor: '#4DA3FF',
-//     shadowOffset: { width: 0, height: 8 },
-//     shadowOpacity: 0.4,
-//     shadowRadius: 12,
-//     elevation: 8,
-//   },
-//   disabledBtn: {
-//     backgroundColor: '#1F3B5F',
-//   },
-//   btnText: {
-//     color: '#061427',
-//     fontSize: 16,
-//     fontWeight: '700',
-//     letterSpacing: 0.5,
-//   },
-
-//   footerText: {
-//     marginTop: 25,
-//     fontSize: 12,
-//     color: '#6F86A8',
-//   },
-// });
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useState, useRef, useEffect } from 'react';
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Alert,
-//   Keyboard,
-//   StatusBar,
-// } from 'react-native';
-// import Icon from 'react-native-vector-icons/Ionicons';
-// import { useNavigation } from '@react-navigation/native';
-
-// const RechargePin = () => {
-//   const [pin, setPin] = useState('');
-//   const [showPin, setShowPin] = useState(false);
-//   const inputRef = useRef(null);
-//   const navigation = useNavigation();
-
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       inputRef.current?.focus();
-//     }, 300);
-//     return () => clearTimeout(timer);
-//   }, []);
-
-//   const handleChange = (val) => {
-//     const onlyNums = val.replace(/[^0-9]/g, '');
-//     setPin(onlyNums);
-//   };
-
-//   const savePin = () => {
-//     if (!pin) {
-//       Alert.alert('Invalid PIN', 'Please enter PIN');
-//       return;
-//     }
-
-//     Keyboard.dismiss();
-
-//     // Return PIN to previous screen safely
-//     navigation.navigate('RechargeScreen', { userPin: pin });
-//     navigation.goBack();
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <StatusBar barStyle="light-content" />
-
-//       <Text style={styles.title}>{translate("Enter_Transaction_PIN")}</Text>
-//       <Text style={styles.subTitle}>{translate("Your_PIN_is_secure_and_encrypted")}</Text>
-
-//       {/* Input Field */}
-//       <View style={styles.inputWrapper}>
-//         <TextInput
-//           ref={inputRef}
-//           value={pin}
-//           onChangeText={handleChange}
-//           keyboardType="number-pad"
-//           secureTextEntry={!showPin}
-//           placeholder="Enter PIN"
-//           placeholderTextColor="#8FA3BF"
-//           style={styles.input}
-//         />
-
-//         {/* Eye toggle */}
-//         <TouchableOpacity
-//           onPress={() => setShowPin(!showPin)}
-//           style={styles.eyeBtn}
-//         >
-//           <Icon
-//             name={showPin ? 'eye-off-outline' : 'eye-outline'}
-//             size={22}
-//             color="#4DA3FF"
-//           />
-//         </TouchableOpacity>
-//       </View>
-
-//       {/* Confirm Button */}
-//       <TouchableOpacity
-//         style={[styles.button, !pin && styles.disabledBtn]}
-//         onPress={savePin}
-//       >
-//         <Text style={styles.btnText}>Confirm PIN</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-// export default RechargePin;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#0B1220',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//     paddingHorizontal: 24,
-//   },
-//   title: {
-//     fontSize: 26,
-//     fontWeight: '700',
-//     color: '#E5F0FF',
-//     marginBottom: 10,
-//   },
-//   subTitle: {
-//     fontSize: 14,
-//     color: '#8FA3BF',
-//     marginBottom: 40,
-//   },
-//   inputWrapper: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     width: '80%',
-//     backgroundColor: '#0F1A2E',
-//     borderRadius: 12,
-//     borderWidth: 1,
-//     borderColor: '#1F2A44',
-//     paddingHorizontal: 15,
-//     marginBottom: 30,
-//   },
-//   input: {
-//     flex: 1,
-//     height: 55,
-//     color: '#E5F0FF',
-//     fontSize: 18,
-//   },
-//   eyeBtn: {
-//     marginLeft: 10,
-//   },
-//   button: {
-//     width: '80%',
-//     paddingVertical: 15,
-//     backgroundColor: '#4DA3FF',
-//     borderRadius: 16,
-//     alignItems: 'center',
-//     shadowColor: '#4DA3FF',
-//     shadowOffset: { width: 0, height: 6 },
-//     shadowOpacity: 0.3,
-//     shadowRadius: 10,
-//     elevation: 5,
-//   },
-//   disabledBtn: {
-//     backgroundColor: '#1F3B5F',
-//   },
-//   btnText: {
-//     color: '#061427',
-//     fontSize: 16,
-//     fontWeight: '700',
-//   },
-// });
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Keyboard,
   StatusBar,
+  Animated,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import RechargeScreen from './RechargeScreen';
+
+const PIN_LENGTH = 4;
+
+// NPCI Brand Color Palette
+const NPCI_BLUE_BG = '#0B1A30';   // Deep Navy Blue (Background)
+const NPCI_BLUE_NEU = '#122643';  // Slightly Lighter Blue (Keys)
+const NPCI_ORANGE = '#F47F20';    // Saffron Orange (Accents/Icons)
+const NPCI_GREEN = '#00A651';     // Secure Green (Filled Dots)
 
 const RechargePinRoute = () => {
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
-  const inputRef = useRef(null);
+  const [pressedKey, setPressedKey] = useState(null);
+  const shakeAnim = useState(new Animated.Value(0))[0];
 
   const navigation = useNavigation();
-  const route = useRoute(); // ✅ must
-  const { onPinSet } = route.params || {}; // get callback
+  const route = useRoute();
+  const { onPinSet } = route.params || {};
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      inputRef.current?.focus();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleChange = (val) => {
-    const onlyNums = val.replace(/[^0-9]/g, '');
-    setPin(onlyNums);
+  const triggerShake = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 6, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start();
   };
 
-  const savePin = () => {
-    if (!pin) {
-      Alert.alert('Invalid PIN', 'Please enter your PIN');
+  const handleKeyPress = (key) => {
+    if (key === 'backspace') {
+      setPin((prev) => prev.slice(0, -1));
       return;
     }
-
-    Keyboard.dismiss();
-
-    // ✅ call callback if passed
-    if (typeof onPinSet === 'function') {
-      onPinSet(pin);
-    }
-navigation.navigate("RechargeScreen");
-    navigation.goBack();
-  
+    if (pin.length >= PIN_LENGTH) return;
+    setPin((prev) => prev + key);
   };
+
+  const savePin = (finalPin) => {
+    if (!finalPin || finalPin.length < PIN_LENGTH) {
+      triggerShake();
+      Alert.alert('Invalid PIN', `Please enter a ${PIN_LENGTH}-digit PIN`);
+      return;
+    }
+    if (typeof onPinSet === 'function') {
+      onPinSet(finalPin);
+    }
+    navigation.goBack();
+  };
+
+  // auto-submit jab PIN pura ho jaye
+  useEffect(() => {
+    if (pin.length === PIN_LENGTH) {
+      const timer = setTimeout(() => savePin(pin), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [pin]);
+
+  const renderDots = () => {
+    const dots = [];
+    for (let i = 0; i < PIN_LENGTH; i++) {
+      const filled = i < pin.length;
+      dots.push(
+        <View
+          key={i}
+          style={[
+            styles.dot,
+            filled ? styles.dotFilled : styles.dotEmpty,
+          ]}
+        >
+          {filled && showPin && (
+            <Text style={styles.dotDigit}>{pin[i]}</Text>
+          )}
+        </View>
+      );
+    }
+    return dots;
+  };
+
+  const keys = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['eye', '0', 'backspace'],
+  ];
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" backgroundColor={NPCI_BLUE_BG} />
       <Text style={styles.title}>{translate("Enter_Transaction_PIN")}</Text>
       <Text style={styles.subTitle}>{translate("Your_PIN_is_secure")}</Text>
 
-      <View style={styles.inputWrapper}>
-        <TextInput
-          ref={inputRef}
-          value={pin}
-          onChangeText={handleChange}
-          keyboardType="number-pad"
-          secureTextEntry={!showPin}
-          placeholder="Enter PIN"
-          placeholderTextColor="#8FA3BF"
-          style={styles.input}
-          autoComplete='off'
-        />
-        <TouchableOpacity
-          onPress={() => setShowPin(!showPin)}
-          style={styles.eyeBtn}
-        >
-          <Icon
-            name={showPin ? 'eye-off-outline' : 'eye-outline'}
-            size={22}
-            color="#4DA3FF"
-          />
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, !pin && styles.disabledBtn]}
-        onPress={savePin}
+      <Animated.View
+        style={[styles.dotsWrapper, { transform: [{ translateX: shakeAnim }] }]}
       >
-        <Text style={styles.btnText}>{translate("Confirm PIN")}</Text>
-      </TouchableOpacity>
+        {renderDots()}
+      </Animated.View>
+
+      <View style={styles.keypad}>
+        {keys.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.keyRow}>
+            {row.map((key) => {
+              const isPressed = pressedKey === key;
+              
+              return (
+                <TouchableOpacity
+                  key={key}
+                  activeOpacity={1}
+                  onPressIn={() => setPressedKey(key)}
+                  onPressOut={() => setPressedKey(null)}
+                  onPress={() => {
+                    if (key === 'eye') {
+                      setShowPin((prev) => !prev);
+                    } else {
+                      handleKeyPress(key);
+                    }
+                  }}
+                  style={[
+                    styles.key,
+                    isPressed ? styles.keyPressed : styles.keyRaised,
+                  ]}
+                >
+                  {key === 'backspace' ? (
+                    <Icon name="backspace-outline" size={24} color={NPCI_ORANGE} />
+                  ) : key === 'eye' ? (
+                    <Icon
+                      name={showPin ? 'eye-off-outline' : 'eye-outline'}
+                      size={24}
+                      color={NPCI_ORANGE}
+                    />
+                  ) : (
+                    <Text style={styles.keyText}>{key}</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
@@ -509,38 +159,86 @@ export default RechargePinRoute;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0B1220',
-    justifyContent: 'center',
+    backgroundColor: NPCI_BLUE_BG,
     alignItems: 'center',
+    paddingTop: 90,
     paddingHorizontal: 24,
   },
-  title: { fontSize: 26, fontWeight: '700', color: '#E5F0FF', marginBottom: 10 },
-  subTitle: { fontSize: 14, color: '#8FA3BF', marginBottom: 40 },
-  inputWrapper: {
+  title: { fontSize: 26, fontWeight: '700', color: '#FFFFFF', marginBottom: 10 },
+  subTitle: { fontSize: 14, color: '#A0B3CC', marginBottom: 40 },
+
+  dotsWrapper: {
     flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 50,
+  },
+  dot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginHorizontal: 10,
     alignItems: 'center',
-    width: '80%',
-    backgroundColor: '#0F1A2E',
-    borderRadius: 12,
+    justifyContent: 'center',
+  },
+  dotEmpty: {
+    backgroundColor: NPCI_BLUE_NEU,
+    shadowColor: '#000000',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
     borderWidth: 1,
-    borderColor: '#1F2A44',
-    paddingHorizontal: 15,
-    marginBottom: 30,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  input: { flex: 1, height: 55, color: '#E5F0FF', fontSize: 18 },
-  eyeBtn: { marginLeft: 10 },
-  button: {
-    width: '80%',
-    paddingVertical: 15,
-    backgroundColor: '#4DA3FF',
-    borderRadius: 16,
+  dotFilled: {
+    backgroundColor: NPCI_GREEN,
+    shadowColor: NPCI_GREEN,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  dotDigit: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
+
+  keypad: { width: '100%', maxWidth: 320 },
+  keyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
+  key: {
+    width: 78,
+    height: 78,
+    borderRadius: 24,
     alignItems: 'center',
-    shadowColor: '#4DA3FF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
+    justifyContent: 'center',
+    backgroundColor: NPCI_BLUE_NEU,
   },
-  disabledBtn: { backgroundColor: '#1F3B5F' },
-  btnText: { color: '#061427', fontSize: 16, fontWeight: '700' },
+  // Raised (convex) neumorphic state
+  keyRaised: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderLeftColor: 'rgba(255,255,255,0.08)',
+    borderRightColor: 'rgba(0,0,0,0.4)',
+    borderBottomColor: 'rgba(0,0,0,0.4)',
+  },
+  // Pressed (concave/inset) neumorphic state
+  keyPressed: {
+    backgroundColor: '#0D1E36', // Slightly darker blue on press
+    shadowColor: '#000000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 2,
+    borderWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.5)',
+    borderLeftColor: 'rgba(0,0,0,0.5)',
+    borderRightColor: 'rgba(255,255,255,0.04)',
+    borderBottomColor: 'rgba(255,255,255,0.04)',
+  },
+  keyText: { color: '#FFFFFF', fontSize: 26, fontWeight: '600' },
 });

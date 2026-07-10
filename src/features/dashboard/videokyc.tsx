@@ -39,6 +39,7 @@ import {
   useCameraDevice,
 } from "react-native-vision-camera";
 import { useLocationHook } from "../../hooks/useLocationHook";
+import { reset } from "../../reduxUtils/store/userInfoSlice";
 const VideoKYC = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -190,7 +191,7 @@ const VideoKYC = () => {
   const [eng, setEng] = useState(IsDealer ? CNTNT.Eng : "");
   const [isCameraActive, setIsCameraActive] = useState(true);
   const [isCameraReady, setIsCameraReady] = useState(false);
-
+const dispatch = useDispatch();
   const [name, setName] = useState("");
 
   const { get } = useAxiosHook();
@@ -377,7 +378,7 @@ const VideoKYC = () => {
         hour12: false,
     });
 
-    const url = `https://${APP_URLS.baseWebUrl}api/user/UploadKYCVIDEO`;
+    const url = `http://${APP_URLS.baseWebUrl}api/user/UploadKYCVIDEO`;
 
     const payload = {
         userids: userId,
@@ -414,7 +415,7 @@ const VideoKYC = () => {
                     text: "OK",
                     onPress: () => IsDealer
                         ? navigation.goBack()
-                        : navigation.navigate("LoginScreen"),
+                        : dispatch(reset()),
                 }]);
             } else {
                 Alert.alert("Upload Failed", responseData.msg || "Unknown Error");

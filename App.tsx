@@ -24,31 +24,25 @@ import OtaUpdateModal from './src/components/OtaUpdateModal';
 import firestore from '@react-native-firebase/firestore';
 import useAxiosHook from './src/utils/network/AxiosClient';
 
-// ─── Jis screen pe hone par auto-update allowed hai ──────────────────────────
-const AUTO_UPDATE_SCREEN = 'DashboardScreen';
+// ─── Ab kisi bhi screen pe update turant chalu ho jayega ────────────────────
+// (pehle sirf DashboardScreen ka wait karta tha, ab zaroorat nahi)
 
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-  // ── State add karo AppContent ke andar ──
   const [otaProgress, setOtaProgress] = useState(0);
   const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
   const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
   const isUpdating = useRef(false);
-  // ── Jab update mil jaye lekin user Dashboard pe na ho, yahan queue hoga ──
-  const pendingOtaRef = useRef<{ version: number; bundle_url: string } | null>(null);
-  const VERSION_URL =
-    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
+  const toastIdRef = useRef<string | number | null>(null);
   const appState = useRef(AppState.currentState);
-  console.log('OTA URL:', VERSION_URL);
-  const {get} = useAxiosHook()
-
+  const { get } = useAxiosHook();
   const fetchOtaDetails = async () => {
     try {
       const version = await get({ url: APP_URLS.current_version });
-      console.log(version)
+      console.log(version);
 
       return {
         version: version.otaVersion,
@@ -63,70 +57,14 @@ const AppContent = () => {
     }
   };
 
-  // ✅ Current route DashboardScreen hai ya nahi check karo
-  // const isOnDashboardScreen = () => {
-  //   if (!navigationRef.isReady()) return false;
-  //   return navigationRef.getCurrentRoute()?.name === AUTO_UPDATE_SCREEN;
-  // };
-
-  // // ✅ Agar update pending hai aur ab user Dashboard pe hai, to start karo
-  // const tryStartPendingOta = () => {
-  //   if (!pendingOtaRef.current) return;
-  //   if (isUpdating.current) return;
-
-  //   if (isOnDashboardScreen()) {
-  //     const data = pendingOtaRef.current;
-  //     pendingOtaRef.current = null;
-  //     console.log('🚀 User is on DashboardScreen → starting OTA update now...');
-  //     startUpdate(data);
-  //   } else {
-  //     console.log(
-  //       `⏳ OTA update pending — waiting for DashboardScreen (current: ${
-  //         navigationRef.isReady() ? navigationRef.getCurrentRoute()?.name : 'not ready'
-  //       })`
-  //     );
-  //   }
-  // };
-// ✅ Current route DashboardScreen hai ya nahi check karo
-  const isOnDashboardScreen = () => {
-    // If using standard ref, access via .current
-    const navigation = navigationRef?.current ? navigationRef.current : navigationRef;
-    
-    if (!navigation || typeof navigation.isReady !== 'function' || !navigation.isReady()) {
-      return false;
-    }
-    return navigation.getCurrentRoute()?.name === AUTO_UPDATE_SCREEN;
-  };
-
-  // ✅ Agar update pending hai aur ab user Dashboard pe hai, to start karo
-  const tryStartPendingOta = () => {
-    if (!pendingOtaRef.current) return;
-    if (isUpdating.current) return;
-
-    const navigation = navigationRef?.current ? navigationRef.current : navigationRef;
-
-    if (isOnDashboardScreen()) {
-      const data = pendingOtaRef.current;
-      pendingOtaRef.current = null;
-      console.log('🚀 User is on DashboardScreen → starting OTA update now...');
-      startUpdate(data);
-    } else {
-      console.log(
-        `⏳ OTA update pending — waiting for DashboardScreen (current: ${
-          navigation && typeof navigation.isReady === 'function' && navigation.isReady()
-            ? navigation.getCurrentRoute()?.name 
-            : 'not ready'
-        })`
-      );
-    }
-  };
   const checkOta = async (isResume = false) => {
     try {
       const data = await fetchOtaDetails();
+      console.log('OTA Check Result:', data);
       if (!data) return;
 
       const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-      const latest = Number(data.version);
+      const latest = Number(data.version) || 0;
 
       console.log('Installed:', installed, 'Latest:', latest, 'isResume:', isResume);
 
@@ -135,16 +73,14 @@ const AppContent = () => {
       if (latest > installed && data.status === true && data.url) {
         dispatch(setOtaUpdate(latest));
 
-        // Update queue mein daalo, sirf DashboardScreen pe hone par hi start hoga
-        pendingOtaRef.current = {
+        // ✅ Turant update start hoga, koi screen wait nahi karega
+        startUpdate({
           version: latest,
           bundle_url: data.url,
-        };
-        tryStartPendingOta();
+        });
       } else {
         console.log('✅ Already on latest version');
         dispatch(clearOtaUpdate());
-        pendingOtaRef.current = null;
       }
     } catch (error) {
       console.log('OTA Check Failed:', error);
@@ -162,6 +98,9 @@ const AppContent = () => {
     setOtaStatus('downloading');
     setOtaProgress(0);
 
+    // ✅ Non-blocking toast banner — jis screen pe bhi user ho, wahin dikhega
+   
+
     try {
       await OtUpdate.downloadBundleUri(
         ReactNativeBlobUtil,
@@ -176,8 +115,9 @@ const AppContent = () => {
           updateSuccess() {
             console.log('✅ OTA Updated:', data.version);
             setOtaStatus('success');
-                    dispatch(clearOtaUpdate());
+            dispatch(clearOtaUpdate());
 
+      
           },
 
           updateFail(error) {
@@ -187,16 +127,20 @@ const AppContent = () => {
 
           progress(received, total) {
             if (total > 0) {
-              const percent = Math.floor(
-                (received / total) * 100
-              );
+              const percent = Math.floor((received / total) * 100);
               setOtaProgress(percent);
+
+              // Toast message me progress % bhi dikha dete hain
+           
             }
           },
         }
       );
     } catch (e: any) {
       setOtaStatus('failed');
+
+   
+
       const errorText = `
       OTA Update Exception Traced
       
@@ -234,8 +178,6 @@ const AppContent = () => {
       );
     } finally {
       isUpdating.current = false;
-      // agar isi beech koi aur update queue hua ho aur ab Dashboard pe ho, use bhi try karo
-      tryStartPendingOta();
     }
   };
 
@@ -245,7 +187,7 @@ const AppContent = () => {
 
   // ✅ APP RESUME CHECK
   useEffect(() => {
-    // ✅ App pehli baar open — check karo, start sirf Dashboard pe hone par hoga
+    // ✅ App pehli baar open — check karo, milte hi turant update start ho jayega
     checkOta(false);
 
     const subscription = AppState.addEventListener('change', nextAppState => {
@@ -262,11 +204,6 @@ const AppContent = () => {
     return () => subscription.remove();
   }, []);
 
-  // ✅ Navigation change hone par bhi check karo — user Dashboard pe aaya to pending update start ho jaye
-  const handleNavigationStateChange = () => {
-    tryStartPendingOta();
-  };
-
   return (
     <>
       <OtaUpdateModal status={otaStatus} progress={otaProgress} />
@@ -275,12 +212,8 @@ const AppContent = () => {
         ref={navigationRef}
         onReady={() => {
           RNBootSplash.hide({ fade: true });
-          // App load hote hi agar starting route hi Dashboard hai to turant check karo
-          tryStartPendingOta();
         }}
-        onStateChange={handleNavigationStateChange}
       >
-
         <AppContainer />
       </NavigationContainer>
     </>

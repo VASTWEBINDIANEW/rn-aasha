@@ -1,4 +1,4 @@
-package com.pemudra.upi;
+package com.worldpayone.upi;
 
 import android.app.Activity;
 import android.content.Intent;

@@ -300,7 +300,7 @@ const RechargeScreen = () => {
   const color2 = `${colorConfig.primaryColor}40`;
   const color3 = `${colorConfig.primaryColor}10`;
   const [loading, setLoading] = useState(true);
-  const { get, post ,post2} = useAxiosHook();
+  const { get, post } = useAxiosHook();
 const { ContactPicker } = NativeModules;
 
 
@@ -735,7 +735,7 @@ const openContactPicker = useCallback(async () => {
   const [isDetail, setIsDetail] = useState(false);
 
 
-const onRechargePress = useCallback(async () => {
+const onRechargePress = useCallback(async (userpin) => {
   console.log(
     mobileNumber, operatorcode, Loc_Data, latitude, longitude,
     '++++++++', Loc_Data?.latitude, Loc_Data?.longitude
@@ -772,7 +772,7 @@ const onRechargePress = useCallback(async () => {
       devtoken, Addresss, PostalCode, InternetTYPE, ip1, ModelNo
     ] = encryption.encryptedData.map(encodeURIComponent);
 
-    const url = `${APP_URLS.rechTask}rd=${rd}&n=${n1}&ok=${ok1}&amn=${Amount}&pc=&bu=&acno=&lt=&ip=${ip1}&mc=&em=${Model}&offerprice=&commAmount=&Devicetoken=${devtoken}&Latitude=${Latitude1}&Longitude=${Longitude1}&ModelNo=${ModelNo}&City=${devtoken}&PostalCode=${PostalCode}&InternetTYPE=${InternetTYPE}&Addresss=${Addresss}&value1=${encodeURIComponent(encryption.keyEncode)}&value2=${encodeURIComponent(encryption.ivEncode)}&circle=${state}`;
+    const url = `${APP_URLS.rechTask}rd=${rd}&n=${n1}&ok=${ok1}&amn=${Amount}&pc=&bu=&acno=&lt=&ip=${ip1}&mc=&em=${Model}&offerprice=&commAmount=&Devicetoken=${devtoken}&Latitude=${Latitude1}&Longitude=${Longitude1}&ModelNo=${ModelNo}&City=${devtoken}&PostalCode=${PostalCode}&InternetTYPE=${InternetTYPE}&Addresss=${Addresss}&value1=${encodeURIComponent(encryption.keyEncode)}&value2=${encodeURIComponent(encryption.ivEncode)}&circle=${state}&Rechargepin=${userpin}`;
 
     console.log('Recharge URL:', url);
 
@@ -780,7 +780,7 @@ const onRechargePress = useCallback(async () => {
     let Message = "Recharge Pending, check report";
 
     // 4. Recharge API Call
-    const res = await post2({ url });
+    const res = await post({ url });
     console.log(res, 'Recharge Response');
 
     if (res?.status === 'False' || res?.status === false) {

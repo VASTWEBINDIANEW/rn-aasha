@@ -14,10 +14,10 @@ import { translate } from '../utils/languageUtils/I18n';
 import OnelineDropdownSvg from '../features/drawer/svgimgcomponents/simpledropdown';
 
 const BALANCE_ITEMS = [
-    { label: 'Main Wallet',  key: 'remainbal' },
-    { label: 'POS Balance',  key: 'posremain' },
-    { label: translate('cmsremainbal'),  key: 'cmsremainbal' },
-    { label: translate('holdandleanbal'),key: 'holdandleanbal' },
+    { label: 'Main Wallet',    key: 'remainbal' },
+    { label: 'POS Balance',    key: 'posremain' },
+    { label: translate('cmsremainbal'),   key: 'cmsremainbal' },
+    { label: translate('holdandleanbal'), key: 'holdandleanbal' },
 ];
 
 const AllBalance = () => {
@@ -25,6 +25,8 @@ const AllBalance = () => {
     const [openDropdown, setOpenDropdown] = useState(false);
     const [balanceInfo, setBalanceInfo] = useState<any>(null);
     const { get } = useAxiosHook();
+
+    const baseSurfaceColor = colorConfig.primaryColor;
 
     const getData = useCallback(async () => {
         try {
@@ -55,78 +57,102 @@ const AllBalance = () => {
         }
     }, [get, IsDealer]);
 
-    useFocusEffect(useCallback(() => { getData(); }, []));
+    useFocusEffect(useCallback(() => { getData(); }, [getData]));
 
     const totalBalance = BALANCE_ITEMS.reduce(
         (sum, item) => sum + (Number(balanceInfo?.[item.key]) || 0), 0
     );
 
     return (
-        <LinearGradient
-            colors={[`${colorConfig.primaryColor}22`, `${colorConfig.secondaryColor}44`]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.container}
-        >
-            {/* Header Row */}
-            <TouchableOpacity
-                style={styles.headerRow}
-                onPress={() => setOpenDropdown(!openDropdown)}
-                activeOpacity={0.8}
-            >
-                {/* Left: Icon + Title */}
-                <View style={[styles.iconBox, { backgroundColor: `${colorConfig.primaryColor}22` }]}>
-                    <WalletSvg size={wScale(22)} />
-                </View>
+        <View style={[styles.container, { backgroundColor: baseSurfaceColor }]}>
+            {/* Neomorphic Main Bar Outer Wrapper */}
+            <View style={[styles.mainBarOuterShadow, { backgroundColor: baseSurfaceColor }]}>
+                <LinearGradient
+                    colors={["rgba(255,255,255,0.35)", "rgba(0,0,0,0.15)"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.mainBarGradient}
+                >
+                    <TouchableOpacity
+                        style={[styles.headerRow, { backgroundColor: baseSurfaceColor }]}
+                        onPress={() => setOpenDropdown(!openDropdown)}
+                        activeOpacity={0.8}
+                    >
+                        {/* Left Icon Area - Depressed/Pressed look */}
+                        <LinearGradient
+                            colors={["rgba(0,0,0,0.2)", "rgba(255,255,255,0.25)"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.iconBoxOuter}
+                        >
+                            <View style={[styles.iconBoxInner, { backgroundColor: baseSurfaceColor }]}>
+                                <WalletSvg size={wScale(22)} color="#FFFFFF" />
+                            </View>
+                        </LinearGradient>
 
-                <View style={styles.headerMid}>
-                    <Text style={styles.walletLabel}>Wallet Balance</Text>
-                    {balanceInfo
-                        ? <Text style={[styles.totalAmount, { color: colorConfig.primaryColor }]}>
-                            ₹ {totalBalance.toLocaleString('en-IN')}
-                          </Text>
-                        : <ShowLoaderBtn color={colorConfig.primaryColor} size={18} />
-                    }
-                </View>
+                        {/* Mid Balance Description */}
+                        <View style={styles.headerMid}>
+                            <Text style={styles.walletLabel}>Wallet Balance</Text>
+                            {balanceInfo ? (
+                                <Text style={styles.totalAmount}>
+                                    ₹ {totalBalance.toLocaleString('en-IN')}
+                                </Text>
+                            ) : (
+                                <View style={{ alignItems: 'flex-start', marginTop: 4 }}>
+                                    <ShowLoaderBtn color="#FFFFFF" size={18} />
+                                </View>
+                            )}
+                        </View>
 
-                {/* Chevron */}
-                <View style={[
-                    styles.chevron,
-                    openDropdown && { transform: [{ rotate: '180deg' }] }
-                ]}>
-                    {/* <Text style={[styles.chevronText, { color: colorConfig.primaryColor }]}>⌄</Text> */}
-                    <OnelineDropdownSvg/>
-                </View>
-            </TouchableOpacity>
+                        {/* Neomorphic Dropdown Trigger Chevron */}
+                        <View style={[styles.chevronOuterShadow, { backgroundColor: baseSurfaceColor }]}>
+                          <LinearGradient
+                              colors={["rgba(255,255,255,0.35)", "rgba(0,0,0,0.15)"]}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 1, y: 1 }}
+                              style={styles.chevronGradient}
+                          >
+                            <View style={[styles.chevronInner, { backgroundColor: baseSurfaceColor }, openDropdown && { transform: [{ rotate: '180deg' }] }]}>
+                                <OnelineDropdownSvg color="#FFFFFF" />
+                            </View>
+                          </LinearGradient>
+                        </View>
+                    </TouchableOpacity>
+                </LinearGradient>
+            </View>
 
-            {/* Dropdown Balance Cards */}
+            {/* Dropdown Content Surface */}
             {openDropdown && (
                 <View style={styles.dropdownBody}>
-                    {/* Divider */}
-                    <View style={[styles.divider, { backgroundColor: `${colorConfig.primaryColor}30` }]} />
-
                     <View style={styles.gridRow}>
                         {BALANCE_ITEMS.map((item, index) => (
                             <View
                                 key={item.key}
                                 style={[
-                                    styles.balanceCard,
-                                    { backgroundColor: `${colorConfig.secondaryColor}18` },
-                                    index % 2 === 0 ? { marginRight: wScale(6) } : { marginLeft: wScale(6) },
+                                    styles.cardOuterContainer,
+                                    index % 2 === 0 ? { paddingRight: wScale(5) } : { paddingLeft: wScale(5) },
                                 ]}
                             >
-                                {/* Accent dot */}
-                                {/* <View style={[styles.dot, { backgroundColor: colorConfig.primaryColor }]} /> */}
-                                <Text style={styles.cardLabel}>{item.label}</Text>
-                                <Text style={[styles.cardValue, { color: colorConfig.primaryColor }]}>
-                                    ₹ {Number(balanceInfo?.[item.key] || 0).toLocaleString('en-IN')}
-                                </Text>
+                                {/* Inset / Carved-in shadow look for Individual balance indicators */}
+                                <LinearGradient
+                                    colors={["rgba(0,0,0,0.2)", "rgba(255,255,255,0.25)"]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.balanceCardInset}
+                                >
+                                    <View style={[styles.balanceCardSurface, { backgroundColor: baseSurfaceColor }]}>
+                                        <Text style={styles.cardLabel}>{item.label}</Text>
+                                        <Text style={styles.cardValue} numberOfLines={1} adjustsFontSizeToFit>
+                                            ₹ {Number(balanceInfo?.[item.key] || 0).toLocaleString('en-IN')}
+                                        </Text>
+                                    </View>
+                                </LinearGradient>
                             </View>
                         ))}
                     </View>
                 </View>
             )}
-        </LinearGradient>
+        </View>
     );
 };
 
@@ -134,84 +160,128 @@ export default AllBalance;
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: wScale(16),
-        paddingHorizontal: wScale(15),
-        paddingVertical: hScale(14),
-        // marginHorizontal: wScale(2),
-        borderTopLeftRadius:0,
-        borderTopRightRadius:0
+        paddingHorizontal: wScale(14),
+        paddingBottom: hScale(14),
+        borderBottomLeftRadius: wScale(24),
+        borderBottomRightRadius: wScale(24),
+    },
+    
+    // ── Neomorphic Main Bar Styles ──
+    mainBarOuterShadow: {
+        borderRadius: wScale(18),
+        shadowColor: "#000",
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    mainBarGradient: {
+        borderRadius: wScale(18),
+        padding: 1.5,
     },
     headerRow: {
         flexDirection: 'row',
         alignItems: 'center',
+        borderRadius: wScale(16.5),
+        paddingHorizontal: wScale(12),
+        paddingVertical: hScale(12),
     },
-    iconBox: {
-        height: wScale(42),
-        width: wScale(42),
-        borderRadius: wScale(12),
-        alignItems: 'center',
-        justifyContent: 'center',
+    
+    // Inset Icon Area Style
+    iconBoxOuter: {
+        height: wScale(44),
+        width: wScale(44),
+        borderRadius: wScale(14),
+        padding: 1.5,
         marginRight: wScale(12),
     },
+    iconBoxInner: {
+        flex: 1,
+        borderRadius: wScale(12.5),
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.02)',
+    },
+
     headerMid: {
         flex: 1,
     },
     walletLabel: {
-        fontSize: wScale(12),
-        color: '#888',
-        marginBottom: hScale(2),
-        letterSpacing: 0.4,
+        fontSize: wScale(11),
+        color: 'rgba(255,255,255,0.75)',
+        fontWeight: '600',
+        letterSpacing: 0.5,
+        textTransform: 'uppercase',
     },
     totalAmount: {
-        fontSize: wScale(22),
+        fontSize: wScale(20),
         fontWeight: '700',
+        color: '#FFFFFF',
         letterSpacing: 0.3,
+        marginTop: 2,
+        textShadowColor: 'rgba(0, 0, 0, 0.2)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
     },
-    chevron: {
-        width: wScale(28),
-        height: wScale(28),
+
+    // Chevron Neomorphic Style
+    chevronOuterShadow: {
+        borderRadius: wScale(16),
+        shadowColor: "#000",
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    chevronGradient: {
+        borderRadius: wScale(16),
+        padding: 1.2,
+    },
+    chevronInner: {
+        width: wScale(32),
+        height: wScale(32),
+        borderRadius: wScale(14.8),
         alignItems: 'center',
         justifyContent: 'center',
     },
-    chevronText: {
-        fontSize: wScale(22),
-        lineHeight: wScale(26),
-        fontWeight: '600',
-    },
+
+    // ── Dropdown Grid Layout Styles ──
     dropdownBody: {
-        marginTop: hScale(10),
-    },
-    divider: {
-        height: 1,
-        marginBottom: hScale(12),
-        borderRadius: 1,
+        marginTop: hScale(14),
     },
     gridRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
-    balanceCard: {
-        width: '47%',
-        borderRadius: wScale(12),
-        paddingHorizontal: wScale(12),
-        paddingVertical: hScale(10),
+    cardOuterContainer: {
+        width: '50%',
         marginBottom: hScale(10),
     },
-    dot: {
-        width: wScale(6),
-        height: wScale(6),
-        borderRadius: wScale(3),
-        marginBottom: hScale(6),
+    balanceCardInset: {
+        borderRadius: wScale(14),
+        padding: 1.5,
+    },
+    balanceCardSurface: {
+        borderRadius: wScale(12.5),
+        paddingHorizontal: wScale(12),
+        paddingVertical: hScale(10),
+        backgroundColor: 'rgba(0,0,0,0.03)',
     },
     cardLabel: {
-        fontSize: wScale(11),
-        color: '#888',
-        marginBottom: hScale(4),
-        letterSpacing: 0.3,
+        fontSize: wScale(10.5),
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontWeight: '600',
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        marginBottom: hScale(3),
     },
     cardValue: {
-        fontSize: wScale(18),
+        fontSize: wScale(16),
         fontWeight: '700',
+        color: '#FFFFFF',
         letterSpacing: 0.2,
+        textShadowColor: 'rgba(0, 0, 0, 0.15)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 1,
     },
 });

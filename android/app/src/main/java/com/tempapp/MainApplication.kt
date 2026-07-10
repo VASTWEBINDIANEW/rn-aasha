@@ -1,4 +1,4 @@
-package com.pemudra
+package com.worldpayone
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -14,11 +14,11 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.modules.network.ReactCookieJarContainer
 
-import com.pemudra.AepsPackage
-import com.pemudra.upi.UpiPackage
-import com.pemudra.location.LocationPackage
-import com.pemudra.security.SecurityPackage
-import com.pemudra.ContactPicker.ContactPickerPackage
+import com.worldpayone.AepsPackage
+import com.worldpayone.upi.UpiPackage
+import com.worldpayone.location.LocationPackage
+import com.worldpayone.security.SecurityPackage
+import com.worldpayone.ContactPicker.ContactPickerPackage
 import com.otahotupdate.OtaHotUpdate
 
 class MainApplication : Application(), ReactApplication {

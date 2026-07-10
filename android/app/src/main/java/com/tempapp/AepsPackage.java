@@ -1,4 +1,4 @@
-package com.pemudra;
+package com.worldpayone;
 
 import androidx.annotation.NonNull;
 
@@ -10,7 +10,7 @@ import com.facebook.react.uimanager.ViewManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.pemudra.AepsModule;
+import com.worldpayone.AepsModule;
 
 public class AepsPackage implements ReactPackage {
 

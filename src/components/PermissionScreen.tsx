@@ -10,13 +10,13 @@ import {
   ScrollView,
   SafeAreaView,
   Platform,
-  ActivityIndicator,
   InteractionManager,
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../reduxUtils/store';
 
-type PermissionKey = 'camera' | 'location' | 'mic';
+// 🔄 'mic' ko hata kar 'gallery' add kiya
+type PermissionKey = 'camera' | 'location' | 'gallery' | 'microphone';
 
 interface PermissionItem {
   key: PermissionKey;
@@ -25,6 +25,14 @@ interface PermissionItem {
   androidPermission: string;
   icon: string;
 }
+
+// 📱 Android version ke hisab se sahi Gallery permission select karne ke liye helper function
+const getGalleryPermission = () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    return PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES;
+  }
+  return PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+};
 
 const PERMISSIONS_LIST: PermissionItem[] = [
   {
@@ -42,9 +50,16 @@ const PERMISSIONS_LIST: PermissionItem[] = [
     icon: '📍',
   },
   {
-    key: 'mic',
+    key: 'gallery',
+    label: 'Gallery / Photos',
+    description: 'Required to upload existing documents or photos from your gallery.',
+    androidPermission: getGalleryPermission(),
+    icon: '🖼️',
+  },
+  {
+    key: 'microphone',
     label: 'Microphone',
-    description: 'Required to verify your identity via Video KYC.',
+    description: 'Required for voice recording and audio features.',
     androidPermission: PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
     icon: '🎤',
   },
@@ -52,22 +67,20 @@ const PERMISSIONS_LIST: PermissionItem[] = [
 
 type PermissionStatus = 'unchecked' | 'granted' | 'denied' | 'blocked';
 
+// 🔄 Ab permissions optional hain — screen kabhi bhi "Continue" se aage badh sakti hai,
+// chahe koi bhi permission granted ho ya na ho.
 const PermissionScreen = ({ onSuccess }: any) => {
   const { colorConfig } = useSelector((state: RootState) => state.userInfo);
 
   const [statuses, setStatuses] = useState<Record<PermissionKey, PermissionStatus>>({
     camera: 'unchecked',
     location: 'unchecked',
-    mic: 'unchecked',
+    gallery: 'unchecked',
+    microphone: 'unchecked', // 🔄 pehle missing tha, isliye allGranted kabhi true nahi hota tha
   });
 
-  // 🔑 Guard against StrictMode double-invoke / re-mount re-trigger
   const hasStartedRef = useRef(false);
 
-  const allGranted = PERMISSIONS_LIST.every(item => statuses[item.key] === 'granted');
-
-  // 🔑 SINGLE effect — pehle wala duplicate hata diya, InteractionManager wale
-  // effect ko hi keep kiya kyunki wo timing-safe hai (transition complete hone ka wait karta hai)
   useEffect(() => {
     if (hasStartedRef.current) {
       console.log('⏭️ Auto-request already ran once, skipping duplicate run');
@@ -81,15 +94,6 @@ const PermissionScreen = ({ onSuccess }: any) => {
 
     return () => interactionHandle.cancel();
   }, []);
-
-  useEffect(() => {
-    if (allGranted && onSuccess) {
-      const timer = setTimeout(() => {
-        onSuccess(true);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [allGranted, onSuccess]);
 
   const autoRequestAllPermissions = async () => {
     if (Platform.OS !== 'android') {
@@ -147,7 +151,6 @@ const PermissionScreen = ({ onSuccess }: any) => {
         return updated;
       });
 
-      // 🔑 Verification pass — check karo koi silently skip to nahi hua
       setTimeout(async () => {
         for (const item of PERMISSIONS_LIST) {
           const isGranted = await PermissionsAndroid.check(item.androidPermission as any);
@@ -203,12 +206,18 @@ const PermissionScreen = ({ onSuccess }: any) => {
     );
   };
 
+  // 🔄 Continue button hamesha available — ye kisi permission status pe depend nahi karta
+  const handleContinue = () => {
+    if (onSuccess) onSuccess(true);
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colorConfig.primaryColor }]}>
       <View style={styles.headerContainer}>
         <Text style={styles.title}>App Permissions</Text>
         <Text style={styles.subtitle}>
-          To provide you with the best and most secure experience, we need a few permissions.
+          These permissions help us give you the best experience, but they're optional —
+          you can continue without granting them.
         </Text>
       </View>
 
@@ -246,8 +255,6 @@ const PermissionScreen = ({ onSuccess }: any) => {
                   {item.description}
                 </Text>
 
-                {/* 🔑 Ab 'unchecked' aur 'denied' dono states pe "Tap to Allow" dikhega,
-                    taaki user ko turant pata chale khud tap karna hai */}
                 {(status === 'unchecked' || status === 'denied') && (
                   <View
                     style={[
@@ -283,16 +290,16 @@ const PermissionScreen = ({ onSuccess }: any) => {
       </ScrollView>
 
       <View style={[styles.bottomContainer, { backgroundColor: colorConfig.primaryColor }]}>
-        {!allGranted ? (
-          <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>Please tap the cards above to allow permissions</Text>
-          </View>
-        ) : (
-          <View style={styles.autoRedirectContainer}>
-            <ActivityIndicator size="small" color="#FFFFFF" />
-            <Text style={styles.redirectText}>Continuing Securely...</Text>
-          </View>
-        )}
+        <TouchableOpacity
+          style={styles.continueBtn}
+          onPress={handleContinue}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.continueBtnText, { color: colorConfig.primaryColor }]}>
+            Continue
+          </Text>
+        </TouchableOpacity>
+        <Text style={styles.skipHint}>You can enable permissions later from Settings</Text>
       </View>
     </SafeAreaView>
   );
@@ -303,7 +310,7 @@ const styles = StyleSheet.create({
   headerContainer: { paddingHorizontal: 24, paddingTop: 32, paddingBottom: 24 },
   title: { fontSize: 28, fontWeight: '800', marginBottom: 8, color: '#FFFFFF' },
   subtitle: { fontSize: 15, lineHeight: 22, fontWeight: '500', color: 'rgba(255, 255, 255, 0.9)' },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 140 },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -333,7 +340,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  actionBtnText: { color: 'green', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  actionBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
   statusCircle: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   statusCircleRed: { backgroundColor: '#FF4D4D', borderColor: '#FF4D4D' },
   statusIcon: { color: '#FFFFFF', fontWeight: '800', fontSize: 14, marginTop: Platform.OS === 'ios' ? 1 : -1 },
@@ -348,10 +355,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  instructionContainer: { paddingVertical: 18 },
-  instructionText: { color: 'rgba(255,255,255,0.8)', fontSize: 15, fontWeight: '700', textAlign: 'center' },
-  autoRedirectContainer: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18 },
-  redirectText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700', marginLeft: 12 },
+  continueBtn: {
+    backgroundColor: '#FFFFFF',
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueBtnText: { fontSize: 16, fontWeight: '800' },
+  skipHint: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '500', marginTop: 10, textAlign: 'center' },
 });
 
 export default PermissionScreen;

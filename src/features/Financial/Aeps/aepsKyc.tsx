@@ -75,7 +75,7 @@ const Aepsekyc = () => {
         data: JSON.stringify(requestData),
         config: { headers },
       });
-
+console.log('OTP Send Response:', response);
       if (response?.Status) {
         setprimarykeyid(response.primaryKeyId);
         setencodeFPTxnId(response.encodeFPTxnId);

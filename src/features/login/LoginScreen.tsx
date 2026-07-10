@@ -80,11 +80,11 @@ const LoginScreen = () => {
 // (Agar Vite use kar rahe hain toh: const isDev = import.meta.env.DEV;)
 
 const [userEmail, setUserEmail] = useState(
-  signUpId || (isDev ? '9878053747' : '')
+  signUpId || (isDev ? '9560381047' : '')
 );
 
 const [userPassword, setUserPassword] = useState(
-  signUpPassword || (isDev ? '142536' : '')
+  signUpPassword || (isDev ? '123456' : '')
 );
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
@@ -715,6 +715,10 @@ const onPressLogin = useCallback(async (otp) => {
       role = response.role;
       msg = `Login success: ${role}`;
       dispatch(setIsDealer(response.role === 'Dealer'));
+        //   if (response.VideoKYC === "VideoKYCPENDING") {
+        //   Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+        //    return;
+        // }
       authenticate(response);
       dispatch(setUserId(response?.userId));
       dispatch(setRefreshToken(response?.refresh_token));
@@ -952,6 +956,10 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
         // });
 
         dispatch(setIsDealer(role === 'Dealer'));
+            if (response.VideoKYC === "VideoKYCPENDING") {
+          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+           return;
+        }
         authenticate(response);
         dispatch(setUserId(response?.userId));
         dispatch(setRefreshToken(response?.refresh_token));
@@ -1075,9 +1083,9 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
         debugRole = response.role || 'No Role Found';
         debugMsg = `finally ${debugRole} Login process completed.`;
         dispatch(setIsDealer(debugRole === 'Dealer'));
-        if (response.VideoKYC === 'VideoKYCPENDING') {
+        if (response.VideoKYC === "VideoKYCPENDING") {
           Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-          //  return;
+           return;
         }
         authenticate(response);
         dispatch(setUserId(response?.userId));
@@ -1104,11 +1112,11 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
       setIsLoading(true);
       const currentDevice = deviceInfo;
       const isDemo = DemoConfig.demoNumbers.includes(userEmail);
-      if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
-        pendingAuthDataRef.current = authData;
-        handleLocationError();
-        return;
-      }
+      // if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
+      //   pendingAuthDataRef.current = authData;
+      //   handleLocationError();
+      //   return;
+      // }
       let fcmToken = '';
       const params = new URLSearchParams({
         Devicetoken: fcmToken,

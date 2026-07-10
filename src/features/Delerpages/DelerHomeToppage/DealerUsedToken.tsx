@@ -93,7 +93,7 @@ const DealerUsedToken = () => {
     <FlashList
       data={usedToken}
       renderItem={renderItem}
-      keyExtractor={(item) => item.JoiningTokenId.toString()}
+      keyExtractor={(item) => item.JoiningTokenId}
       estimatedItemSize={100} // Adjust this based on your item size
       contentContainerStyle={styles.container}
     />

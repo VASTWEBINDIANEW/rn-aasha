@@ -1,4 +1,4 @@
-package com.pemudra.security;
+package com.worldpayone.security;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

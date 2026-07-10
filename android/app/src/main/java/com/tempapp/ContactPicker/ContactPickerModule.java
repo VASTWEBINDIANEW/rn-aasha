@@ -1,4 +1,4 @@
-package com.pemudra.ContactPicker;
+package com.worldpayone.ContactPicker;
 
 import android.app.Activity;
 import android.content.Intent;

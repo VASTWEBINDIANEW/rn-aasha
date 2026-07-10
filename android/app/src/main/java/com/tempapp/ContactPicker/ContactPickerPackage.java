@@ -1,4 +1,4 @@
-package com.pemudra.ContactPicker;
+package com.worldpayone.ContactPicker;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

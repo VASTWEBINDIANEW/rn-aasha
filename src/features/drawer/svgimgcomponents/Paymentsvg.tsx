@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { wScale } from "../../../utils/styles/dimensions";
 
-const Paymentsvg = ({ size = wScale(40), color='#000' }) => {
+const Paymentsvg = ({ size = wScale(40), color='#ffffff' }) => {
     const searchicon = `
 
 <?xml version="1.0" encoding="UTF-8"?>

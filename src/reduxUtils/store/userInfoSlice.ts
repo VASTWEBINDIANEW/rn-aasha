@@ -80,7 +80,7 @@ payutxnid:null,
   signUpId: null,
   signUpPassword: null,
   logoUrl: '',
-  allPermissionsGranted: null as boolean | null, // 🔥 Naya state for permission check (null = abhi check ho raha hai)
+  allPermissionsGranted: null, // 🔥 Naya state for permission check (null = abhi check ho raha hai)
 };
 
 const userInfoSlice = createSlice({

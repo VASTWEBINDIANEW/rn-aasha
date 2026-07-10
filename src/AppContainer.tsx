@@ -86,26 +86,31 @@ export const AppContainer = () => {
   try { getApp(); } catch (e) { initializeApp(firebaseConfig, 'aircharge'); }
 
   // 🔥 Permission Check Effect — sirf initial check karta hai, request nahi karta
-  useEffect(() => {
-    const checkPermissions = async () => {
-      if (Platform.OS === 'android') {
-        const camera = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
-        const location = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
-        const mic = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+useEffect(() => {
+  const checkPermissions = async () => {
+    if (Platform.OS === 'android') {
+      const galleryPermission =
+        Platform.Version >= 33
+          ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+          : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
 
-        if (camera && location && mic) {
-          dispatch(setAllPermissionsGranted(true));
-        } else {
-          dispatch(setAllPermissionsGranted(false));
-        }
-      } else {
-        // iOS ya dusre platform ke liye default true maan rahe hain abhi ke liye
+      const camera = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
+      const location = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      const gallery = await PermissionsAndroid.check(galleryPermission);
+
+      if (camera && location && gallery) {
         dispatch(setAllPermissionsGranted(true));
+      } else {
+        dispatch(setAllPermissionsGranted(false));
       }
-    };
+    } else {
+      // iOS ya dusre platform ke liye default true maan rahe hain abhi ke liye
+      dispatch(setAllPermissionsGranted(true));
+    }
+  };
 
-    checkPermissions();
-  }, []);
+  checkPermissions();
+}, []);
 
   // 🔑 FIX: Ab ye effect sirf tabhi aage badhega jab allPermissionsGranted true ho.
   // Isse initAppAndLocation() ka location request PermissionScreen ke requestMultiple()
