@@ -1112,11 +1112,11 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
       setIsLoading(true);
       const currentDevice = deviceInfo;
       const isDemo = DemoConfig.demoNumbers.includes(userEmail);
-      if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
-        pendingAuthDataRef.current = authData;
-        handleLocationError();
-        return;
-      }
+      // if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
+      //   pendingAuthDataRef.current = authData;
+      //   handleLocationError();
+      //   return;
+      // }
       let fcmToken = '';
       const params = new URLSearchParams({
         Devicetoken: fcmToken,
