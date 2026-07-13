@@ -32,7 +32,7 @@ useEffect(()=>{
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.worldpayone.com//',
+        baseURL: 'http://native.uniquerechargesrs.in/',
         timeout: DEFAULT_TIMEOUT,
       }),
     [],
