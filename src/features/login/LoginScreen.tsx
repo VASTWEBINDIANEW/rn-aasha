@@ -41,6 +41,7 @@ import {
   setFcmToken,
   setFingerprintStatus,
   setIsDealer,
+  setOnlyCmsuser,
   setRefreshToken,
   setUserId,
 } from '../../reduxUtils/store/userInfoSlice';
@@ -80,12 +81,13 @@ const LoginScreen = () => {
 // (Agar Vite use kar rahe hain toh: const isDev = import.meta.env.DEV;)
 
 const [userEmail, setUserEmail] = useState(
-  signUpId || (isDev ? '9993827541' : '')
+  signUpId || (isDev ? '8863888123' : '')
 );
 
 const [userPassword, setUserPassword] = useState(
-  signUpPassword || (isDev ? '60051771' : '')
+  signUpPassword || (isDev ? '50511473' : '')
 );
+
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
   const [androidVersion, setCurrentAndroidVersion] = useState('');
@@ -122,6 +124,46 @@ const [userPassword, setUserPassword] = useState(
   const formSlide = useRef(new Animated.Value(60)).current;
   const formOpacity = useRef(new Animated.Value(0)).current;
 
+const [onlycms, setOnlyCms] = useState<any>(null);
+
+const fetchdata = async () => {
+  try {
+    const url = APP_URLS.getUserInfo;
+
+    console.log('🌐 API URL:', url);
+
+    const res = await get({ url });
+
+    console.log('✅ FULL RESPONSE:cmsuser42354235423453453', res);
+
+    // state set
+    setOnlyCms(res);
+
+    // ✅ condition lagao
+    if (res?.data?.CMSUSER === true) {
+      dispatch(setOnlyCmsuser(false));
+    } else {
+      dispatch(setOnlyCmsuser(false));
+      // ya agar kuch nahi bhejna:
+      // return;
+    }
+
+  } catch (error) {
+    console.log('❌ ERROR:', error);
+  }
+};
+
+
+
+  useEffect(() => {
+    if(authToken){
+    fetchdata()
+    }
+    console.log('776676767676767*/*/*/*/');
+
+  }, []);
+
+  
   useEffect(() => {
     Animated.parallel([
       Animated.spring(logoAnim, {
@@ -354,282 +396,6 @@ const [userPassword, setUserPassword] = useState(
     }
   };
 
-  /* ================== LOGIN FUNCTION ================== */
-
-//   const onPressLogin = useCallback(async (otp) => {
-
-//     initDebug(); // 🔥 हर बार reset
-
-//     Keyboard.dismiss();
-//     setIsLoading(true);
-
-//     let role = '';
-//     let msg = '';
-
-//     try {
-
-//       /* ---------------- INIT ---------------- */
-//       // addDebugStep('INIT', { message: 'Login started' });
-
-//       setShowOtpModal(false);
-//       // addDebugStep('OTP_MODAL_CLOSED');
-
-//       /* ---------------- NETWORK ---------------- */
-//       let net = 'unknown';
-
-//       try {
-//         net = (await getCarrier()) || 'wifi/net';
-
-//         // addDebugStep('NETWORK_DETECTED', {
-//         //   data: { net }
-//         // });
-
-//       } catch (e) {
-//         // addDebugStep('NETWORK_FAILED', {
-//         //   status: 'ERROR',
-//         //   message: 'Network detect failed',
-//         //   error: e?.message
-//         // });
-//       }
-
-//       /* ---------------- ENCRYPTION ---------------- */
-//       const encryption = encrypt([
-//         userEmail,
-//         userPassword,
-//         otp,
-//         mobileNumber,
-//         deviceInfo?.buildId,
-//         deviceInfo?.uniqueId,
-//         Loc_Data?.latitude,
-//         Loc_Data?.longitude,
-//         deviceInfo?.modelNumber,
-//         deviceInfo?.brand,
-//         deviceInfo?.ipAddress,
-//         deviceInfo?.address,
-//         deviceInfo?.city,
-//         deviceInfo?.postalCode,
-//         net
-//       ]);
-
-//       if (!encryption?.encryptedData || encryption.encryptedData.length < 15) {
-
-//         // addDebugStep('ENCRYPTION_FAILED', {
-//         //   status: 'ERROR',
-//         //   message: 'Encryption failed',
-//         //   data: encryption
-//         // });
-
-//         throw new Error('Encryption failed');
-//       }
-
-//       // addDebugStep('ENCRYPTION_SUCCESS');
-
-//       /* ---------------- PAYLOAD ---------------- */
-//       const loginData = {
-//         UserName: encryption.encryptedData[0],
-//         Password: encryption.encryptedData[1],
-//         'X-OTP': encryption.encryptedData[2],
-//         Mobile: encryption.encryptedData[3],
-//         Imei: encryption.encryptedData[4],
-//         Devicetoken: encryption.encryptedData[5],
-//         Latitude: encryption.encryptedData[6],
-//         Longitude: encryption.encryptedData[7],
-//         ModelNo: encryption.encryptedData[8],
-//         BrandName: encryption.encryptedData[9],
-//         IPAddress: encryption.encryptedData[10],
-//         City: encryption.encryptedData[11],
-//         Address: encryption.encryptedData[12],
-//         PostalCode: encryption.encryptedData[13],
-//         InternetTYPE: encryption.encryptedData[14],
-//         grant_type: 'password',
-//       };
-
-//       // addDebugStep('PAYLOAD_READY', {
-//       //   data: { keys: Object.keys(loginData) }
-//       // });
-
-//       /* ---------------- API CALL ---------------- */
-//       // addDebugStep('API_CALL_STARTED');
-
-//       const responseRaw = await post({
-//         url: APP_URLS.getToken,
-//         data: loginData,
-//         config: {
-//           headers: {
-//             'Content-Type': 'application/x-www-form-urlencoded',
-//             Authorization: 'bearer',
-//             value1: encryption.keyEncode,
-//             value2: encryption.ivEncode,
-//           },
-//         },
-//       });
-
-//       const response = responseRaw?.data ?? responseRaw ?? {};
-// console.log(response);
-
-//       // addDebugStep('API_RESPONSE', {
-//       //   data: response
-//       // });
-
-//       /* ---------------- SUCCESS ---------------- */
-//       if (response?.access_token) {
-
-//         role = response.role;
-//         msg = `Login success: ${role}`;
-
-//         // addDebugStep('LOGIN_SUCCESS', {
-//         //   message: msg,
-//         //   data: { role, userId: response.userId }
-//         // });
-
-//         dispatch(setIsDealer(response.role === 'Dealer'));
-
-//         if (response.VideoKYC === 'VideoKYCPENDING') {
-
-//           // addDebugStep('VIDEO_KYC_PENDING', {
-//           //   status: 'INFO'
-//           // });
-
-//           // Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-//           // return;
-//         }
-
-//         authenticate(response);
-//         dispatch(setUserId(response?.userId));
-//         dispatch(setRefreshToken(response?.refresh_token));
-
-//         userData(response[".expires"]);
-//       }
-
-//       /* ---------------- API ERROR ---------------- */
-//       else if (response?.error || response?.message) {
-
-//         const errorDescription =
-//           response?.error_description ||
-//           response?.message ||
-//           response?.error ||
-//           'Something went wrong';
-
-//         msg = errorDescription;
-
-//         // addDebugStep('API_ERROR', {
-//         //   status: 'ERROR',
-//         //   message: errorDescription,
-//         //   data: response
-//         // });
-
-//         Alert.alert('Login Error', errorDescription);
-
-//         if (response?.error === 'SENDOTP') {
-
-//           // addDebugStep('OTP_RESEND', {
-//           //   status: 'INFO'
-//           // });
-
-//           setShowOtpModal(true);
-//         }
-//       }
-
-//       /* ---------------- UNKNOWN ---------------- */
-//       else {
-
-//         // addDebugStep('UNKNOWN_RESPONSE', {
-//         //   status: 'ERROR',
-//         //   data: response
-//         // });
-
-//         msg = 'Unexpected response';
-//       }
-
-//    } catch (error) {
-
-//   const apiError =
-//     error?.response?.data ||
-//     error?.data ||
-//     error;
-
-//   const errorDescription =
-//     apiError?.error_description ||
-//     apiError?.message ||
-//     apiError?.error ||
-//     error?.message ||
-//     'Network failed';
-
-//   msg = errorDescription;
-
-//   addDebugStep('CATCH_ERROR', {
-//     status: 'ERROR',
-//     message: errorDescription,
-//     data: apiError
-//   });
-
-//   console.log('FULL ERROR =>', JSON.stringify(apiError, null, 2));
-
-//   // 🔥 OTP CASE
-//   if (apiError?.error === 'SENDOTP') {
-
-//     addDebugStep('OTP_RESEND', {
-//       status: 'INFO',
-//       message: 'Opening OTP Modal'
-//     });
-
-//     // modal force reopen
-//     setShowOtpModal(false);
-
-//     setTimeout(() => {
-//       setShowOtpModal(true);
-//     }, 100);
-
-//     // Alert.alert(
-//     //   'OTP Sent',
-//     //   apiError?.error_description || 'OTP Send To Your Registered Email'
-//     // );
-// ToastAndroid.show(apiError?.error_description || 'OTP Send To Your Registered Email', ToastAndroid.LONG);
-//   } else {
-
-//     Alert.alert('Error', errorDescription);
-//   }
-
-//   // 🔥 Backup save
-//   const debug = getDebugJson();
-//   await saveDebugToStorage(debug);
-
-// } finally {
-
-//   addDebugStep('FINAL', {
-//     message: 'Flow completed',
-//     data: { role, msg }
-//   });
-
-//   const debug = getDebugJson();
-
-//   console.log(
-//     '🧪 FULL DEBUG JSON 👉',
-//     JSON.stringify(debug, null, 2)
-//   );
-
-//   await saveDebugToStorage(debug);
-
-//   onReceiveNotification2({
-//     notification: {
-//       title: role || 'Login',
-//       body: msg || 'Done',
-//     },
-//   });
-
-//   setIsLoading(false);
-// }
-
-//   }, [
-//     dispatch,
-//     post,
-//     userEmail,
-//     userPassword,
-//     mobileNumber,
-//     Loc_Data,
-//     deviceInfo
-//   ]);
-  
 
 const onPressLogin = useCallback(async (otp) => {
 
@@ -715,6 +481,10 @@ const onPressLogin = useCallback(async (otp) => {
       role = response.role;
       msg = `Login success: ${role}`;
       dispatch(setIsDealer(response.role === 'Dealer'));
+          if (response.VideoKYC === "VideoKYCPENDING") {
+          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+           return;
+        }
       authenticate(response);
       dispatch(setUserId(response?.userId));
       dispatch(setRefreshToken(response?.refresh_token));
@@ -934,6 +704,8 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
         },
       });
 
+      console.log(responseRaw,'gettokaresponse-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-');
+      
       const response = responseRaw?.data ?? responseRaw ?? {};
 
       // addDebugStep('API_RESPONSE', {
@@ -952,6 +724,10 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
         // });
 
         dispatch(setIsDealer(role === 'Dealer'));
+            if (response.VideoKYC === "VideoKYCPENDING") {
+          Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
+           return;
+        }
         authenticate(response);
         dispatch(setUserId(response?.userId));
         dispatch(setRefreshToken(response?.refresh_token));
@@ -1070,14 +846,13 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
       };
       const response = await post({ url: APP_URLS.getToken, data: loginData, config });
 
-      console.log("API Response:", response);
       if (response?.access_token) {
         debugRole = response.role || 'No Role Found';
         debugMsg = `finally ${debugRole} Login process completed.`;
         dispatch(setIsDealer(debugRole === 'Dealer'));
-        if (response.VideoKYC === 'VideoKYCPENDING') {
+        if (response.VideoKYC === "VideoKYCPENDING") {
           Alert.alert('', 'Video KYC Uploaded. Wait for admin approval.');
-          //  return;
+           return;
         }
         authenticate(response);
         dispatch(setUserId(response?.userId));
@@ -1104,11 +879,11 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
       setIsLoading(true);
       const currentDevice = deviceInfo;
       const isDemo = DemoConfig.demoNumbers.includes(userEmail);
-      if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
-        pendingAuthDataRef.current = authData;
-        handleLocationError();
-        return;
-      }
+      // if (!isDemo && (!currentDevice?.latitude || currentDevice?.latitude == "0")) {
+      //   pendingAuthDataRef.current = authData;
+      //   handleLocationError();
+      //   return;
+      // }
       let fcmToken = '';
       const params = new URLSearchParams({
         Devicetoken: fcmToken,
@@ -1214,7 +989,6 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
 
   // ─── Version Update Screen ───────────────────────────────────────────────────
 
-console.log(logoUrl)
   // ─── Loading / Splash ────────────────────────────────────────────────────────
   if (loading) {
     return (

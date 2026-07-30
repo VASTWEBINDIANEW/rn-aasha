@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../../features/login/LoginScreen';
@@ -137,7 +137,6 @@ import RecentTx from '../../features/dashboard/RecentTx';
 import EditProfile from '../../features/drawer/EditProfile';
 import CableTvScreen from '../../features/Recharge/CabelTvScreen';
 import UPISeamless from '../../features/AddMoneyOps/payu/seamless/UPISeamless';
-import UPIScreen from '../../features/AddMoneyOps/payu/UPIScreen';
 import UPI from '../../features/AddMoneyOps/payu/seamless/UPI';
 import PrepaidGasScreen from '../../features/Recharge/pipegas';
 import LoginReport from '../../features/drawer/securityPages/LoginReport';
@@ -190,10 +189,22 @@ import CommissionReport from '../../features/Acount/maxuspay';
 import RadiantStep from '../../features/RadiantApp/Radiantregister/RadiantStep';
 import ApprovalStatusScreen from '../../features/RadiantApp/Radiantregister/ApprovalStatusScreen';
 import CameraScreen from '../../components/CameraScreen';
+import PartnerStep from '../../features/RadiantApp/Radiantregister/PartnerOnboardingForm/PartnerStep';
+import { RootState } from '../../reduxUtils/store';
+import { useSelector } from 'react-redux';
+import { APP_URLS } from '../network/urls';
+import UPIScreen from '../../features/AddMoneyOps/payu/UPIScreen';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
+ 
+  const {
+    onlyCmsUser
+  } = useSelector((state: RootState) => state.userInfo);
+
+  console.log(onlyCmsUser,'-=-=-=-onlyCmsUser');
+  
   return (
     <Stack.Navigator
     
@@ -202,18 +213,29 @@ const AppNavigator = () => {
     gestureEnabled: true,
     animation: 'none',   // 👈 animation band
   }}
-      initialRouteName={'DashboardScreen'}>
+      initialRouteName={onlyCmsUser == true ?'CmsScreen':'DashboardScreen'}>
+
+
+       {onlyCmsUser ? (
+        <Stack.Screen name="CmsScreen" component={CmsScreen} />
+      ) : (
+        <>
+          <Stack.Screen name="DashboardScreen" component={DrawerNavigation} />
+          <Stack.Screen name="CmsScreen" component={CmsScreen} />
+        </>
+      )}
+
+      
       <Stack.Screen
         name="DeviceLockScreen"
         component={DeviceLockScreen}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+   {/* <Stack.Screen
         name="DashboardScreen"
         component={DrawerNavigation}
         options={{ headerShown: false }}
-      />
-  
+      /> */}
       <Stack.Screen
         name="Changepassword"
         component={Changepassword}
@@ -719,11 +741,11 @@ const AppNavigator = () => {
         component={RechargeHistory}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name="CmsScreen"
         component={CmsScreen}
         options={{ headerShown: false }}
-      />
+      /> */}
       <Stack.Screen
         name="RadiantDashboard"
         component={RadiantDashboard}
@@ -1082,6 +1104,11 @@ const AppNavigator = () => {
             <Stack.Screen
         name="UPIScreen"
         component={UPIScreen}
+        options={{ headerShown: false }}
+      />   
+       <Stack.Screen
+        name="PartnerStep"
+        component={PartnerStep}
         options={{ headerShown: false }}
       />   
     </Stack.Navigator>

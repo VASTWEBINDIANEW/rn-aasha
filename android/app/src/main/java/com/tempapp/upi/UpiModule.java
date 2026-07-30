@@ -1,4 +1,4 @@
-package com.globalmultisolution.upi;
+package com.digitalindiapay.upi;
 
 import android.app.Activity;
 import android.content.Intent;

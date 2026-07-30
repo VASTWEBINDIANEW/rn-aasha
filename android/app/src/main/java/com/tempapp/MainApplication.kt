@@ -1,4 +1,4 @@
-package com.globalmultisolution
+package com.digitalindiapay
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -14,11 +14,11 @@ import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.react.modules.network.OkHttpClientProvider
 import com.facebook.react.modules.network.ReactCookieJarContainer
 
-import com.globalmultisolution.AepsPackage
-import com.globalmultisolution.upi.UpiPackage
-import com.globalmultisolution.location.LocationPackage
-import com.globalmultisolution.security.SecurityPackage
-import com.globalmultisolution.ContactPicker.ContactPickerPackage
+import com.digitalindiapay.AepsPackage
+import com.digitalindiapay.upi.UpiPackage
+import com.digitalindiapay.location.LocationPackage
+import com.digitalindiapay.security.SecurityPackage
+import com.digitalindiapay.ContactPicker.ContactPickerPackage
 import com.otahotupdate.OtaHotUpdate
 
 class MainApplication : Application(), ReactApplication {

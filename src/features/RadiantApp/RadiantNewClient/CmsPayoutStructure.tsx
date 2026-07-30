@@ -71,19 +71,6 @@ const Table = ({ title, data, showNote }) => {
                                 )}
 
                         </Text>
-                        <BorderLine height={'100%'} width={.5} />
-
-                        <Text style={[styles.cell, { flex: 1 }]}>
-                            {item.CashDeposit}{' '}
-                            {(item.Particular === 'Day Collection & Cash deposit' ||
-                                item.Particular === 'Evening Collection & Cash deposit' ||
-                                item.Particular === 'Vaulting & Cash deposit') && (
-                                    <Text style={styles.liveText}>
-                                        {translate('Per Thousand')}
-                                    </Text>
-                                )}
-                        </Text>
-
                     </View>
                     <BorderLine height={.5} />
                 </>
@@ -148,9 +135,6 @@ const CmsPayoutStructure = () => {
                             <Text style={[styles.cell, styles.cell2, { flex: 2 }]}>{translate("Particular")}</Text>
                             <BorderLine height={'100%'} width={.5} style={{backgroundColor:'#fff'}}/>
                             <Text style={[styles.cell, styles.cell2]}>{translate("Wallet_Mode")}</Text>
-                            <BorderLine height={'100%'} width={.5} style={{backgroundColor:'#fff'}}/>
-
-                            <Text style={[styles.cell, styles.cell2]}>{translate("Deposit_Mode")}</Text>
                         </View>
                         <Table title="Granted RCE Minimum Fixed Payout" data={addInfo.MinimumPayout} />
 
@@ -244,5 +228,3 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
 });
-
-

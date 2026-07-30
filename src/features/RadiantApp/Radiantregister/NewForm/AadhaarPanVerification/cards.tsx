@@ -551,7 +551,8 @@ export const EmailCard = ({
             placeholderTextColor="#9CA3AF"
             keyboardType="email-address"
             autoCapitalize="none"
-            editable={false}
+            // editable={false}
+  editable={!email.prefilled}   // ✅ smart control
 
           />
           {isValid && !email.error && email.value.length > 0 && (

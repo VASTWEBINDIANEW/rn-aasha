@@ -207,7 +207,6 @@ const processFinalSubmit = async () => {
         await processFinalSubmit();
       }}
     />
-        {/* ── Header notice ── */}
         <View style={s.headerBox}>
           <MaterialCommunityIcons name="shield-lock-outline" size={wScale(20)} color={stepColor} />
           <View style={{ flex: 1 }}>

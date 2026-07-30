@@ -110,7 +110,7 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
                 if (info?.email) {
                     setEmail(p => ({
                         ...p,
-                        value: info.email,
+                         value: info.email.trim(),   // ✅ left/right spaces remove
                         verified: info.emailsts === true,
                     }));
                 }
@@ -331,50 +331,55 @@ const AadhaarPanVerification = ({ onNext }: { onNext: () => void }) => {
 
 
 
-    const sendEmailOtp = useCallback(async () => {
-        if (!isEmailValid) return;
-        setEmail(p => ({ ...p, loading: true, error: "" }));
-        try {
-            const url = `${APP_URLS.EmailVerify}?Email=${email.value}`;
-            console.log('📡 EMAIL OTP URL:', url);
-            const res = await post({ url });
-            console.log('✅ EMAIL OTP RESPONSE:', JSON.stringify(res, null, 2));
 
-            if (res?.info?.stschk === true) {
-                setEmail(p => ({ ...p, loading: false, otpSent: true }));
-                toast("OTP sent to email!");
-            } else {
-                setEmail(p => ({ ...p, loading: false, error: res?.message || "OTP send failed. Try again." }));
-            }
-        } catch (err) {
-            console.log('❌ EMAIL OTP ERROR:', err);
-            setEmail(p => ({ ...p, loading: false, error: "Something went wrong. Try again." }));
+
+
+// ── FIX 2: sendEmailOtp — URL mein trim karo ──
+const sendEmailOtp = useCallback(async () => {
+    if (!isEmailValid) return;
+    setEmail(p => ({ ...p, loading: true, error: "" }));
+    try {
+        const trimmedEmail = email.value.trim();  // ✅
+        const url = `${APP_URLS.EmailVerify}?Email=${trimmedEmail}`;
+        console.log('📡 EMAIL OTP URL:', url);
+        const res = await post({ url });
+        console.log('✅ EMAIL OTP RESPONSE:', JSON.stringify(res, null, 2));
+
+        if (res?.info?.stschk === true) {
+            setEmail(p => ({ ...p, loading: false, otpSent: true }));
+            toast("OTP sent to email!");
+        } else {
+            setEmail(p => ({ ...p, loading: false, error: res?.message || "OTP send failed. Try again." }));
         }
-    }, [email.value, isEmailValid]);
+    } catch (err) {
+        console.log('❌ EMAIL OTP ERROR:', err);
+        setEmail(p => ({ ...p, loading: false, error: "Something went wrong. Try again." }));
+    }
+}, [email.value, isEmailValid]);
 
 
+// ── FIX 3: verifyEmailOtp — URL mein trim karo ──
+const verifyEmailOtp = useCallback(async () => {
+    if (email.otpValue.length < 4) return;
+    setEmail(p => ({ ...p, loading: true, otpError: "" }));
+    try {
+        const trimmedEmail = email.value.trim();  // ✅
+        const url = `${APP_URLS.EmailVerifyOTP}?Email=${trimmedEmail}&OTP=${email.otpValue}`;
+        console.log('📡 EMAIL VERIFY URL:', url);
+        const res = await post({ url });
+        console.log('✅ EMAIL VERIFY RESPONSE:', JSON.stringify(res, null, 2));
 
-    const verifyEmailOtp = useCallback(async () => {
-        if (email.otpValue.length < 4) return;
-        setEmail(p => ({ ...p, loading: true, otpError: "" }));
-        try {
-            const url = `${APP_URLS.EmailVerifyOTP}?Email=${email.value}&OTP=${email.otpValue}`;
-            console.log('📡 EMAIL VERIFY URL:', url);
-            const res = await post({ url });
-            console.log('✅ EMAIL VERIFY RESPONSE:', JSON.stringify(res, null, 2));
-
-            if (res?.info?.stschk === true) {
-                setEmail(p => ({ ...p, loading: false, verified: true }));
-                toast("Email verified Successfully!");
-            } else {
-                setEmail(p => ({ ...p, loading: false, otpError: res?.info?.Message || "Invalid OTP. Try again." }));
-            }
-        } catch (err) {
-            console.log('❌ EMAIL VERIFY ERROR:', err);
-            setEmail(p => ({ ...p, loading: false, otpError: "Verification failed. Try again." }));
+        if (res?.info?.stschk === true) {
+            setEmail(p => ({ ...p, loading: false, verified: true }));
+            toast("Email verified Successfully!");
+        } else {
+            setEmail(p => ({ ...p, loading: false, otpError: res?.info?.Message || "Invalid OTP. Try again." }));
         }
-    }, [email.value, email.otpValue]);
-
+    } catch (err) {
+        console.log('❌ EMAIL VERIFY ERROR:', err);
+        setEmail(p => ({ ...p, loading: false, otpError: "Verification failed. Try again." }));
+    }
+}, [email.value, email.otpValue]);
     const handleSubmit = async () => {
         console.log('🚀 handleSubmit START');
         if (!canSubmit) return;

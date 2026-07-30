@@ -12,7 +12,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // ── tumhara existing theme import ─────────────────────────────────────────────
-import { colors } from '../../../utils/styles/theme'; // apna path adjust karo
+import { colors, useColorsOfApi } from '../../../utils/styles/theme'; // apna path adjust karo
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxUtils/store';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
@@ -48,13 +48,17 @@ export const getStepColor = (step: number) => STEP_COLORS[step] ?? colors.primar
 export const StepBanner = ({
   currentStep,
   onBack,
+  steps,       // ✅ optional — agar pass na ho to default global STEPS use hoga
 }: {
   currentStep: number;
   onBack?: () => void;
+  steps?: { label: string; icon: string }[];
 }) => {
+  const activeSteps = steps ?? STEPS;   // ✅ flow-specific steps fallback
+
   const color = getStepColor(currentStep);
-  const step = STEPS[currentStep];
-  const total = STEPS.length;
+  const step = activeSteps[currentStep];
+  const total = activeSteps.length;
   const navigation = useNavigation();
   const { colorConfig } = useSelector((state: RootState) => state.userInfo);
 
@@ -62,8 +66,7 @@ export const StepBanner = ({
     if (onBack) {
       onBack();
     } else {
-      // navigation.navigate('DashboardScreen');
-      navigation.goBack(); // ✅ default back behavior — previous screen pe chala jayega
+      navigation.goBack();
     }
   };
 
@@ -76,17 +79,16 @@ export const StepBanner = ({
           {/* Left — Back button */}
           <TouchableOpacity
             style={sb.iconCircle}
-            onPress={handleBack}          // ✅ handleBack — har case mein kaam karega
+            onPress={handleBack}
             activeOpacity={0.8}
           >
             <MaterialCommunityIcons name="arrow-left" size={18} color={color} />
           </TouchableOpacity>
 
           {/* Center — Step label */}
-          {/* <Text style={sb.stepLabel}>STEP {currentStep + 1} OF {total}</Text> */}
           <Text style={sb.title} ellipsizeMode="tail"
             numberOfLines={1}
-            adjustsFontSizeToFit        // ✅ auto font size adjust karega
+            adjustsFontSizeToFit
             minimumFontScale={0.5} >{step?.label}</Text>
 
           {/* Right — Step icon */}
@@ -96,34 +98,11 @@ export const StepBanner = ({
 
         </View>
 
-        {/* <Text style={sb.title}>{step?.label}</Text> */}
         <Text style={sb.stepLabel}>STEP {currentStep + 1} OF {total}</Text>
 
         <View style={sb.barTrack}>
           <View style={[sb.barFill, { width: `${((currentStep + 1) / total) * 100}%` as any }]} />
         </View>
-
-        {/* Dot row */}
-        {/* <View style={sb.dotsRow}>
-          {STEPS.map((_, i) => (
-            <View key={i} style={sb.dotWrap}>
-              <View style={[
-                sb.dot,
-                i < currentStep && sb.dotDone,
-                i === currentStep && sb.dotActive,
-                i > currentStep && sb.dotFuture,
-              ]}>
-                {i < currentStep
-                  ? <MaterialCommunityIcons name="check" size={10} color={color} />
-                  : <Text style={[sb.dotNum, i === currentStep && { color }]}>{i + 1}</Text>
-                }
-              </View>
-              {i < STEPS.length - 1 && (
-                <View style={[sb.connector, i < currentStep && sb.connectorDone]} />
-              )}
-            </View>
-          ))}
-        </View> */}
 
       </View>
     </View>
@@ -470,20 +449,35 @@ interface AppButtonProps {
   color?: string;
   style?: any;
 }
-
 export const AppButton: React.FC<AppButtonProps> = ({
   title, onPress, variant = 'primary', loading, disabled,
   icon, iconRight, color, style,
 }) => {
-  const bg = variant === 'primary' ? (color ?? colors.primary) : colors.transparency;
-  const borderC = variant === 'outline' ? (color ?? colors.primary) : colors.transparency;
-  const textC = variant === 'primary' ? colors.white : (color ?? colors.primary);
+
+  // ✅ API se color lo
+  const { btnprimary, btnsecondary } = useColorsOfApi();
+
+  const bg = variant === 'primary'
+    ? (color ?? btnprimary)
+    : colors.transparency;
+
+  const borderC = variant === 'outline'
+    ? (color ?? btnprimary)
+    : colors.transparency;
+
+  const textC = variant === 'primary'
+    ? colors.white
+    : (color ?? btnprimary);
 
   return (
     <TouchableOpacity
       style={[
         bt.base,
-        { backgroundColor: bg, borderColor: borderC, borderWidth: variant === 'outline' ? 1.5 : 0 },
+        {
+          backgroundColor: bg,
+          borderColor: borderC,
+          borderWidth: variant === 'outline' ? 1.5 : 0,
+        },
         (disabled || loading) && { opacity: 0.5 },
         style,
       ]}
@@ -492,12 +486,16 @@ export const AppButton: React.FC<AppButtonProps> = ({
       activeOpacity={0.85}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} size="small" />
+        <ActivityIndicator color={colors.white} size="small" />
       ) : (
         <>
-          {icon && !iconRight && <MaterialCommunityIcons name={icon} size={18} color={textC} style={{ marginRight: 6 }} />}
+          {icon && !iconRight && (
+            <MaterialCommunityIcons name={icon} size={18} color={textC} style={{ marginRight: 6 }} />
+          )}
           <Text style={[bt.text, { color: textC }]}>{title}</Text>
-          {icon && iconRight && <MaterialCommunityIcons name={icon} size={18} color={textC} style={{ marginLeft: 6 }} />}
+          {icon && iconRight && (
+            <MaterialCommunityIcons name={icon} size={18} color={textC} style={{ marginLeft: 6 }} />
+          )}
         </>
       )}
     </TouchableOpacity>
@@ -505,12 +503,11 @@ export const AppButton: React.FC<AppButtonProps> = ({
 };
 
 const bt = StyleSheet.create({
-  base: { height: 52, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, elevation: 3, shadowColor: colors.dark_blue, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10 },
-  text: { fontSize: 15, fontWeight: '700', letterSpacing: 0.3 },
+  base: { height: hScale(50), borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, elevation: 3, shadowColor: colors.dark_blue, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 10 },
+  text: { fontSize: wScale(15), fontWeight: '700', letterSpacing: 0.3 },
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ─────────────────────────────────────────────────────────────────────────────
+
 export const NavRow = ({
   onNext,
   nextLabel = 'Next',
@@ -535,9 +532,7 @@ export const NavRow = ({
     />
   </View>
 );
-// ─────────────────────────────────────────────────────────────────────────────
-// AppRadioGroup — Yes / No / Applied jaise options ke liye
-// ─────────────────────────────────────────────────────────────────────────────
+
 interface AppRadioGroupProps {
   label: string;
   options: string[];

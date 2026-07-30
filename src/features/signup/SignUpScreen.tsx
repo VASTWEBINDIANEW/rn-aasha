@@ -87,7 +87,7 @@ const SignUpScreen = ({ route }) => {
       return <PersonalInfoStep svg={svg} Radius2={Radius2} />;
     }
     if (currentPage === 2) {
-      return <SignUpKyc  svg={svg} Radius2={Radius2}/>;
+      return <SignUpKyc svg={svg} Radius2={Radius2} />;
     } if (currentPage === 3) {
       return <VerifyInfoStep svg={svg} Radius2={Radius2} />;
     }
@@ -151,10 +151,11 @@ const SignUpScreen = ({ route }) => {
       }}>
       <>
         <View style={{ flex: 1, backgroundColor: colors.base }}>
-          <AppBarSecond title={'SIGN UP NOW !'}  titlestyle={{}}  actionButton="From Web"
- onActionPress={()=>{
-  Linking.openURL(`https://${APP_URLS.baseWebUrl}/Home/Login/singup`)
- }}/>
+          <AppBarSecond title={'SIGN UP NOW !'} titlestyle={{}} actionButton="From Web"
+            onActionPress={() => {
+              Linking.openURL(`https://${APP_URLS.baseWebUrl}/Home/Login/singup`)
+            }} />
+            
           {/* <Header
             LeftAction={'none'}
             

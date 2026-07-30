@@ -13,211 +13,95 @@ import { store, persistor } from './src/reduxUtils/store';
 import RNBootSplash from 'react-native-bootsplash';
 import { AppContainer } from './src/AppContainer';
 import { navigationRef } from './src/utils/navigation/NavigationService';
-import { clearOtaUpdate, setOtaUpdate, setUnlocked } from './src/reduxUtils/store/userInfoSlice';
+import { setUnlocked } from './src/reduxUtils/store/userInfoSlice';
 import { PaperProvider } from 'react-native-paper';
 import OtUpdate from 'react-native-ota-hot-update';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { Alert, AppState } from 'react-native';
+import { AppState } from 'react-native';
 import { FormProvider } from './src/features/RadiantApp/Radiantregister/NewForm/FormContext';
 import { APP_URLS } from './src/utils/network/urls';
 import OtaUpdateModal from './src/components/OtaUpdateModal';
-import firestore from '@react-native-firebase/firestore';
-import useAxiosHook from './src/utils/network/AxiosClient';
+
 const AppContent = () => {
   const toast = useToast();
   const dispatch = useDispatch();
-  // ── State add karo AppContent ke andar ──
-  const [otaProgress, setOtaProgress] = useState(0);
-  const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
+// ── State add karo AppContent ke andar ──
+const [otaProgress, setOtaProgress] = useState(0);
+const [otaStatus, setOtaStatus] = useState<'idle' | 'downloading' | 'installing' | 'success' | 'failed'>('idle');
   const language = useSelector((state: any) => state.userInfo.appLanguage);
   const authToken = useSelector((state: any) => state.userInfo.authToken);
-  const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
-  const isUpdating = useRef(false);
-  const VERSION_URL =
-    `https://raw.githubusercontent.com/Vwi-app/Ota-bundles/main/${formatted}/version.json`;
+const formatted = APP_URLS.AppName.toLowerCase().replace(/\s+/g, '');
+
+const VERSION_URL =
+  `https://raw.githubusercontent.com/vastgangadhar-app/ota-bundles/main/${formatted}/version.json`;
   const appState = useRef(AppState.currentState);
-  console.log('OTA URL:', VERSION_URL);
-  const {get} = useAxiosHook()
-const fetchOtaDetails = async () => {
-  try {
-    // const documentSnapshot = await firestore()
-    //   .collection('otaData')
-    //   .doc('otadata')
-    //   .collection('rechargedrishti')
-    //   .doc('ota')
-    //   .get();
+console.log('OTA URL:', VERSION_URL);
 
-    // if (!documentSnapshot.exists) {
-    //   console.log('OTA document not found');
-    //   return null;
-    // }
-
-    // return documentSnapshot.data();
-
-
-    
-          const version = await get({ url: APP_URLS.current_version });
-console.log(version)
-
-  return {
-      version: version.otaVersion,
-      url: version.bundleUrl,
-      status: true, // true/false
-      currentVersion: version.currentversion ,
-      message: version.message,
-    };
-  } catch (error) {
-    console.log('Firestore Error:', error);
-    return null;
-  }
-};
-// const checkOta = async () => {
-//   try {
-//     const data = await fetchOtaDetails();
-
-//     if (!data) {
-//       return;
-//     }
-
-//     const installed =
-//       Number(await OtUpdate.getCurrentVersion()) || 0;
-
-//     const latest = Number(data.version);
-
-//     console.log('Installed Version:', installed);
-//     console.log('Firebase Version:', latest);
-//     console.log('Bundle URL:', data.url);
-
-//     if (!latest || isNaN(latest)) {
-//       return;
-//     }
-
-//     if (
-//       latest > installed &&
-//       data.status === true &&
-//       data.url
-//     ) {
-//       console.log('🚀 New OTA update found');
-
-//       startUpdate({
-//         version: latest,
-//         bundle_url: data.url,
-//       });
-//     } else {
-//       //Alert.alert('✅ Already latest version');
-//     }
-//   } catch (error) {
-//     console.log('OTA Check Failed:', error);
-//   }
-// };
-
-  // ✅ START UPDATE
- 
-//  const checkOta = async () => {
-//   try {
-//     const data = await fetchOtaDetails();
-//     if (!data) return;
-
-//     const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-//     const latest = Number(data.version);
-
-//     console.log('Installed:', installed, 'Latest:', latest);
-
-//     if (!latest || isNaN(latest)) return;
-
-//     if (latest > installed && data.status === true) {
-//       dispatch(setOtaUpdate(latest));
-//     } else {
-//       dispatch(clearOtaUpdate());
-//     }
-//   } catch (error) {
-//     console.log('OTA Check Failed:', error);
-//   }
-// };
- const checkOta = async (isResume = false) => {
-  try {
-    const data = await fetchOtaDetails();
-    if (!data) return;
-
-    const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
-    const latest = Number(data.version);
-
-    console.log('Installed:', installed, 'Latest:', latest, 'isResume:', isResume);
-
-    if (!latest || isNaN(latest)) return;
-
-    if (latest > installed && data.status === true && data.url) {
-      dispatch(setOtaUpdate(latest));
-
-      if (isResume) {
-        // ✅ Background se aaya — sirf Redux
-        console.log('🔔 Background check — Redux updated only');
-      } else {
-        // ✅ App open hua — auto update shuru
-        console.log('🚀 App opened + update found → auto update starting...');
-        await startUpdate({
-          version: latest,
-          bundle_url: data.url,
-        });
-      }
-    } else {
-      console.log('✅ Already on latest version');
-      dispatch(clearOtaUpdate());
-    }
-  } catch (error) {
-    console.log('OTA Check Failed:', error);
-  }
-};
-
-  const startUpdate = async (data: any) => {
-    if (isUpdating.current) {
-      console.log('OTA already running');
-      return;
-    }
-
-    isUpdating.current = true;
-
-    setOtaStatus('downloading');
-    setOtaProgress(0);
-
+  const checkOta = async () => {
     try {
-      await OtUpdate.downloadBundleUri(
-        ReactNativeBlobUtil,
-        data.bundle_url,
-        Number(data.version),
-        {
-          restartAfterInstall: true,
-          restartDelay: 1500,
-          notification: false,
-          useDownloadManager: false,
+      const res = await fetch(VERSION_URL + '?t=' + Date.now());
+      const data = await res.json();
 
-          updateSuccess() {
-            console.log('✅ OTA Updated:', data.version);
-            setOtaStatus('success');
-          },
+      const installed = Number(await OtUpdate.getCurrentVersion()) || 0;
+      const latest = Number(data.version);
 
-          updateFail(error) {
-            console.log('❌ OTA Failed:', error);
-            setOtaStatus('failed');
-          },
+      console.log('Installed:', installed, 'Latest:', latest);
 
-          progress(received, total) {
-            if (total > 0) {
-              const percent = Math.floor(
-                (received / total) * 100
-              );
-              setOtaProgress(percent);
-            }
-          },
-        }
-      );
+      if (!latest || isNaN(latest)) return;
+
+      if (latest > installed  && data.status) {
+        console.log('🚀 New OTA update found');
+        startUpdate(data);
+      } else {
+        console.log('✅ Already latest version');
+      }
     } catch (error) {
-      console.log('OTA error:', error);
-      setOtaStatus('failed');
-    } finally {
-      isUpdating.current = false;
+      console.log('OTA check failed', error);
     }
   };
+
+  // ✅ START UPDATE
+const startUpdate = async (data: any) => {
+  setOtaStatus('downloading');
+  setOtaProgress(0);
+
+
+  try {
+    await OtUpdate.downloadBundleUri(
+      ReactNativeBlobUtil,
+      data.bundle_url,
+      Number(data.version),
+      {
+        restartAfterInstall: true,
+        restartDelay: 1500,
+        notification: false,
+        useDownloadManager: false,
+
+        updateSuccess() {
+  setOtaStatus('installing');
+},
+
+        updateFail(error) {
+          setOtaStatus('failed');
+          // ❌ Version revert karo agar fail hua
+          OtUpdate.setCurrentVersion(0);
+          console.log('OTA Failed:', error);
+        },
+
+        progress(received, total) {
+          if (total > 0) {
+            const percent = Math.floor((received / total) * 100);
+            setOtaProgress(percent);
+          }
+        },
+      }
+    );
+  } catch (error) {
+    setOtaStatus('idle');
+    OtUpdate.setCurrentVersion(0);
+    console.log('OTA error:', error);
+  }
+};
 
   // ✅ INITIAL + LOGIN CHANGE
   useEffect(() => {
@@ -225,37 +109,36 @@ console.log(version)
   }, [language, authToken]);
 
   // ✅ APP RESUME CHECK
-useEffect(() => {
-  // ✅ App pehli baar open — auto update
-  checkOta(false);
+  // useEffect(() => {
+  //     checkOta(); // ✅ App open hone pe bhi check karo
 
-  const subscription = AppState.addEventListener('change', nextAppState => {
-    if (
-      appState.current.match(/inactive|background/) &&
-      nextAppState === 'active'
-    ) {
-      // ✅ App running me background se aaya — sirf Redux
-      console.log('🔄 App resumed → background check only');
-      checkOta(true);
-    }
-    appState.current = nextAppState;
-  });
+  //   const subscription = AppState.addEventListener('change', nextAppState => {
+  //     if (
+  //       appState.current.match(/inactive|background/) &&
+  //       nextAppState === 'active'
+  //     ) {
+  //       console.log('🔄 App resumed → checking OTA');
+  //       checkOta();
+  //     }
 
-  return () => subscription.remove();
-}, []);
+  //     appState.current = nextAppState;
+  //   });
+
+  //   return () => subscription.remove();
+  // }, []);
+
   return (
-    <>
-      <OtaUpdateModal status={otaStatus} progress={otaProgress} />
-      <NavigationContainer
-        key={language}
-        ref={navigationRef}
-        onReady={() => RNBootSplash.hide({ fade: true })}
-      >
-
-        <AppContainer />
-      </NavigationContainer>
-    </>
-  );
+  <>
+    <OtaUpdateModal status={otaStatus} progress={otaProgress} />
+    <NavigationContainer
+      key={language}
+      ref={navigationRef}
+      onReady={() => RNBootSplash.hide({ fade: true })}
+    >
+      <AppContainer />
+    </NavigationContainer>
+  </>
+);
 };
 
 function App() {
@@ -279,9 +162,9 @@ function App() {
                 <PersistGate loading={null} persistor={persistor}>
 
                   <FormProvider>
-                    <AppContent />
+                      <AppContent />
                   </FormProvider>
-
+                
                 </PersistGate>
               </PaperProvider>
             </Provider>

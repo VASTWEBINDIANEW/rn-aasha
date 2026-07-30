@@ -8,13 +8,15 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { COLORS } from '../utils/theme';
+import { APP_URLS } from '../../../utils/network/urls';
+import useAxiosHook from '../../../utils/network/AxiosClient';
 
 interface OtpModalProps {
-  visible:   boolean;
-  type:      'mobile' | 'email';           // which channel
-  target:    string;                        // masked number/email to show
-  onVerify:  (otp: string) => Promise<boolean>; // return true = success
-  onClose:   () => void;
+  visible: boolean;
+  type: 'mobile' | 'email';           // which channel
+  target: string;                        // masked number/email to show
+  onVerify: (otp: string) => Promise<boolean>; // return true = success
+  onClose: () => void;
   onResend?: () => void;
 }
 
@@ -23,10 +25,10 @@ const OTP_LENGTH = 6;
 const OtpModal: React.FC<OtpModalProps> = ({
   visible, type, target, onVerify, onClose, onResend,
 }) => {
-  const [otp,       setOtp]       = useState<string[]>(Array(OTP_LENGTH).fill(''));
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState('');
-  const [success,   setSuccess]   = useState(false);
+  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [resendSec, setResendSec] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
@@ -52,8 +54,8 @@ const OtpModal: React.FC<OtpModalProps> = ({
 
   const handleChange = (val: string, idx: number) => {
     const digit = val.replace(/\D/g, '').slice(-1);
-    const next  = [...otp];
-    next[idx]   = digit;
+    const next = [...otp];
+    next[idx] = digit;
     setOtp(next);
     setError('');
     if (digit && idx < OTP_LENGTH - 1) inputRefs.current[idx + 1]?.focus();
@@ -74,7 +76,7 @@ const OtpModal: React.FC<OtpModalProps> = ({
     const ok = await onVerify(code);
     setLoading(false);
     if (ok) { setSuccess(true); setTimeout(onClose, 1200); }
-    else    { setError('Invalid OTP. Please try again.'); setOtp(Array(OTP_LENGTH).fill('')); inputRefs.current[0]?.focus(); }
+    else { setError('Invalid OTP. Please try again.'); setOtp(Array(OTP_LENGTH).fill('')); inputRefs.current[0]?.focus(); }
   };
 
   const handleResend = () => {
@@ -86,8 +88,25 @@ const OtpModal: React.FC<OtpModalProps> = ({
   };
 
   const accentColor = type === 'mobile' ? '#F59E0B' : '#8B5CF6';
-  const icon        = type === 'mobile' ? 'cellphone-message' : 'email-check-outline';
+  const icon = type === 'mobile' ? 'cellphone-message' : 'email-check-outline';
 
+  const { get } = useAxiosHook();
+
+  const fetchdata = async () => {
+    try {
+      const res = await get({ url: APP_URLS.getUserInfo })
+      console.log(res,'assdfasfasfasdf9089078907890');
+      
+    } catch (error: any) {
+
+     }
+  }
+
+
+
+  useEffect(() => {
+    fetchdata()
+  }, [])
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={s.overlay}>
@@ -189,26 +208,26 @@ const OtpModal: React.FC<OtpModalProps> = ({
 export default OtpModal;
 
 const s = StyleSheet.create({
-  overlay:      { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
-  sheet:        { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 36, alignItems: 'center' },
-  handle:       { width: 40, height: 4, backgroundColor: COLORS.border, borderRadius: 99, marginBottom: 20 },
-  closeBtn:     { position: 'absolute', top: 20, right: 20, padding: 4 },
-  iconBox:      { width: 64, height: 64, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  title:        { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 6 },
-  sub:          { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 24 },
-  target:       { fontWeight: '700' },
-  otpRow:       { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  otpBox:       { width: 46, height: 54, borderWidth: 1.5, borderRadius: 12, fontSize: 22, fontWeight: '700', color: COLORS.textPrimary, backgroundColor: '#F9FAFB' },
-  errorRow:     { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 },
-  errorText:    { fontSize: 12, color: COLORS.error },
-  verifyBtn:    { width: '100%', height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  verifyText:   { fontSize: 15, fontWeight: '700', color: '#fff' },
-  resendRow:    { flexDirection: 'row', alignItems: 'center' },
-  resendLabel:  { fontSize: 13, color: COLORS.textSecondary },
-  resendBtn:    { fontSize: 13, fontWeight: '700' },
-  successWrap:  { alignItems: 'center', paddingVertical: 20 },
-  successCircle:{ width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 36, alignItems: 'center' },
+  handle: { width: 40, height: 4, backgroundColor: COLORS.border, borderRadius: 99, marginBottom: 20 },
+  closeBtn: { position: 'absolute', top: 20, right: 20, padding: 4 },
+  iconBox: { width: 64, height: 64, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
+  title: { fontSize: 20, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 6 },
+  sub: { fontSize: 13, color: COLORS.textSecondary, textAlign: 'center', marginBottom: 24 },
+  target: { fontWeight: '700' },
+  otpRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  otpBox: { width: 46, height: 54, borderWidth: 1.5, borderRadius: 12, fontSize: 22, fontWeight: '700', color: COLORS.textPrimary, backgroundColor: '#F9FAFB' },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 },
+  errorText: { fontSize: 12, color: COLORS.error },
+  verifyBtn: { width: '100%', height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  verifyText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  resendRow: { flexDirection: 'row', alignItems: 'center' },
+  resendLabel: { fontSize: 13, color: COLORS.textSecondary },
+  resendBtn: { fontSize: 13, fontWeight: '700' },
+  successWrap: { alignItems: 'center', paddingVertical: 20 },
+  successCircle: { width: 100, height: 100, borderRadius: 50, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   successInner: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   successTitle: { fontSize: 22, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 8 },
-  successSub:   { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center' },
+  successSub: { fontSize: 14, color: COLORS.textSecondary, textAlign: 'center' },
 });

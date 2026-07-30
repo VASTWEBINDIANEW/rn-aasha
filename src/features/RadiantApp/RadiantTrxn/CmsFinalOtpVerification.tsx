@@ -25,7 +25,7 @@ const CmsFinalOtpVerification = ({ route }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isChecked, setIsChecked] = useState(false);
   const inputsRef = useRef([]);
-  console.error(transid);
+  console.error(transid,'090990io90koasklfdasdfr4t');
   const [isLoad, setIsLoad] = useState(false);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [currentReceiptIndex, setCurrentReceiptIndex] = useState(0);

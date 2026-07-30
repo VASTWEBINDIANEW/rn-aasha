@@ -37,6 +37,7 @@ import CashDepositReportSvg from '../drawer/svgimgcomponents/CashDepositReportSv
 import { TextStyle } from 'react-native';
 import { Color } from 'react-native-alert-notification/lib/typescript/service';
 import { translate } from '../../utils/languageUtils/I18n';
+import AddSvg from '../drawer/svgimgcomponents/AddSvg';
 
 
 const CmsTab = () => {
@@ -195,6 +196,15 @@ const CmsTab = () => {
             },
             ]
             : []),
+             {
+            id: '4',
+            title: "Add Customer",
+            description:
+                'Onboard a new partner as a Retail Cash Executive (RCE). Verify their GST number, complete KYC with Aadhaar and PAN, add business and outlet details, and submit their bank account information — all in one guided flow',
+
+            nav: 'PartnerStep',
+            img: <AddSvg color={svgColor} />,
+        },
 
         {
             id: '4',
@@ -330,7 +340,6 @@ const CmsTab = () => {
             console.error("Error fetching PVC Radiant Status:", error);
         }
     };
-
     return (
 
         <View style={{ flex: 1 }}>
@@ -377,6 +386,7 @@ const CmsTab = () => {
                 )}
             />
              */}
+             
         
 <TabView
   navigationState={{ index, routes }}
@@ -401,6 +411,7 @@ const CmsTab = () => {
     />
   )}
 />
+
         </View>
 
     );
@@ -458,3 +469,4 @@ const styles = StyleSheet.create({
 });
 
 export default CmsTab;
+

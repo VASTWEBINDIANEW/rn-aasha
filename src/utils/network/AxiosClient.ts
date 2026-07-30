@@ -9,7 +9,7 @@ const HEAVY_ENDPOINTS = [
   'CashpickupSubmit',
   'CashDeposit',
   'Submit',
-  'hkhk2'
+  'hkhk2','TranstionSendotp'
 ];
 const HEAVY_TIMEOUT = 300000;  // 5 minutes
 const DEFAULT_TIMEOUT = 120000; // 2 minutes
@@ -32,7 +32,7 @@ useEffect(()=>{
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.uniquerechargesrs.in//',
+        baseURL: 'http://native.ssvcms.in//',
         timeout: DEFAULT_TIMEOUT,
       }),
     [],

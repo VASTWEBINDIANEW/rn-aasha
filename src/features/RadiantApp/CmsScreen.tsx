@@ -24,6 +24,19 @@ import AttachedDocuments from './Radiantregister/NewForm/AttachedDocuments';
 import SecurityChequeScreen from './Radiantregister/NewForm/SecurityChequeScreen';
 import ApprovalStatusScreen from './Radiantregister/ApprovalStatusScreen';
 import CmsNewPin from './RadiantTrxn/CmsNewPin';
+import AboutCms from './RadiantNewClient/AboutCms';
+import Availabilitybusiness from './RadiantNewClient/Availabilitybusiness';
+import PartnerOnboardingScreen from './Radiantregister/PartnerOnboardingScreen';
+import PartnerBasicInfoScreen from './Radiantregister/PartnerOnboardingForm/PartnerBasicInfoScreen';
+import PartnerStep from './Radiantregister/PartnerOnboardingForm/PartnerStep';
+import PartnerBankDetailsScreen from './Radiantregister/PartnerOnboardingForm/PartnerBankDetailsScreen';
+import PartnerKycDocsScreen from './Radiantregister/PartnerOnboardingForm/PartnerKycDocsScreen';
+import ClientApplicationStatusScreen from './CmsReport/ClientApplicationStatusScreen';
+import Walletunloadreport from './CmsReport/CashPicUpReport';
+import CashDepositReport from './CmsReport/CashDepositReport';
+import PickupSalaryCalendar from './CmsSalarySheet/PickupSalaryCalendar';
+import TermsScreen from './components/TermsScreen';
+import CmsTab from './CmsTab';
 
 const CmsScreen = () => {
   const { rceIdStatus } = useSelector((state: RootState) => state.userInfo);
@@ -36,80 +49,90 @@ const CmsScreen = () => {
 
   const { post } = useAxiosHook();
   const dispatch = useDispatch();
+const [showTerms, setShowTerms] = useState<boolean | null>(null);
+useEffect(() => {
+  const checkTerms = async () => {
+    try {
+      const res = await post({
+url: APP_URLS.ShowchangesTerms
+      });
 
-  useEffect(() => {
-    const loadStatus = async () => {
-      console.log('🚀 loadStatus START');
+      console.log('📥 Terms API:', res);
 
-      setLoading(true);
-      dispatch(clearEntryScreen(null));
-
-      try {
-        const res1 = await post({ url: APP_URLS.RCEID });
-        console.log('📡 URL =', APP_URLS.RCEID);
-
-        if (typeof res1 === 'string') {
-          console.log('HTML RESPONSE RECEIVED',res1);
-          setLoading(false);
-          return;
-        }
-
-        console.log('✅ RCEID RESPONSE:', JSON.stringify(res1, null, 2));
-
-        const s1 = res1?.Content?.ADDINFO?.sts ?? null;
-        const t1 = res1?.Content?.ADDINFO?.Type ?? null;
-        const rceID = res1?.Content?.ADDINFO?.CEID ?? null;
-
-        console.log('📊 Parsed:', { s1, t1, rceID });
-
-        setStatus(s1);
-        dispatch(setRctype(t1));
-        dispatch(setRceID(rceID));
-
-        // ✅ NEW: sts false + CEID NOTFound nahi hai toh Alert dikhao
-        if (s1 === false && rceID !== null && rceID !== 'NOTFound') {
-          Alert.alert('Info', `CEID: ${rceID}`);
-          setLoading(false);
-          return; // ← aage koi API call nahi hogi
-        }
-
-        // ✅ EXISTING: sts false + CEID NOTFound → normal flow
-        if (s1 === false) {
-          console.log('📡 Calling API: RadiantCEIntersetCheck');
-
-          const res2 = await post({
-            url: APP_URLS.RadiantCEIntersetCheck,
-          });
-
-          console.log('✅ InterestCheck RESPONSE:', JSON.stringify(res2, null, 2));
-
-          const s2 = res2?.Content?.ADDINFO?.sts ?? null;
-          setStatus2(s2);
-
-          console.log('📊 status2:', s2);
-
-          if (s2 === 'Success' || s2 === 'DocVerification') {
-            console.log('📡 Calling API: CheckPendingForm');
-
-            const res3 = await post({
-              url: APP_URLS.CheckPendingForm,
-            });
-
-            console.log('✅ CheckPendingForm RESPONSE:', JSON.stringify(res3, null, 2));
-
-            const checkStatus = res3?.status ?? null;
-            setCheckInfo(checkStatus);
-
-            console.log('📊 checkInfo:', checkStatus);
-          }
-        }
-      } catch (error) {
-        console.error('❌ ERROR:', error);
+      if (res?.sts === true) {
+        setShowTerms(true);   // 👉 TermsScreen dikhega
+      } else {
+        setShowTerms(false);  // 👉 normal flow chalega
       }
 
-      console.log('🏁 loadStatus END');
+    } catch (err) {
+      console.log('❌ Terms API Error:', err);
+      setShowTerms(false);
+    }
+  };
+
+  checkTerms();
+}, []);
+
+useEffect(() => {
+  if (showTerms === false) {
+    loadStatus();
+  }
+}, [showTerms]);
+
+const loadStatus = async () => {
+  console.log('🚀 loadStatus START');
+
+  setLoading(true);
+  dispatch(clearEntryScreen(null));
+
+  try {
+    const res1 = await post({ url: APP_URLS.RCEID });
+
+    if (typeof res1 === 'string') {
       setLoading(false);
-    };
+      return;
+    }
+
+    const s1 = res1?.Content?.ADDINFO?.sts ?? null;
+    const t1 = res1?.Content?.ADDINFO?.Type ?? null;
+    const rceID = res1?.Content?.ADDINFO?.CEID ?? null;
+
+    setStatus(s1);
+    dispatch(setRctype(t1));
+    dispatch(setRceID(rceID));
+
+    if (s1 === false && rceID !== null && rceID !== 'NOTFound') {
+      Alert.alert('Info', `CEID: ${rceID}`);
+      setLoading(false);
+      return;
+    }
+
+    if (s1 === false) {
+      const res2 = await post({
+        url: APP_URLS.RadiantCEIntersetCheck,
+      });
+
+      const s2 = res2?.Content?.ADDINFO?.sts ?? null;
+      setStatus2(s2);
+
+      if (s2 === 'Success' || s2 === 'DocVerification') {
+        const res3 = await post({
+          url: APP_URLS.CheckPendingForm,
+        });
+
+        const checkStatus = res3?.status ?? null;
+        setCheckInfo(checkStatus);
+      }
+    }
+  } catch (error) {
+    console.error('❌ ERROR:', error);
+  }
+
+  setLoading(false);
+};
+  useEffect(() => {
+
 
     loadStatus();
   }, [dispatch]);
@@ -119,6 +142,13 @@ const CmsScreen = () => {
   }
 
 const renderScreen = () => {
+  if (showTerms === null) {
+  return <RadiantWellCome />; // loader ya splash
+}
+
+if (showTerms === true) {
+  return <TermsScreen />; // ✅ direct terms screen
+}
   if (status === true) {
     return <RadiantTransactionScreen />;
   }
@@ -152,14 +182,28 @@ const renderScreen = () => {
 
   return <RadiantWellCome />;
 };
+let num = 15;
 
+if (num % 2 === 0) {
+  console.log("Even");
+} else {
+  console.log("Odd");
+}
+function checkEven(num) {
+  return num % 2 === 0;
+}
+
+console.log(checkEven(4));
   return (
     <View style={styles.container}>
       {renderScreen()}
+    {/* <CmsTab/> */}
     </View>
   );
 };
-
+function reverse(str) {
+  return str.split("").reverse().join("");
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

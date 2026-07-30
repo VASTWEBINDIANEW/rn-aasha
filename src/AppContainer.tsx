@@ -4,11 +4,13 @@ import { RootState } from './reduxUtils/store';
 import useAxiosHook from './utils/network/AxiosClient';
 import { APP_URLS } from './utils/network/urls';
 import {
+  reset,
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
   setLogoUrl,
   setNeedUpdate,
+  setOnlyCmsuser,
   setVersionData
 } from './reduxUtils/store/userInfoSlice';
 import registerNotification from './utils/NotificationService';
@@ -46,6 +48,9 @@ import ConnectionLost from './components/ConnectionLost';
 import { translate } from './utils/languageUtils/I18n';
 import BlockedMessageAnimated from './features/dashboard/components/Pkgmiss';
 import firestore from '@react-native-firebase/firestore';
+import CmsScreen from './features/RadiantApp/CmsScreen';
+import { useNavigation } from '@react-navigation/native';
+import NavigationService from './utils/navigation/NavigationService';
 
 export const AppContainer = () => {
   const { LocationModule } = NativeModules;
@@ -60,7 +65,8 @@ export const AppContainer = () => {
     loginId,
     isFingerprintEnabled,
     unLocked,
-    isDemoUser: reduxIsDemoUser
+    isDemoUser: reduxIsDemoUser,
+    onlyCmsUser
   } = useSelector((state: RootState) => state.userInfo);
 
   const [locationAllowed, setLocationAllowed] = useState(false);
@@ -138,7 +144,7 @@ export const AppContainer = () => {
     }
   };
 
-  const [allowed, setAllowed] = useState(null);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
     const subscriber = firestore()
@@ -209,7 +215,7 @@ export const AppContainer = () => {
       console.log("Bundle ID:", bundleId);
       console.log('====================================');
       setpkg(bundleId);
-      
+
       let locData = {
         latitude: '0',
         longitude: '0',
@@ -275,21 +281,21 @@ export const AppContainer = () => {
           labelColor: res.LABLECOLOR,
         }));
       }
-      
+
       const version = await get({ url: APP_URLS.current_version });
       console.log('====================================');
       console.log("Server Version Response:", version);
       console.log('====================================');
-      
+
       if (version) {
         dispatch(setLogoUrl(version.Logo));
-        dispatch(setVersionData(version)); // पूरे डेटा को Redux में डाला ताकि UpdateBox लिंक रीड कर सके
+        dispatch(setVersionData(version));
 
         const isUpToDate = APP_URLS.version === version.currentversion;
         setUpdate(isUpToDate);
       }
 
-      const bundleId = DeviceInfo.getBundleId(); 
+      const bundleId = DeviceInfo.getBundleId();
 
       if (version?.PackageName) {
         const mismatch = bundleId !== version.PackageName;
@@ -300,19 +306,19 @@ export const AppContainer = () => {
         console.log('❗ PACKAGE MISMATCH:', mismatch);
       }
       registerNotification();
-    } catch (e) { 
-      console.log('❌ API Error', e); 
+    } catch (e) {
+      console.log('❌ API Error', e);
     }
   };
 
   const [connectionLost, setConnectionLost] = useState(false);
-  
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const isDisconnected = !state.isConnected;
 
       setConnectionLost(prev => {
-        if (prev === isDisconnected) return prev; 
+        if (prev === isDisconnected) return prev;
         return isDisconnected;
       });
 
@@ -326,38 +332,80 @@ export const AppContainer = () => {
     return () => unsubscribe();
   }, []);
 
-  // --- RENDER LOGIC (Priority Based) --- 
-  const renderMainContent = () => {
-    // अगर पैकेज मिसमैच ब्लॉक को एक्टिवेट करना चाहते हैं तो इसे अनकमेंट कर सकते हैं
-    // if (pkgmiss) {
-    //   return (
-    //     <BlockedMessageAnimated
-    //       message={'Invalid application package detected.\nContact developer.'}
-    //       bubbleCount={15}
-    //     />
-    //   );
-    // }
+  const navigation = useNavigation();
+  const appState1 = useRef(AppState.currentState);
 
+  const fetchdata = async () => {
+    try {
+      const url = APP_URLS.getUserInfo;
+      console.log('🌐 API URL:', url);
+
+      const res = await get({ url });
+      console.log('✅ RESPONSE:', res);
+
+      if (res?.data?.CMSUSER === true) {
+        dispatch(setOnlyCmsuser(false));
+      } else {
+        dispatch(setOnlyCmsuser(false));
+      }
+    } catch (error) {
+      console.log('❌ ERROR:', error);
+    }
+  };
+
+  useEffect(() => {
+    // 1. Screen Focus Listener
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      console.log('📲 Screen Focus → API Call');
+      fetchdata();
+    });
+
+    // 2. Background → Foreground Listener
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (
+        appState1.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('🔄 App foreground me aayi → API Call');
+        fetchdata();
+      }
+
+      appState1.current = nextAppState;
+    });
+
+    return () => {
+      unsubscribeFocus();
+      subscription.remove();
+    };
+  }, [navigation]);
+
+
+  useEffect(() => {
+    if (authToken) {
+      if (onlyCmsUser) {
+        NavigationService.reset('CmsScreen');
+      } else {
+        NavigationService.reset('DashboardScreen');
+      }
+    }
+  }, [onlyCmsUser]);
+  const renderMainContent = () => {
     if (connectionLost) {
       return <ConnectionLost onRetry={() => console.log('retry')} />;
     }
 
-    // 🔥 GOOGLE & APP NAME BYPASS BLOCKS REMOVED HERE TOO
-    // सीधे चेक होगा: अगर ऐप अपडेटेड नहीं है (!update), तो अपडेट बॉक्स दिखाओ
     if (!update) {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
     }
 
-    // Priority 2: Not Logged In
     if (!authToken) {
       return <AuthNavigator />;
     }
 
-    // Priority 3: Biometric Auth
     if (isFingerprintEnabled && !unLocked) {
       return <BiometricAuth />;
     }
-
+    // if(!onlyCmsUser) return <CmsScreen/>
     return IsDealer ? <DealerNavigator /> : <AppNavigator />;
   };
 

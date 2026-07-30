@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, Modal, } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Linking, TextInput, ToastAndroid, Modal, Keyboard, } from 'react-native';
 import FlotingInput from '../../drawer/securityPages/FlotingInput';
 import AlertSvg from '../../drawer/svgimgcomponents/AlertSvg';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
@@ -123,7 +123,7 @@ const CmsPrePay = ({ route }) => {
 
     const fatchData = async () => {
         setLoading(true);
-
+        Keyboard.dismiss()
         try {
             const url = `${APP_URLS.CashPickupRemainBalNEW}?Amount=${amount}&RCEID=${rceID}&Shopid=${shopId}`;
             console.log("API URL 👉🟰🟰🟰🟰🟰🟰", url);
@@ -134,7 +134,7 @@ const CmsPrePay = ({ route }) => {
             setAmountneed(response.amountneeded);
             setAdminiStatus(response);  // store full response
             if (response?.apiremainstatus && response?.sts && response?.allowzero) {
-                navigation.navigate('CmsCoustomerInfo', {item, setAmount, setRAmount });
+                navigation.navigate('CmsCoustomerInfo', { item, setAmount, setRAmount });
 
             }
 
@@ -174,7 +174,7 @@ const CmsPrePay = ({ route }) => {
             return;
         }
         dispatch(setCmsAddMFrom('CmsPrePay'))
-        navigation.navigate("AddMoneyOptions", { amount:amountneed, paymentMode: 'UPI', from: 'PrePay' });
+        navigation.navigate("AddMoneyOptions", { amount: amountneed, paymentMode: 'UPI', from: 'PrePay' });
 
     };
     useEffect(() => {
@@ -261,36 +261,38 @@ const CmsPrePay = ({ route }) => {
                 </View>
             </Modal>
             <AllBalance />
-            <ScrollView>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
 
                 <View style={styles.container}>
-                    <View style={[styles.bgColor, { backgroundColor: `${colorConfig.secondaryColor}33` }]}>
-                        <View style={styles.notBg}>
 
-                            <Text style={styles.disc}>
-                                Please enter the amount you wish to collect from Customer Points in the field below. Here, you can
-                                choose one-time (final payment) or multi-time pickup (partial payment) from Customer Points. If you
-                                wish to collect the payment in installments, select Partial Payment.
-                            </Text>
-                            <Text style={styles.disc}>
-                                Please check that you have the required wallet balance. If not, first add the required balance to your wallet
-                                using UPI, NEFT, RTGS, IMPS, or cash deposit mode.
-                            </Text>
-                            <Text style={styles.disc}>
-                                Please check that you have the required wallet balance. If not, first add the required balance to your wallet
-                                using UPI, NEFT, RTGS, IMPS, or cash deposit mode.
-                            </Text>
+                    {/* ── Info Card ── */}
+                    <View style={styles.infoCard}>
+                        <Text style={styles.infoTitle}>How pickup works</Text>
+                        <Text style={styles.disc}>
+                            Enter the amount you wish to collect from Customer Points below. Choose
+                            One-time (Full & Final) payment, or Partial payment if you want to collect
+                            it in installments.
+                        </Text>
+                        <Text style={styles.disc}>
+                            Make sure your wallet has enough balance. If not, top it up using UPI, NEFT,
+                            RTGS, IMPS, or a cash deposit before continuing.
+                        </Text>
+                    </View>
 
-                        </View>
-                        <TouchableOpacity onPress={() => setShowPaymentDropdown(!showPaymentDropdown)}
+                    {/* ── Payment Card ── */}
+                    <View style={styles.card}>
+                        <Text style={styles.label}>Pickup Type</Text>
+                        <TouchableOpacity
+                            onPress={() => setShowPaymentDropdown(!showPaymentDropdown)}
+                            activeOpacity={0.8}
                         >
-                            <TextInput placeholder={'Full & Final Pickup'}
-                                value={paymentType}
-                                editable={false} style={styles.input} placeholderTextColor={'#000'}
-
-                            />
-
-                            <View style={commonStyles.righticon2}>
+                            <View style={styles.dropdownTrigger}>
+                                <Text style={styles.dropdownTriggerText}>{paymentType}</Text>
                                 <OnelineDropdownSvg />
                             </View>
                         </TouchableOpacity>
@@ -300,7 +302,10 @@ const CmsPrePay = ({ route }) => {
                                 {paymentOptions.map((item, index) => (
                                     <TouchableOpacity
                                         key={index}
-                                        style={styles.option}
+                                        style={[
+                                            styles.option,
+                                            index === paymentOptions.length - 1 && { borderBottomWidth: 0 },
+                                        ]}
                                         onPress={() => {
                                             setPaymentType(item.label);   // 👈 label set karo
                                             setShowPaymentDropdown(false);
@@ -314,20 +319,21 @@ const CmsPrePay = ({ route }) => {
                             </View>
                         )}
 
-                        <TextInput placeholder={"Enter Pickup Amount"}
+                        <Text style={[styles.label, { marginTop: hScale(16) }]}>Pickup Amount</Text>
+                        <TextInput
+                            placeholder={"Enter Pickup Amount"}
                             keyboardType="numeric"
                             value={amount}
                             onChangeText={(t) => setAmount(t)}
                             style={styles.input}
-                            placeholderTextColor={'#000'}
-
-
+                            placeholderTextColor={'#9AA0A6'}
                         />
 
-                        <View >
+                        <Text style={styles.label}>Confirm Amount</Text>
+                        <View>
                             <TextInput
                                 keyboardType="numeric"
-                                placeholder="Enter Re-Amount"
+                                placeholder="Re-enter the amount"
                                 value={Ramount}
                                 editable={!!amount}
                                 onChangeText={(t) => {
@@ -337,8 +343,12 @@ const CmsPrePay = ({ route }) => {
                                     }
 
                                 }}
-                                style={styles.input}
-                                placeholderTextColor={'#000'}
+                                style={[
+                                    styles.input,
+                                    showMismatch && styles.inputError,
+                                    Number(amount) > 0 && amount === Ramount && styles.inputSuccess,
+                                ]}
+                                placeholderTextColor={'#9AA0A6'}
                             />
 
                             {showMismatch && (
@@ -357,20 +367,19 @@ const CmsPrePay = ({ route }) => {
                                 </View>
                             )}
                         </View>
+
                         {/* First condition */}
                         {adminiStatus?.sts === false && (
                             <View style={styles.amountView}>
-                                <View>
-                                    <Text style={styles.discNeedA}>
-                                        Your wallet balance is short by
-                                        <Text style={styles.amountN}> ₹ {amountneed} </Text>
-                                        to complete the transaction. Please enter the remaining amount by clicking below:-
-                                    </Text>
+                                <Text style={styles.discNeedA}>
+                                    Your wallet balance is short by
+                                    <Text style={styles.amountN}> ₹{amountneed} </Text>
+                                    to complete the transaction. Add the remaining amount below:
+                                </Text>
 
-                                    <TouchableOpacity onPress={handleAddMoney} style={styles.btnstyle}>
-                                        <Text style={styles.btntxt}>Click on me to add the remaining amount</Text>
-                                    </TouchableOpacity>
-                                </View>
+                                <TouchableOpacity onPress={handleAddMoney} style={styles.btnstyle} activeOpacity={0.85}>
+                                    <Text style={styles.btntxt}>Add Remaining Amount</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
 
@@ -379,69 +388,120 @@ const CmsPrePay = ({ route }) => {
                             <View style={styles.amountView}>
                                 <Text style={styles.discNeedA}>
                                     Administrator is running low on balance to complete the transaction.
-                                    Please notify the administrator by calling the mobile number provided below.
+                                    Please notify the administrator using the number below.
                                 </Text>
 
                                 <TouchableOpacity
                                     onPress={openPhoneApp}
-                                    activeOpacity={0.7}
+                                    activeOpacity={0.85}
                                     style={styles.btnstyle}
                                 >
                                     <Text style={styles.btntxt}>
-                                        {/* +91 {supportData.adminmobile} */}
-                                        Click Me to Call Administrator Now
+                                        Call Administrator Now
                                     </Text>
                                 </TouchableOpacity>
                             </View>
                         )}
 
-
-
                         {adminiStatus?.allowzero === false &&
                             <View style={styles.zeroView}>
-                                <View style={[styles.svgimg, { backgroundColor: `${colorConfig.secondaryColor}1A` },
-                                    // { transform: [{ rotate: '-190deg' }] },
-
-                                ]}>
+                                <View style={[styles.svgimg, { backgroundColor: `${colorConfig.secondaryColor}1A` }]}>
                                     <CmsZeroSvg />
                                 </View>
                                 <View style={styles.zeroTextCon}>
                                     <Text style={styles.zeroTitle}>
-                                        Zero amount is not allowed.
+                                        Zero amount is not allowed
                                     </Text>
 
-
                                     <Text style={styles.zeroText}>
-                                        According to company rules and regulations, a retail executive can generate a maximum of five zero-value pickup slips from a particular store each month.
+                                        Company policy allows a maximum of five zero-value pickup slips per
+                                        store, per month.
+                                        {adminiStatus?.msgshow}
                                     </Text>
                                 </View>
                             </View>
                         }
                     </View>
-                    <View>
+
+                    <View style={styles.reportCard}>
                         <PartialPayReport Shopid={shopId} currentAmount={amount} />
                     </View>
 
                 </View>
-            </ScrollView >
-        </View >
+            </ScrollView>
+        </View>
     );
 };
 
 export default CmsPrePay;
 
-
+const RADIUS = wScale(12);
 
 const styles = StyleSheet.create({
 
     main: {
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#F4F6F8'
+    },
+    scroll: {
+        flex: 1,
+    },
+    // ── FIX: bottom padding so last card / button isn't hugging
+    // the screen edge or hidden behind nav bars / keyboard.
+    scrollContent: {
+        paddingBottom: hScale(48),
     },
     container: {
         flex: 1,
-        paddingHorizontal: wScale(8),
-        paddingTop: hScale(10),
+        paddingHorizontal: wScale(14),
+        paddingTop: hScale(14),
+        rowGap: hScale(14),
+    },
+
+    // ── Cards ──
+    infoCard: {
+        backgroundColor: '#FFF7E0',
+        borderRadius: RADIUS,
+        paddingHorizontal: wScale(14),
+        paddingVertical: hScale(12),
+        borderWidth: 1,
+        borderColor: '#FCE6A8',
+    },
+    infoTitle: {
+        fontSize: wScale(14),
+        fontWeight: '700',
+        color: '#8A5A00',
+        marginBottom: hScale(6),
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: RADIUS,
+        paddingHorizontal: wScale(14),
+        paddingVertical: hScale(16),
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 2,
+    },
+    reportCard: {
+        backgroundColor: '#fff',
+        borderRadius: RADIUS,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 1,
+    },
+
+    label: {
+        fontSize: wScale(12),
+        fontWeight: '600',
+        color: '#6B7280',
+        marginBottom: hScale(6),
+        textTransform: 'uppercase',
+        letterSpacing: 0.4,
     },
 
     righticon2: {
@@ -456,95 +516,116 @@ const styles = StyleSheet.create({
         marginRight: wScale(-2),
     },
     miss: {
-        color: 'red',
+        color: '#EF4444',
         fontSize: wScale(9),
         width: wScale(60),
         textAlign: 'right',
         marginTop: hScale(-4)
     },
     disc: {
-        color: 'red',
-        fontSize: wScale(13),
+        color: '#7A5300',
+        fontSize: wScale(12.5),
         textAlign: 'justify',
-        marginBottom: hScale(10)
+        marginBottom: hScale(6),
+        lineHeight: hScale(18),
     },
     discNeedA: {
-        color: '#000',
-        fontSize: wScale(15),
+        color: '#111827',
+        fontSize: wScale(14),
         textAlign: 'justify',
+        lineHeight: hScale(20),
     },
     amountN: {
-        color: '#000',
-        fontSize: wScale(16),
-        fontWeight: 'bold',
-
+        color: '#B91C1C',
+        fontSize: wScale(15),
+        fontWeight: '800',
     },
     btntxt: {
         color: "#fff",
-        fontWeight: "bold",
+        fontWeight: "700",
         textTransform: 'uppercase',
-        fontSize: wScale(16)
+        fontSize: wScale(13),
+        letterSpacing: 0.3,
     },
     btnstyle: {
-        backgroundColor: '#FF3B30',
-        borderRadius: wScale(6),
+        backgroundColor: '#EF4444',
+        borderRadius: wScale(10),
         alignItems: 'center',
-        paddingVertical: 3,
-        marginLeft: wScale(5),
-        marginBottom: hScale(4),
-        marginTop: hScale(5)
+        paddingVertical: hScale(11),
+        marginTop: hScale(10),
     },
 
-
     amountView: {
-        marginBottom: hScale(10),
-        backgroundColor: 'rgba(255, 0, 0, 0.3)',
-        paddingHorizontal: wScale(10),
-        borderRadius: 5,
+        marginTop: hScale(14),
+        backgroundColor: '#FEF2F2',
+        paddingHorizontal: wScale(12),
+        paddingVertical: hScale(10),
+        borderRadius: wScale(10),
         borderWidth: 1,
-        borderColor: 'red',
-        marginTop: hScale(20),
+        borderColor: '#FCA5A5',
     },
     svgimg: {
         borderRadius: 10,
         paddingHorizontal: wScale(10),
         paddingVertical: hScale(5),
         marginVertical: hScale(5),
-
     },
     zeroView: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(253, 181, 181, 0.3)', flex: 1,
-        // paddingVertical: hScale(8),
-        paddingHorizontal: wScale(5)
-
+        backgroundColor: '#FFF1F2',
+        borderRadius: wScale(10),
+        marginTop: hScale(14),
+        paddingVertical: hScale(10),
+        paddingHorizontal: wScale(10),
+        borderWidth: 1,
+        borderColor: '#FECDD3',
     },
 
     zeroTextCon: {
-        paddingLeft: wScale(4),
+        paddingLeft: wScale(8),
         flex: 1,
     },
     zeroText: {
-        fontSize: wScale(13),
+        fontSize: wScale(12.5),
         textAlign: 'justify',
-        color: '#000',
-        marginTop: hScale(5)
-
+        color: '#374151',
+        marginTop: hScale(4),
+        lineHeight: hScale(18),
     },
     zeroTitle: {
-        fontSize: wScale(20),
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#000',
+        fontSize: wScale(15),
+        fontWeight: '700',
+        color: '#111827',
+    },
+    dropdownTrigger: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: wScale(10),
+        paddingHorizontal: wScale(14),
+        height: hScale(48),
+        backgroundColor: '#F9FAFB',
+    },
+    dropdownTriggerText: {
+        fontSize: wScale(14.5),
+        color: '#111827',
+        fontWeight: '500',
     },
     dropdown: {
         backgroundColor: '#fff',
-        borderRadius: 8,
-        marginBottom: hScale(18),
-        elevation: 5,
-        borderWidth: 0.5,
-        borderColor: '#ccc',
-        marginTop: hScale(-10)
+        borderRadius: wScale(10),
+        marginTop: hScale(6),
+        marginBottom: hScale(4),
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+        borderWidth: 1,
+        borderColor: '#EEF0F2',
+        overflow: 'hidden',
     },
     option: {
         paddingVertical: hScale(12),
@@ -553,37 +634,31 @@ const styles = StyleSheet.create({
         borderColor: '#eee'
     },
     optionText: {
-        fontSize: wScale(16),
-        color: '#000'
-    },
-    bgColor: {
-        paddingHorizontal: wScale(8),
-        paddingTop: hScale(10),
-        borderRadius: 5
-    },
-    notBg: {
-        backgroundColor: '#fadc7a',
-        paddingHorizontal: wScale(4),
-        paddingTop: hScale(5),
-        borderRadius: 4,
-        marginBottom: hScale(8)
+        fontSize: wScale(14.5),
+        color: '#111827'
     },
     input: {
-        borderWidth: wScale(0.5),
-        borderColor: '#000',
-        borderRadius: wScale(5),
-        paddingLeft: wScale(15),
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+        borderRadius: wScale(10),
+        paddingLeft: wScale(14),
         height: hScale(48),
         width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#000',
-        fontSize: hScale(18),
-        marginBottom: hScale(15),
-        backgroundColor: '#fff'
-
+        color: '#111827',
+        fontSize: wScale(15),
+        marginBottom: hScale(14),
+        backgroundColor: '#F9FAFB',
+    },
+    inputError: {
+        borderColor: '#EF4444',
+        backgroundColor: '#FEF2F2',
+    },
+    inputSuccess: {
+        borderColor: '#22C55E',
+        backgroundColor: '#F0FDF4',
     },
 });
+
 const za = StyleSheet.create({
     overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
     card: { backgroundColor: '#fff', borderRadius: wScale(16), padding: wScale(24), width: '85%', alignItems: 'center' },

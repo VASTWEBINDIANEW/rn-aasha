@@ -1,4 +1,4 @@
-package com.globalmultisolution.location;
+package com.digitalindiapay.location;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

@@ -55,6 +55,7 @@ export interface EmailState {
   otpError: string;
   verified: boolean;
   loading: boolean;
+  prefilled: boolean;
 }
 
 // ─── Init Helpers ──────────────────────────────────────
@@ -98,4 +99,8 @@ export const initEmail = (): EmailState => ({
   otpError: "",
   verified: false,
   loading: false,
+    // prefilled: boolean;
+      prefilled: false,
+
+
 });

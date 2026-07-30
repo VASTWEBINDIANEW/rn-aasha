@@ -1,8 +1,10 @@
-package com.globalmultisolution;
+
+package com.digitalindiapay;
 
 import okhttp3.OkHttpClient;
 import javax.net.ssl.*;
 import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
 public class UnsafeOkHttpClient {
 
@@ -25,6 +27,12 @@ public class UnsafeOkHttpClient {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
             builder.hostnameVerifier((hostname, session) -> true);
+
+           
+            builder.connectTimeout(30, TimeUnit.SECONDS);
+            builder.readTimeout(120, TimeUnit.SECONDS);
+            builder.writeTimeout(120, TimeUnit.SECONDS);
+            builder.callTimeout(150, TimeUnit.SECONDS);
 
             return builder.build();
 

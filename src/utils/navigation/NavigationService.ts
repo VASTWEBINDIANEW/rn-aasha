@@ -5,7 +5,7 @@ import {
   StackActions,
   useNavigation as useNavigationLib,
 } from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export const navigationRef = React.createRef<any>();
 
@@ -33,8 +33,16 @@ const replace = (routeName: string, params?: any) => {
   navigationRef.current?.dispatch(StackActions.replace(routeName, params));
 };
 
-const reset = options => {
-  navigationRef.current?.dispatch(CommonActions.reset(options));
+// 🔹 UPDATED: Screen Name and Params direct pass karne ke liye reset function
+const reset = (routeName: string, params?: object) => {
+  if (navigationRef.current?.isReady()) {
+    navigationRef.current?.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: routeName, params }],
+      })
+    );
+  }
 };
 
 const resetMainTabStack = () => {
@@ -50,22 +58,9 @@ const resetMainTabStack = () => {
   );
 };
 
-// export function useNavigation<Params extends NavigationParams, State = NavigationRoute<Params>>() {
-//   return useContext<NavigationScreenProp<State, Params> & NavigationStackProp<State, Params>>(
-//     NavigationContext as any,
-//   );
-// }
-
 export function useNavigation() {
   return useNavigationLib<any>();
 }
-
-/*const getCurrentRoute = (): NavigationRoute | null => {
-  if (!_navigator || !_navigator.state.nav) {
-    return null;
-  }
-  return _navigator.state.nav.routes[_navigator.state.nav.index] || null;
-};*/
 
 const getCurrentRoute = () => {
   if (
@@ -79,30 +74,18 @@ const getCurrentRoute = () => {
   ];
 };
 
-/*
-const getCurrentRouteName = () => {
-  const routeState = getCurrentRoute();
-  if (routeState && routeState.routes && routeState.routes.length > 0) {
-    const routeName = routeState.routes[routeState.index]?.routeName;
-    if (typeof routeName === 'string') {
-      return routeName;
-    }
-  }
-  return;
-};*/
-
 const getCurrentRouteName = () => {
   if (!navigationRef.current) {
     return null;
   }
-  return navigationRef.current.getCurrentRoute().name;
+  return navigationRef.current.getCurrentRoute()?.name;
 };
 
 export default {
   getNavigator: () => navigationRef,
   navigate,
   goBack,
-  reset,
+  reset, // 👈 Ab aap NavigationService.reset('CmsScreen') use kar sakte hain
   popToTop,
   getCurrentRoute,
   getCurrentRouteName,
@@ -110,6 +93,6 @@ export default {
   replace,
   pop,
   useNavigation,
-  getNavigation: () => navigationRef.current.navigation,
+  getNavigation: () => navigationRef.current?.navigation,
   resetMainTabStack,
 };

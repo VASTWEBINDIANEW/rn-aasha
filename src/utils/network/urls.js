@@ -4,24 +4,24 @@
 export const APP_URLS = {
   playUrl: 'http://play.google.com/store/apps/details?id=',
   RCEID: 'api/Radiant/RCEID',
-  appPackage: 'com.uprecharge',
+  appPackage: 'com.digitalindiapay',
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
-  baseapiurl: 'http://native.uniquerechargesrs.in///',
+  baseapiurl: 'http://native.ssvcms.in///',
   // baseWebUrl: 'vastwebindia.com/',
-  baseWebUrl: 'uniquerechargesrs.in///',
+  baseWebUrl: 'ssvcms.in///',
 
-  AppName: 'ssvcms',
+  AppName: 'Digital India Pay',
   app_logo: 'sonicswipe.png',
   cms_logo: 'radiant.png',
   DownloadAPK: '/Home/DownloadAPK',
-    dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
+  dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',
 
   recentTx: 'Retailer/api/data/_Recent_Transaction?topentry=',
   // baseWebUrl:'http://divyanshipay.co.in/',
   current_version: 'Common/api/data/Check_Android_Current_Version?vs_no=7',
-  version: '6',
+  version: '2.0.8',
   AepsBankInfo: 'AEPS/api/data/AepsBankInfo',
   daywisecommsofuser: 'Money/api/Money/daywisecommsofuser',
   ExtracommReport: 'Money/api/Money/ExtracommReport',
@@ -237,7 +237,7 @@ export const APP_URLS = {
   ShowActualIncome: 'api/Dealer/ShowActualIncome?from=',
   DealerLedger: 'api/Dealer/DealerLedger?txt_frm_date=',
   Dealer_Daybook_Repor: 'api/Dealer/Dealer_Daybook_Report?',
-  daybook:'Retailer/api/data/Retailerdaybook?',
+  daybook: 'Retailer/api/data/Retailerdaybook?',
 
   DealerPurchaseOrderReport: 'api/Data/DealerPurchaseOrderReport?',
   ReceiveFund_by_master: 'api/Dealer/ReceiveFund_by_master?',
@@ -368,7 +368,23 @@ export const APP_URLS = {
   ShowForm9: 'api/Radiant/ShowForm9',
   InsertForm9Update: 'api/Radiant/InsertForm9Update',
   AccountVerify: 'api/Radiant/AccountVerify',
-  RadiantFormALLStatus: 'api/Radiant/RadiantFormALLStatus'
+  RadiantFormALLStatus: 'api/Radiant/RadiantFormALLStatus',
+  ClientEmailVerify: 'api/Radiant/ClientEmailVerify',
+  ClientEmailVerifyOTP: 'api/Radiant/ClientEmailVerifyOTP',
+  ClientSendOTPMobile: 'api/Radiant/ClientSendOTPMobile',
+  ClientVerifyOTPMobile: 'api/Radiant/ClientVerifyOTPMobile',
+  NewClientInsert: 'Api/Radiant/NewClientInsert',
+  ShowClientInsert: 'Api/Radiant/ShowClientInsert',
+  Clientverifyaadhar: 'api/Radiant/Clientverifyaadhar',
+  ClientverifyaadharOTP: 'api/Radiant/ClientverifyaadharOTP',
+  ClientVerifyPanCard: 'api/Radiant/ClientVerifyPanCard',
+  ClientAccountVerify: 'api/Radiant/ClientAccountVerify',
+CheckGstNUmber:'Api/Radiant/CheckGstNUmber',
+ShowClientInfo:'Api/Radiant/ShowClientInfo',
+ShowchangesTerms: 'api/Radiant/ShowchangesTerms',
+UpdatechangesTerms: 'api/Radiant/UpdatechangesTerms',
+
+
 };
 export const IMAGE_BASE_URL = 'https://cdn.jsdelivr.net/gh/Vwi-app/vwiImages@main/';
 

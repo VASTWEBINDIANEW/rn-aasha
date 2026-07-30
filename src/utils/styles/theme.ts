@@ -1,6 +1,6 @@
-import {Platform} from 'react-native';
-import {hasDynamicIsland} from 'react-native-device-info';
-import {hScale, wScale} from './dimensions';
+import { Platform } from 'react-native';
+import { hasDynamicIsland } from 'react-native-device-info';
+import { hScale, wScale } from './dimensions';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../reduxUtils/store';
 
@@ -240,5 +240,8 @@ export const useColorsOfApi = () => {
   return {
     primary: colorConfig?.primaryColor ?? '#00C460',
     secondary: colorConfig?.secondaryColor ?? '#01AD54',
+    btnprimary: colorConfig?.primaryButtonColor ?? '#01AD54',
+    btnsecondary: colorConfig?.secondaryButtonColor ?? '#01AD54',
+    labelColor: colorConfig?.labelColor ?? '#01AD54',
   };
 };

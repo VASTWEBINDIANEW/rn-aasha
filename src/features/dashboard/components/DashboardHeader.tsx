@@ -1,10 +1,9 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Alert, ActivityIndicator, Image, Platform, Linking, Animated,
+  Alert, Image, Platform, Linking, Animated,
 } from 'react-native';
 import { hScale, wScale } from '../../../utils/styles/dimensions';
-import MenuIcon from './MenuIcon';
 import useAxiosHook from '../../../utils/network/AxiosClient';
 import { APP_URLS } from '../../../utils/network/urls';
 import { BalanceType } from '../utils';
@@ -13,18 +12,34 @@ import { RootState } from '../../../reduxUtils/store';
 import { decryptData } from '../../../utils/encryptionUtils';
 import { DrawerActions, useFocusEffect, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import QrcodSvg from '../../drawer/svgimgcomponents/QrcodSvg';
-import Entypo from 'react-native-vector-icons/Entypo';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useLocationHook } from '../../../hooks/useLocationHook';
 import { check, PERMISSIONS, request, RESULTS } from 'react-native-permissions';
-import { clearOtaUpdate, setRceIdStatus } from '../../../reduxUtils/store/userInfoSlice';
+import { setRceIdStatus } from '../../../reduxUtils/store/userInfoSlice';
 import { translate } from '../../../utils/languageUtils/I18n';
-import RecentTrSvg from '../../drawer/svgimgcomponents/RecentTrSvg';
-import ToselfSvg from '../../drawer/svgimgcomponents/ToselfSvg';
-import firestore from '@react-native-firebase/firestore';
-import ReactNativeBlobUtil from 'react-native-blob-util';
-import OtUpdate from 'react-native-ota-hot-update';
+
+const HEADER_ICON_SIZE = wScale(22);
+const HEADER_ICON_COLOR = '#FFFFFF';
+
+interface HeaderIconBtnProps {
+  name: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+  onPress?: () => void;
+  onLongPress?: () => void;
+  color?: string;
+  badge?: React.ReactNode;
+}
+
+const HeaderIconBtn = ({ name, onPress, onLongPress, color = HEADER_ICON_COLOR, badge }: HeaderIconBtnProps) => (
+  <TouchableOpacity
+    style={styles.iconBtn}
+    onPress={onPress}
+    onLongPress={onLongPress}
+    activeOpacity={0.7}
+  >
+    <MaterialCommunityIcons name={name} size={HEADER_ICON_SIZE} color={color} />
+    {badge}
+  </TouchableOpacity>
+);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ExtendedBalanceType extends BalanceType {
@@ -76,7 +91,7 @@ const BalanceCard = memo(({ label, value, accentColor, align = 'left', delay = 0
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 const DashboardHeader = ({ refreshPress }) => {
-  const { colorConfig, IsDealer, Loc_Data  ,otaHasUpdate, otaLatestVersion} = useSelector((state: RootState) => state.userInfo);
+  const { colorConfig, IsDealer, Loc_Data } = useSelector((state: RootState) => state.userInfo);
   const { get, post } = useAxiosHook();
   const [balanceInfo, setBalanceInfo] = useState<ExtendedBalanceType | undefined>();
   const [firmname, setfirmName] = useState<string>('');
@@ -187,71 +202,7 @@ const DashboardHeader = ({ refreshPress }) => {
       requestNotifPermission();
     }
   };
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [progress, setProgress] = useState(0);
-const fetchOtaDetails = async () => {
-  try {
-    // const doc = await firestore()
-    //   .collection('otaData')
-    //   .doc('otadata')
-    //   .collection('rechargedrishti')
-    //   .doc('ota')
-    //   .get();
-    // if (!doc.exists) return null;
-    // return doc.data();
-       const version = await get({ url: APP_URLS.current_version });
-console.log(version)
 
-  return {
-      version: version.otaVersion,
-      url: version.bundleUrl,
-      status: true, // true/false
-      currentVersion: version.currentversion ,
-      message: version.message,
-    };
-
-  } catch (e) {
-    console.log('Firestore OTA error:', e);
-    return null;
-  }
-};
-
-  const handleUpdatePress = async () => {
-    if (isUpdating || !otaLatestVersion) return;
-
-    const data = await fetchOtaDetails();
-    if (!data?.url) return;
-
-    setIsUpdating(true);
-    setProgress(0);
-
-    try {
-      await OtUpdate.downloadBundleUri(
-        ReactNativeBlobUtil,
-        data.url,
-        Number(otaLatestVersion),
-        {
-          restartAfterInstall: true,
-          restartDelay: 1500,
-          updateSuccess() {
-            dispatch(clearOtaUpdate());
-            setIsUpdating(false);
-          },
-          updateFail() {
-            setIsUpdating(false);
-          },
-          progress(received, total) {
-            if (total > 0) {
-              setProgress(Math.floor((received / total) * 100));
-            }
-          },
-        },
-      );
-    } catch (e) {
-      console.log('OTA update error:', e);
-      setIsUpdating(false);
-    }
-  };
   useFocusEffect(
     useCallback(() => {
       getData();
@@ -305,22 +256,13 @@ console.log(version)
         {/* ── Top Row ── */}
         <View style={styles.topRow}>
 
-  
           {/* Left: Menu + Brand */}
           <View style={styles.leftGroup}>
-            {APP_URLS.AppName === 'STdigiPe' ? (
-              <TouchableOpacity
-                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                style={styles.menuBtn}
-              >
-                {/* <Image source={require('../../drawer/assets/menu2.png')} style={styles.menuImg} /> */}
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.menuview}>
-                <MenuIcon />
-              </View>
+            <HeaderIconBtn
+              name="menu"
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+            />
 
-            )}
 
             <Text
               style={styles.firmName}
@@ -337,69 +279,55 @@ console.log(version)
           </View>
 
           <View style={styles.rightGroup}>
-
-
             {Loc_Data['isGPS'] && (
-              <TouchableOpacity onLongPress={longPress} style={styles.notiBell}>
-                <Entypo
-                  name="location"
-                  size={20}
-                  color={Loc_Data['latitude'] ? '#fff' : 'rgba(255,255,255,0.3)'}
-                />
-              </TouchableOpacity>
+              <HeaderIconBtn
+                name="map-marker"
+                onLongPress={longPress}
+                color={Loc_Data['latitude'] ? HEADER_ICON_COLOR : 'rgba(255,255,255,0.35)'}
+              />
             )}
 
-            {!IsDealer && <View>
-              <TouchableOpacity
-                style={styles.notiBell}
-
-                onPress={() => navigation.navigate({ name: "PostoMain" })}
-              >
-                <ToselfSvg size={20} color="#fff" />
-              </TouchableOpacity>
-              <Text style={styles.towallet}>
-                {translate('to Wallet')}
-              </Text>
-            </View>}
-            {!IsDealer && <TouchableOpacity
-              style={styles.notiBell}
-
-              onPress={() => navigation.navigate({ name: "RecentTx" })}            >
-              <RecentTrSvg size={25} color="#fff" />
-            </TouchableOpacity>}
-            {!IsDealer && <TouchableOpacity
-              style={styles.notiBell}
-
-              onPress={() => navigation.navigate({ name: "QRScanScreen" })}            >
-              <QrcodSvg size={25} color="#fff" />
-
-            </TouchableOpacity>}
-            {!IsDealer && <TouchableOpacity
-              style={styles.notiRow}
-              onPress={() => navigation.navigate('Notifications')}
-            >
-              <MaterialIcons name="notifications" size={20} color="#fff" style={styles.notiBell} />
-              <View style={styles.notiBadge}>
-                <Text style={styles.notiBadgeText}>{notifCount}</Text>
+            {!IsDealer && (
+              <View style={styles.walletWrap}>
+                <HeaderIconBtn
+                  name="wallet-outline"
+                  onPress={() => navigation.navigate({ name: 'PostoMain' })}
+                />
+                <Text style={styles.towallet}>{translate('to Wallet')}</Text>
               </View>
-            </TouchableOpacity>}
+            )}
+
+            {!IsDealer && (
+              <HeaderIconBtn
+                name="history"
+                onPress={() => navigation.navigate({ name: 'RecentTx' })}
+              />
+            )}
+
+            {!IsDealer && (
+              <HeaderIconBtn
+                name="qrcode-scan"
+                onPress={() => navigation.navigate({ name: 'QRScanScreen' })}
+              />
+            )}
+
+            {!IsDealer && (
+              <HeaderIconBtn
+                name="bell-outline"
+                onPress={() => navigation.navigate('Notifications')}
+                badge={
+                  notifCount > 0 ? (
+                    <View style={styles.notiBadge}>
+                      <Text style={styles.notiBadgeText}>{notifCount}</Text>
+                    </View>
+                  ) : null
+                }
+              />
+            )}
           </View>
         </View>
       </View>
-   {otaHasUpdate && (
-        <TouchableOpacity
-          style={styles.updateBanner}
-          onPress={handleUpdatePress}
-          disabled={isUpdating}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.updateText}>
-            {isUpdating
-              ? `⬇ Downloading... ${progress}%`
-              : `🔄 Update Available v${otaLatestVersion} — Tap to Update`}
-          </Text>
-        </TouchableOpacity>
-      )}
+
       {/* ── 4 Balance Cards ── */}
       <View style={styles.cardsRow}>
         {balanceCards.map((card, i) => (
@@ -433,31 +361,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-    updateBanner: {
-    backgroundColor: '#000000',
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  updateText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
+
   // ── Left ──
-  menuBtn: { padding: wScale(3) },
-  menuImg: { width: wScale(26), height: wScale(17), resizeMode: 'contain' },
   brandLogo: { width: wScale(70), height: wScale(30), resizeMode: 'contain', borderRadius: 4 },
 
-  // ── Right ──
-  loader: { marginRight: wScale(4) },
-  iconBtn: { padding: wScale(4), position: 'relative' },
-  notifDot: {
-    position: 'absolute', top: wScale(4), right: wScale(4),
-    width: wScale(5), height: wScale(5),
-    borderRadius: wScale(3), backgroundColor: '#FF5252',
+  // ── Right icons (uniform size) ──
+  iconBtn: {
+    width: wScale(36),
+    height: wScale(36),
+    borderRadius: wScale(18),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: wScale(4),
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    position: 'relative',
+  },
+  walletWrap: {
+    alignItems: 'center',
+    marginLeft: wScale(4),
   },
   firmName: {
     fontSize: wScale(20),       // ye max font size rahega
@@ -469,30 +392,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: wScale(4),
     marginLeft: wScale(-7)
   },
-  notiRow: { flexDirection: 'row', alignItems: 'center', },
-  menuview: {
-    backgroundColor: 'rgba(79, 195, 247, 0.12)',
-    borderRadius: wScale(30), padding: wScale(5),
-    borderWidth: 1, borderColor: 'rgba(79, 195, 247, 0.25)',
-    overflow: 'hidden',
-  },
-  notiBell: {
-    // backgroundColor: 'rgba(79, 195, 247, 0.12)',
-    borderRadius: wScale(30), padding: wScale(5),
-    borderWidth: 1, borderColor: 'rgba(79, 195, 247, 0.25)',
-    overflow: 'hidden', marginLeft: wScale(4)
-  },
   notiBadge: {
-    position: 'absolute', top: -1, right: 0,
-    backgroundColor: 'green',
-    borderRadius: wScale(10),
+    position: 'absolute',
+    top: wScale(2),
+    right: wScale(2),
+    backgroundColor: '#22C55E',
+    borderRadius: wScale(8),
     minWidth: wScale(14),
-    padding: wScale(3),
+    height: wScale(14),
+    paddingHorizontal: wScale(3),
+    justifyContent: 'center',
     alignItems: 'center',
   },
   notiBadgeText: { color: '#fff', fontSize: wScale(7), fontWeight: '700' },
 
-  // ── Balance Cards ──
   cardsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -524,5 +437,14 @@ const styles = StyleSheet.create({
     fontSize: wScale(14), color: '#FFFFFF',
     fontWeight: '700', letterSpacing: 0.2,
   },
-  towallet:{ fontSize: wScale(6), color: '#fff', fontWeight: '700', textAlign: 'center' ,position:'absolute',bottom:hScale(-6.8),left:wScale(7.5)}
+  towallet: {
+    fontSize: wScale(6),
+    color: '#fff',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: hScale(2),
+    textTransform:'capitalize',
+    position:'absolute',
+    bottom:wScale(-6),
+  },
 });

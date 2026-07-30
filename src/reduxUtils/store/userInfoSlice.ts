@@ -78,6 +78,8 @@ payutxnid:null,
   signUpId: null,
   signUpPassword: null,
   logoUrl: '',
+  onlyCmsUser: false,
+
 };
 
 const userInfoSlice = createSlice({
@@ -143,6 +145,7 @@ const userInfoSlice = createSlice({
     setSignUpId: (state, action) => { state.signUpId = action.payload; },
     setSignUpPassword: (state, action) => { state.signUpPassword = action.payload; },
     setLogoUrl: (state, action) => { state.logoUrl = action.payload; },
+    setOnlyCmsuser: (state,action)=>{state.onlyCmsUser = action.payload;    },
 
     reset: () => initialState,
   },
@@ -192,7 +195,8 @@ export const {
   setUnlocked,
   setSignUpId,
   setSignUpPassword,
-  setLogoUrl
+  setLogoUrl,
+  setOnlyCmsuser 
 } = userInfoSlice.actions;
 
 export default userInfoSlice.reducer;

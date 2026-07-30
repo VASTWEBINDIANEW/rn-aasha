@@ -2,134 +2,48 @@ import { translate } from "../../utils/languageUtils/I18n";
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert, Pressable, RefreshControl, ScrollView,
-  StatusBar, TouchableOpacity, Animated,
+  StatusBar, TouchableOpacity,
   View, Text, StyleSheet, Image,
 } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
 import IconButtons from "./components/IconButtons";
 import CarouselView from "./components/CarouselView";
 import { hScale, wScale } from "../../utils/styles/dimensions";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../reduxUtils/store";
 import useAxiosHook from "../../utils/network/AxiosClient";
-import { APP_URLS } from "../../utils/network/urls";
+import { APP_URLS, IMAGE_BASE_URL } from "../../utils/network/urls";
 import { sectionData } from "./utils";
 import DashboardHeader from "./components/DashboardHeader";
 import { useNavigation } from "../../utils/navigation/NavigationService";
-import LottieView from "lottie-react-native";
 import { decryptData } from "../../utils/encryptionUtils";
 import { reset, setDashboardData, setIsDemoUser, setThemeChangeTime } from "../../reduxUtils/store/userInfoSlice";
-import HoldcreditSvg from "../drawer/svgimgcomponents/HoldcreditSvg";
-import ToselfSvg from "../drawer/svgimgcomponents/ToselfSvg";
-import RecentTrSvg from "../drawer/svgimgcomponents/RecentTrSvg";
 import NewsSlider from "../../components/SliderText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import QrcodSvg from '../drawer/svgimgcomponents/QrcodSvg';
 import FastImage from "react-native-fast-image";
-import { getImageSource, getImageSource2 } from "../../utils/network/NetWorkImages";
+import { getAssetSource, getImageSource2 } from "../../utils/network/NetWorkImages";
+import payon4uStaticData from "../../../src/utils/payon4u_dashboard.json"
+import firestore from '@react-native-firebase/firestore';
 
-// ─── Glow Orbs (same as ReportScreen / AccReportScreen) ──────────────────────
-const GlowOrbs = ({ primaryColor }: { primaryColor: string }) => (
-  <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
-    <View style={[styles.orb, {
-      top: -80, left: -80, width: 240, height: 240,
-      backgroundColor: `${primaryColor}70`,
-    }]} />
-    <View style={[styles.orb, {
-      top: 200, right: -100, width: 280, height: 280,
-      backgroundColor: `${primaryColor}28`,
-    }]} />
-    <View style={[styles.orb, {
-      top: 500, left: 20, width: 180, height: 180,
-      backgroundColor: "rgba(5,150,105,0.15)",
-    }]} />
-    <View style={[styles.orb, {
-      bottom: 100, right: 10, width: 200, height: 200,
-      backgroundColor: "rgba(219,39,119,0.14)",
-    }]} />
-  </View>
-);
-
-// ─── Glass Section Card ───────────────────────────────────────────────────────
-interface GlassSectionProps {
+// ─── Simple Section Card (no gradient, no shimmer) ───────────────────────────
+interface SectionProps {
   title: string;
   rightElement?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const GlassSection = ({
-  title,
-  rightElement,
-  children,
-}: GlassSectionProps) => {
-
-  const { colorConfig } = useSelector(
-    (state: RootState) => state.userInfo
-  );
-
+const Section = ({ title, rightElement, children }: SectionProps) => {
   return (
-    <View style={styles.glassSection}>
-      
-      {/* Glass fill */}
-      <LinearGradient
-        colors={["rgba(13, 8, 8, 0.13)", "rgba(255,255,255,0.04)"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      {/* Top shimmer */}
-      <LinearGradient
-        colors={[
-          colorConfig.secondaryColor,
-          colorConfig.secondaryColor,
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.sectionTopShimmer}
-      />
-
+    <View style={styles.section}>
       <View style={styles.sectionTitleRow}>
         <Text style={styles.sectionTitle}>{title}</Text>
         {rightElement}
       </View>
-
       <View style={styles.sectionContent}>
         {children}
       </View>
-
     </View>
   );
 };
-
-// ─── Quick Action Button ──────────────────────────────────────────────────────
-interface QuickBtnProps {
-  icon: React.ReactNode;
-  label: string;
-  onPress: () => void;
-  primaryColor: string;
-}
-
-const QuickBtn = ({ icon, label, onPress, primaryColor }: QuickBtnProps) => (
-  <TouchableOpacity activeOpacity={0.72} onPress={onPress} style={styles.quickBtnOuter}>
-    <LinearGradient
-      colors={["rgba(255,255,255,0.22)", "rgba(255,255,255,0.06)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={StyleSheet.absoluteFillObject}
-    />
-    <LinearGradient
-      colors={["rgba(255,255,255,0.5)", "rgba(255,255,255,0)"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.quickBtnShimmer}
-    />
-    <View style={[styles.quickBtnIcon, { backgroundColor: `${primaryColor}55` }]}>
-      {icon}
-    </View>
-    <Text style={styles.quickBtnText}>{label}</Text>
-  </TouchableOpacity>
-);
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 const HomeScreen = () => {
@@ -143,156 +57,228 @@ const HomeScreen = () => {
   const [otherSectionData,    setOtherSectionData]    = useState<sectionData[]>([]);
   const [travelSectionData,   setTravelSectionData]   = useState<sectionData[]>([]);
   const [cmsSectionData,      setCmsSectionData]      = useState<sectionData[]>([]);
-  const [sliderImages,        setSliderImages]        = useState<any[]>([]);
   const [refreshing,          setRefreshing]          = useState(false);
   const [savedItems,          setSavedItems]          = useState([]);
   const [newsData,            setNewsData]            = useState([]);
   const [adminFirmDet,        setAdminFirmDet]        = useState<any>();
   const [FirmDet,             setFirmDet]             = useState<any>();
   const [is_demo,             setId_Demo]             = useState(false);
+  const [refreshTick,         setRefreshTick]          = useState(0);
 
   const { post, get } = useAxiosHook();
   const navigation     = useNavigation();
   const dispatch       = useDispatch();
 
-  const scaleValue = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const zoomInOut = () => {
-      Animated.sequence([
-        Animated.timing(scaleValue, { toValue: 1,   duration: 1000, useNativeDriver: true }),
-        Animated.timing(scaleValue, { toValue: 0.8, duration: 1000, useNativeDriver: true }),
-      ]).start(() => zoomInOut());
-    };
-    zoomInOut();
-  }, [scaleValue]);
-
   const Newssms = async () => {
-    const res = await get({ url: APP_URLS.getProfile });
-    if (res.data) {
-      JSON.parse(decryptData(res.value1, res.value2, res.data));
-    }
     try {
+      const res = await get({ url: APP_URLS.getProfile });
+      if (res && res.data) {
+        JSON.parse(decryptData(res.value1, res.value2, res.data));
+      }
       const response = await get({ url: APP_URLS.NewsNotifaction });
-      if (response.Status) setNewsData(response.data);
+      if (response && response.Status) setNewsData(response.data);
     } catch (_) {}
+                    };
+
+  // ─── Retry wrapper: icons kabhi gayab na ho isliye 1 baar retry karta hai ───
+  const postWithRetry = async (url: string, retries = 1): Promise<any> => {
+    try {
+      const res = await post({ url });
+      if (!res) throw new Error("Empty response");
+      return res;
+    } catch (err) {
+      if (retries > 0) {
+        console.log(`🔁 Retry left for ${url}`);
+        return postWithRetry(url, retries - 1);
+      }
+      console.log(`❌ Failed after retries: ${url}`, err);
+      return null; // null = fail marker (empty array se differentiate karne ke liye)
+    }
   };
 
-const fetchData = async () => {
-  try {
-    setRefreshing(true);
-
-    let backendTime = null;
-
-    // ✅ STEP 1: Try ThemeChangeTime API
+  const fetchData = async (force: boolean = false) => {
     try {
-      const themeResponse = await post({
-        url: APP_URLS.ThemeChangeTime,
-      });
+      Newssms();
+      const storedItems = await AsyncStorage.getItem("quickAccessItems");
+      const userData = await AsyncStorage.getItem("expiryDate");
+      const date = new Date();
 
-      backendTime = themeResponse?.FullDateTime;
-      console.log('🌐 Backend Time:', backendTime);
+      if (userData === date.toUTCString()) {
+        Alert.alert(
+          "Session Expired",
+          userData,
+          [{ text: "OK", onPress: () => dispatch(reset()) }],
+          { cancelable: false }
+        );
+        return;
+      }
 
-    } catch (error) {
-      console.log('❌ ThemeChangeTime FAILED → fallback to API');
-    }
+      if (storedItems) {
+        setSavedItems(JSON.parse(storedItems));
+      }
 
-    const localTime = themeChangeTime?.themeUpdateTime;
+      let backendTime = null;
 
-    // ✅ STEP 2: Check cache
-    if (
-      backendTime &&                      // API success
-      backendTime === localTime &&        // no change
-      dashboardData &&
-      Object.keys(dashboardData).length > 0
-    ) {
-      console.log('⚡ Using cached data');
+      try {
+        const themeResponse = await post({
+          url: APP_URLS.ThemeChangeTime,
+        });
+        backendTime = themeResponse?.FullDateTime || null;
+      } catch (error) {
+        console.log("❌ ThemeChangeTime Error:", error);
+      }
 
-      setFinanceSectionData(dashboardData.financeSectionData || []);
-      setOtherSectionData(dashboardData.otherSectionData || []);
-      setTravelSectionData(dashboardData.travelSectionData || []);
-      setCmsSectionData(dashboardData.cmsSectionData || []);
+      const localTime = themeChangeTime?.themeUpdateTime;
 
-      const filtered = dashboardData.rechargeSectionData?.filter(i => i.name !== "Hide More") || [];
+      const useStaticData =
+        APP_URLS.AppName === "payon4u" ||
+        APP_URLS.AppName === "Recharge Drishti";
+
+      if (
+        !force &&
+        !useStaticData &&
+        backendTime &&
+        backendTime === localTime &&
+        dashboardData &&
+        Object.keys(dashboardData).length > 0
+      ) {
+        console.log("🟢 USING CACHED DATA (No API Calls)");
+        setFinanceSectionData(dashboardData.financeSectionData || []);
+        setOtherSectionData(dashboardData.otherSectionData || []);
+        setTravelSectionData(dashboardData.travelSectionData || []);
+        setCmsSectionData(dashboardData.cmsSectionData || []);
+
+        const filtered = dashboardData.rechargeSectionData?.filter(
+          item => item.name !== "Hide More"
+        ) || [];
+        const first7 = filtered.slice(0, 7);
+        const vmItem = filtered.find(item => item.name === "View More");
+
+        setRechargeSectionData(vmItem ? [...first7, vmItem] : first7);
+        setRechargeViewMoreData(filtered);
+        return;
+      }
+
+      console.log("⏳ Fetching Fresh Data from APIs...");
+      const [rRes, fRes, oRes, tRes, cRes] = await Promise.all([
+        postWithRetry(APP_URLS.getRechargeSectionImages),
+        postWithRetry(APP_URLS.getFinanceSectionImages),
+        postWithRetry(APP_URLS.getOtherSectionImages),
+        postWithRetry(APP_URLS.getTravelSectionImages),
+        postWithRetry(APP_URLS.getcmsSectionImages),
+      ]);
+
+      // agar retry ke baad bhi fail (null) hua to purana redux cached data use karo,
+      // taaki icons blank na dikhein — sirf tabhi [] jab pehli baar hi kuch nahi mila
+      let finalRecharge = rRes ?? dashboardData?.rechargeSectionData ?? [];
+      let finalFinance  = fRes ?? dashboardData?.financeSectionData  ?? [];
+      let finalOther    = oRes ?? dashboardData?.otherSectionData    ?? [];
+      let finalTravel   = tRes ?? dashboardData?.travelSectionData   ?? [];
+      let finalCms      = cRes ?? dashboardData?.cmsSectionData      ?? [];
+
+      if (useStaticData) {
+        console.log("🟠 OVERRIDING WITH STATIC GIT DATA");
+        const mapGitUrls = (dataArray = []) =>
+          dataArray.map(item => ({
+            name: item.name,
+            ScreenName: item.ScreenName,
+            svg: `${IMAGE_BASE_URL}payon4u/${item.fileName}`,
+          }));
+
+        finalRecharge = mapGitUrls(payon4uStaticData?.recharge);
+        finalFinance = mapGitUrls(payon4uStaticData?.financial);
+        finalOther = mapGitUrls(payon4uStaticData?.other);
+        finalTravel = mapGitUrls(payon4uStaticData?.travel);
+        finalCms = mapGitUrls(payon4uStaticData?.cms);
+      }
+
+      const filtered = finalRecharge?.filter(
+        item => item.name !== "Hide More" && item.name !== "Hide More1"
+      ) || [];
+
       const first7 = filtered.slice(0, 7);
-      const vmItem = filtered.find(i => i.name === "View More");
+      const vmItem = filtered.find(item => item.name === "View More");
 
       setRechargeSectionData(vmItem ? [...first7, vmItem] : first7);
       setRechargeViewMoreData(filtered);
+      setFinanceSectionData(finalFinance);
+      setOtherSectionData(finalOther);
+      setTravelSectionData(finalTravel);
+      setCmsSectionData(finalCms);
 
-      setRefreshing(false);
-      return;
+      dispatch(
+        setDashboardData({
+          rechargeSectionData: finalRecharge,
+          financeSectionData: finalFinance,
+          otherSectionData: finalOther,
+          travelSectionData: finalTravel,
+          cmsSectionData: finalCms,
+        })
+      );
+
+      if (backendTime) {
+        dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
+      }
+    } catch (error) {
+      console.error("❌ Fetch Data Error:", error);
     }
+  };
 
-    // ✅ STEP 3: Call all APIs (fallback or data changed)
-    console.log('🚀 Calling ALL APIs');
+  const fetchGitStatus = async () => {
+    try {
+      const documentSnapshot = await firestore()
+        .collection('Otadata')
+        .doc('otaData')
+        .collection('imagedata')
+        .doc('data')
+        .get();
 
-    const results = await Promise.allSettled([
-      post({ url: APP_URLS.getRechargeSectionImages }),
-      post({ url: APP_URLS.getFinanceSectionImages }),
-      post({ url: APP_URLS.getOtherSectionImages }),
-      post({ url: APP_URLS.getTravelSectionImages }),
-      post({ url: APP_URLS.getcmsSectionImages }),
-    ]);
-
-    const rRes = results[0].status === "fulfilled" ? results[0].value : [];
-    const fRes = results[1].status === "fulfilled" ? results[1].value : [];
-    const oRes = results[2].status === "fulfilled" ? results[2].value : [];
-    const tRes = results[3].status === "fulfilled" ? results[3].value : [];
-    const cRes = results[4].status === "fulfilled" ? results[4].value : [];
-
-    // ✅ UI SET
-    const filtered = rRes?.filter((i: any) => i.name !== "Hide More1") || [];
-    const first7 = filtered.slice(0, 7);
-    const vmItem = filtered.find((i: any) => i.name === "View More");
-
-    setRechargeSectionData(vmItem ? [...first7, vmItem] : first7);
-    setRechargeViewMoreData(filtered);
-
-    setFinanceSectionData(fRes || []);
-    setOtherSectionData(oRes || []);
-    setTravelSectionData(tRes || []);
-    setCmsSectionData(cRes || []);
-
-    // ✅ SAVE TO REDUX CACHE
-    dispatch(setDashboardData({
-      rechargeSectionData: rRes || [],
-      financeSectionData: fRes || [],
-      otherSectionData: oRes || [],
-      travelSectionData: tRes || [],
-      cmsSectionData: cRes || [],
-    }));
-
-    // ✅ SAVE TIME (only if API worked)
-    if (backendTime) {
-      dispatch(setThemeChangeTime({ themeUpdateTime: backendTime }));
+      if (documentSnapshot.exists) {
+        const data = documentSnapshot.data();
+        return data ? data.status : null;
+      } else {
+        console.log('Document nahi mila! Path check karein.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Status read karne me error aaya:', error);
+      return null;
     }
-
-  } catch (e) {
-    console.error("❌ Fetch Data Error:", e);
-  } finally {
-    setRefreshing(false);
-  }
-};
+  };
 
   const onRefresh = useCallback(() => {
+    setRefreshing(true);
     setViewMoreStatus(false);
-    fetchData();
+    setRefreshTick((t) => t + 1); // pehle fail hue icons ko bhi dobara try karwane ke liye
+    fetchData(true).finally(() => setRefreshing(false)); // force=true → hमेशा fresh API call, chahe 1 sec pehle hi refresh kiya ho
   }, []);
 
   useEffect(() => {
     setViewMoreStatus(false);
     const getData = async () => {
-      await post({ url: `Retailer/api/data/Rem_CallAutofundtransfer?userid=${userId}` });
-      const userInfo = await get({ url: APP_URLS.getUserInfo });
-      const data     = userInfo.data;
-      setFirmDet(decryptData(data.vvvv, data.kkkk, data.frmanems));
-      setAdminFirmDet(decryptData(data.vvvv, data.kkkk, data.adminfarmname));
-      await AsyncStorage.setItem("adminFarmData", JSON.stringify({
-        adminFarmName: decryptData(data.vvvv, data.kkkk, data.adminfarmname),
-        frmanems:      decryptData(data.vvvv, data.kkkk, data.frmanems),
-        photoss:       decryptData(data.vvvv, data.kkkk, data.photoss),
-      }));
+      try {
+        await post({ url: `Retailer/api/data/Rem_CallAutofundtransfer?userid=${userId}` });
+        const userInfo = await get({ url: APP_URLS.getUserInfo });
+
+        if (userInfo && userInfo.data) {
+          const data = userInfo.data;
+
+          const decryptedFirmDet = data.frmanems ? decryptData(data.vvvv, data.kkkk, data.frmanems) : "";
+          const decryptedAdminFirmDet = data.adminfarmname ? decryptData(data.vvvv, data.kkkk, data.adminfarmname) : "";
+          const decryptedPhotos = data.photoss ? decryptData(data.vvvv, data.kkkk, data.photoss) : "";
+
+          setFirmDet(decryptedFirmDet);
+          setAdminFirmDet(decryptedAdminFirmDet);
+
+          await AsyncStorage.setItem("adminFarmData", JSON.stringify({
+            adminFarmName: decryptedAdminFirmDet,
+            frmanems:      decryptedFirmDet,
+            photoss:       decryptedPhotos,
+          }));
+        }
+      } catch (error) {
+        console.error("Error in getData init:", error);
+      }
     };
     Promise.all([getData(), fetchData()]).then(() => setRefreshing(false));
     adharpanStatus();
@@ -301,19 +287,16 @@ const fetchData = async () => {
   const adharpanStatus = async () => {
     try {
       const userInfo = await get({ url: APP_URLS.getUserInfo });
-      dispatch(setIsDemoUser(userInfo));
-      setId_Demo(userInfo.data.Demo_User);
-      const APstatus = await get({ url: `${APP_URLS.AddharPanStatus}=${userId}` });
-      if (!APstatus) return;
-      let isVerify = true;
-      if      (APstatus.verify_type === "all")    isVerify = APstatus.aadhar_status && APstatus.pan_status;
-      else if (APstatus.verify_type === "aadhar") isVerify = APstatus.aadhar_status === true;
-      else if (APstatus.verify_type === "pan")    isVerify = APstatus.pan_status    === true;
-      // if (!isVerify) {
-      //   navigation.replace("AadhrPanVerify", {
-      //     aadharcard: APstatus.aadhar, pancard: APstatus.pan, verify_type: APstatus.verify_type,
-      //   });
-      // }
+      if (userInfo && userInfo.data) {
+        dispatch(setIsDemoUser(userInfo));
+        setId_Demo(userInfo.data.Demo_User);
+        const APstatus = await get({ url: `${APP_URLS.AddharPanStatus}=${userId}` });
+        if (!APstatus) return;
+        let isVerify = true;
+        if      (APstatus.verify_type === "all")    isVerify = APstatus.aadhar_status && APstatus.pan_status;
+        else if (APstatus.verify_type === "aadhar") isVerify = APstatus.aadhar_status === true;
+        else if (APstatus.verify_type === "pan")    isVerify = APstatus.pan_status    === true;
+      }
     } catch (e) {
       console.error("Error in adharpanStatus:", e);
     }
@@ -321,26 +304,13 @@ const fetchData = async () => {
 
   // ─── Render ─────────────────────────────────────────────────────────────────
   return (
-    <View style={styles.root}>
-      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-
-      {/* Full-screen gradient */}
-      <LinearGradient
-        colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 0.9, y: 1 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      {/* Ambient orbs */}
-      <GlowOrbs primaryColor={colorConfig.primaryColor} />
+    <View style={[styles.root, { backgroundColor: colorConfig.primaryColor }]}>
+      <StatusBar backgroundColor={colorConfig.primaryColor} barStyle="light-content" />
 
       <DashboardHeader refreshPress={onRefresh} />
 
-      {/* News ticker (non-Divyanshi) */}
-      {/* { newsData?.length > 0 && ( */}
-        <NewsSlider data={newsData} />
-      {/* )} */}
+      {/* News ticker */}
+      <NewsSlider data={newsData} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -350,26 +320,14 @@ const fetchData = async () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colorConfig.primaryColor}
-            colors={[colorConfig.primaryColor,colorConfig.secondaryColor]}
+            colors={[colorConfig.primaryColor, colorConfig.secondaryColor]}
           />
         }
       >
-   
 
         {/* ── Quick Access ── */}
         {APP_URLS.AppName !== "Divyanshi Pay" && (
-          <View style={styles.glassSection}>
-            <LinearGradient
-              colors={[colorConfig.secondaryColor, colorConfig.secondaryColor]}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
-            <LinearGradient
-              colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
-              start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
-              style={styles.sectionTopShimmer}
-            />
-
+          <View style={[styles.section, { backgroundColor: colorConfig.secondaryColor }]}>
             <View style={styles.quickAccessHeader}>
               <View style={styles.qaLeft}>
                 <Text style={styles.qaHi}>{translate("Hi.")}</Text>
@@ -380,19 +338,20 @@ const fetchData = async () => {
               </View>
               <Pressable
                 onPress={() => navigation.navigate({ name: "QuickAccessScreen" })}
-                style={[styles.editBtn, { backgroundColor: `${colorConfig.secondaryColor}90` }]}
+                style={styles.editBtn}
               >
-                <LottieView
-                  autoPlay loop
-                  style={styles.lotiSmall}
-                  source={require("../../utils/lottieIcons/pencil.json")}
+                <FastImage
+                  source={getImageSource2("edit.png")}
+                  style={styles.editIcon}
+                  resizeMode={FastImage.resizeMode.contain}
                 />
               </Pressable>
             </View>
 
             <View style={styles.sectionContent}>
               <IconButtons
-                buttonData={savedItems?.length > 0 ? savedItems : otherSectionData}
+                buttonData={savedItems?.length > 0 ? savedItems : APP_URLS.AppName == 'World Pay One' ? financeSectionData : otherSectionData}
+                refreshTick={refreshTick}
               />
             </View>
           </View>
@@ -403,8 +362,8 @@ const fetchData = async () => {
           <CarouselView />
         </View>
 
-       
-        <GlassSection
+        {/* ── Recharge Section ── */}
+        <Section
           title={translate("Recharge_Pay_Bill")}
           rightElement={
             <FastImage
@@ -421,16 +380,17 @@ const fetchData = async () => {
             getItem={undefined}
             isQuickAccess={undefined}
             iconButtonstyle={undefined}
+            refreshTick={refreshTick}
           />
-        </GlassSection>
+        </Section>
 
         {/* ── CMS ── */}
         {!is_demo && (
-          <GlassSection
+          <Section
             title={translate("Our_Exclusive_CMS")}
             rightElement={
               <FastImage
-                source={getImageSource(`${APP_URLS.cms_logo}`)}
+                source={getImageSource2(`${APP_URLS.cms_logo}`)}
                 style={styles.cmsLogo}
               />
             }
@@ -440,57 +400,39 @@ const fetchData = async () => {
               getItem={undefined}
               isQuickAccess={undefined}
               iconButtonstyle={undefined}
+              refreshTick={refreshTick}
             />
-          </GlassSection>
+          </Section>
         )}
 
         {/* ── Financial Services ── */}
-        <GlassSection
-          title={translate("Financial_Services")}
-          rightElement={
-            <LottieView
-              autoPlay loop
-              style={styles.lotiRight}
-              source={require("../../utils/lottieIcons/Money-bag2")}
+        {APP_URLS.AppName !== "World Pay One" && (
+          <Section title={translate("Financial_Services")}>
+            {financeSectionData.length === 4 && (
+              <Text style={styles.newBadge}>New</Text>
+            )}
+            <IconButtons
+              buttonData={financeSectionData}
+              getItem={undefined}
+              isQuickAccess={undefined}
+              iconButtonstyle={undefined}
+              refreshTick={refreshTick}
             />
-          }
-        >
-          {financeSectionData.length === 4 && (
-            <Animated.Text
-              style={[styles.newBadge, { transform: [{ scale: scaleValue }] }]}
-            >
-              New
-            </Animated.Text>
-          )}
-          <IconButtons
-            buttonData={financeSectionData}
-            getItem={undefined}
-            isQuickAccess={undefined}
-            iconButtonstyle={undefined}
-          />
-        </GlassSection>
+          </Section>
+        )}
 
         {/* ── Travel ── */}
         {!is_demo && APP_URLS.AppName !== "Divyanshi Pay" && (
-          <GlassSection
-            title={translate("Travel_Hotel")}
-            rightElement={
-              <LottieView
-                autoPlay loop
-                style={styles.lotiRight}
-                source={require("../../utils/lottieIcons/Travel.json")}
-              />
-            }
-          >
-            <IconButtons buttonData={travelSectionData} />
-          </GlassSection>
+          <Section title={translate("Travel_Hotel")}>
+            <IconButtons buttonData={travelSectionData} refreshTick={refreshTick} />
+          </Section>
         )}
 
         {/* ── Other Section ── */}
         {!is_demo && APP_URLS.AppName !== "Divyanshi Pay" && (
-          <GlassSection title={translate("Other_Section")}>
-            <IconButtons buttonData={otherSectionData} />
-          </GlassSection>
+          <Section title={translate("Other_Section")}>
+            <IconButtons buttonData={otherSectionData} refreshTick={refreshTick} />
+          </Section>
         )}
       </ScrollView>
     </View>
@@ -499,106 +441,46 @@ const fetchData = async () => {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  root: { flex: 1 ,paddingBottom:hScale(30) },
-
-  orb: { position: "absolute", borderRadius: 999 },
+  root: { flex: 1, paddingBottom: hScale(30) },
 
   scrollContent: {
     paddingHorizontal: wScale(10),
-    paddingTop:        hScale(0),
+    paddingTop:        hScale(10),
     paddingBottom:     hScale(80),
   },
 
-  // ── Quick action row ──
-  quickRow: {
-    flexDirection:  "row",
-    justifyContent: "space-between",
-    marginBottom:   hScale(10),
-    gap:            wScale(6),
-  },
-  quickBtnOuter: {
-    flex:           1,
-    overflow:       "hidden",
+  section: {
     borderRadius:   14,
     borderWidth:    1,
-    borderColor:    "rgba(255,255,255,0.22)",
-    alignItems:     "center",
-    paddingVertical: hScale(10),
-    paddingHorizontal: wScale(4),
-  },
-  quickBtnShimmer: {
-    position: "absolute",
-    top: 0, left: 0, right: 0,
-    height: hScale(30),
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-  },
-  quickBtnIcon: {
-    height:        hScale(34),
-    width:         hScale(34),
-    borderRadius:  10,
-    justifyContent:"center",
-    alignItems:    "center",
-    marginBottom:  hScale(5),
-    borderWidth:   1,
-    borderColor:   "rgba(255,255,255,0.2)",
-  },
-  quickBtnText: {
-    color:      "rgba(255,255,255,0.9)",
-    fontSize:   wScale(11),
-    fontWeight: "600",
-    textAlign:  "center",
-    textShadowColor:  "rgba(0,0,0,0.4)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-  },
-
-  // ── Glass section card ──
-  glassSection: {
-    borderRadius:   18,
-    overflow:       "hidden",
-    borderWidth:    1,
-    borderColor:    "rgba(255,255,255,0.18)",
+    borderColor:    "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     marginVertical: hScale(6),
-    position:       "relative",
-  },
-  sectionTopShimmer: {
-    position:              "absolute",
-    top: 0, left: 0, right: 0,
-    height:                hScale(32),
-    borderTopLeftRadius:   18,
-    borderTopRightRadius:  18,
   },
   sectionTitleRow: {
     flexDirection:  "row",
     justifyContent: "space-between",
     alignItems:     "center",
-    paddingTop:     hScale(5),
+    paddingTop:     hScale(10),
     paddingHorizontal: wScale(14),
     paddingRight:   wScale(12),
   },
   sectionTitle: {
     fontSize:   wScale(15),
-    color:      "rgba(255,255,255,0.95)",
+    color:      "#fff",
     fontWeight: "700",
-    textShadowColor:  "rgba(0,0,0,0.4)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-    letterSpacing:    0.3,
   },
   sectionContent: {
     paddingTop: hScale(10),
+    paddingBottom: hScale(10),
   },
 
-  // ── Quick Access card ──
   quickAccessHeader: {
     flexDirection:  "row",
     justifyContent: "space-between",
     alignItems:     "center",
     paddingHorizontal: wScale(14),
-    paddingTop:     hScale(5),
+    paddingTop:     hScale(10),
     paddingBottom:  hScale(4),
-    backgroundColor: "rgba(255,255,255,0.05)",
   },
   qaLeft: {
     flexDirection: "row",
@@ -625,26 +507,22 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     alignItems:    "center",
     borderWidth:   1,
-    borderColor:   "rgba(255,255,255,0.25)",
+    borderColor:   "rgba(255,255,255,0.3)",
   },
-  lotiSmall: { height: hScale(18), width: wScale(18) },
+  editIcon: {
+    height: wScale(16),
+    width:  wScale(16),
+  },
 
-  // ── Carousel ──
   carouselWrap: { marginVertical: hScale(0) },
 
-  // ── Logos ──
   bblogo:  { height: wScale(25), width: wScale(20) },
   cmsLogo: { height: wScale(25), width: wScale(25) },
-  lotiRight: {
-    height: hScale(46),
-    width:  wScale(38),
-  },
 
-  // ── New badge ──
   newBadge: {
     backgroundColor:   "red",
     position:          "absolute",
-    right:             wScale(31),
+    right:             wScale(14),
     top:               hScale(10),
     zIndex:            20,
     color:             "#fff",

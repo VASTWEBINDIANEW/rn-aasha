@@ -288,43 +288,43 @@ export const DrivingLicenseSchema = Yup.object({
 });
 
 
-// export const DrivingLicenseSchema = Yup.object({
-//   isDrivingLicense: Yup.boolean().required(),
+// ── Add this to utils/validationSchemas.ts ──────────────
 
-//   drivingLicenseNumber: Yup.string().when('isDrivingLicense', {
-//     is: true,
-//     then: s =>
-//       s
-//         .required('License number required')
-//         .matches(
-//           drivingLicenseRegex,
-//           'Invalid license number (e.g. MH0420110012345)'
-//         ),
-//     otherwise: s => s.optional(),
-//   }),
+export const Section1Schema = Yup.object({
 
-//   isTwoWheeler: Yup.string()
-//     .oneOf(['Yes', 'No'], 'Please select Yes or No')
-//     .required('Please select'),
+  Name: Yup.string()
+    .trim()
+    .matches(/^[a-zA-Z\s]+$/, 'Only alphabets')
+    .min(3, 'Too short')
+    .required('Full name required'),
 
-//   twoWheelerNumber: Yup.string().when('isTwoWheeler', {
-//     is: 'Yes',
-//     then: s =>
-//       s
-//         .required('Two wheeler number required')
-//         .matches(
-//           vehicleNumberRegex,
-//           'Invalid format (e.g. MH02AB1234)'
-//         ),
-//     otherwise: s => s.optional(),
-//   }),
+  Firmname: Yup.string()
+    .trim()
+    .min(3, 'Too short')
+    .required('Firm name required'),
 
-//   // vehicleNumber: Yup.string()
-//   //   .optional()
-//   //   .matches(
-//   //     vehicleNumberRegex,
-//   //     'Invalid format (e.g. MH02AB1234)'
-//   //   ),
+  Statename: Yup.string()
+    .required('Select state'),
 
-//   languageKnown: Yup.string().required('Language required'),
-// });
+  Districtname: Yup.string()
+    .required('Select district'),
+cityname: Yup.string()
+  .trim()
+  .required('City name required'),
+  Pincode: Yup.string()
+    .matches(/^\d{6}$/, 'Enter valid 6-digit pincode')
+    .required('Pincode required'),
+
+  Address: Yup.string()
+    .trim()
+    .min(10, 'Enter complete address')
+    .required('Address required'),
+
+  // ✅ Mobile & Email verification handled by MobileCard/EmailCard
+  // (own internal verified state) — but we still guard at submit time
+  mobileVerified: Yup.boolean()
+    .oneOf([true], 'Please verify mobile number'),
+
+  emailVerified: Yup.boolean()
+    .oneOf([true], 'Please verify email address'),
+});
