@@ -4,7 +4,7 @@
 export const APP_URLS = {
   playUrl: 'http://play.google.com/store/apps/details?id=',
   RCEID: 'api/Radiant/RCEID',
-  appPackage: 'com.digitalindiapay',
+  appPackage: 'com.ssvcms',
   retailerlist: 'api/data/retailer_list',
   LoginDetailsRetailer: 'Retailer/api/data/LoginDetailsRetailer',
   LoginDetailsDealer: 'api/data/LoginDetails',
@@ -12,8 +12,7 @@ export const APP_URLS = {
   // baseWebUrl: 'vastwebindia.com/',
   baseWebUrl: 'ssvcms.in///',
 
-  AppName: 'Digital India Pay',
-  app_logo: 'sonicswipe.png',
+  AppName: 'Ssv Cms',
   cms_logo: 'radiant.png',
   DownloadAPK: '/Home/DownloadAPK',
   dealerDaybook: 'api/Dealer/Dealer_Daybook_Report?',

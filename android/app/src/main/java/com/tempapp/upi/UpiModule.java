@@ -1,4 +1,4 @@
-package com.digitalindiapay.upi;
+package com.ssvcms.upi;
 
 import android.app.Activity;
 import android.content.Intent;

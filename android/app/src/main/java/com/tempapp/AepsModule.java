@@ -1,4 +1,4 @@
-package com.digitalindiapay;
+package com.ssvcms;
 
 import android.app.Activity;
 import android.content.Intent;

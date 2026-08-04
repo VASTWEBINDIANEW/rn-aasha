@@ -1,5 +1,5 @@
 
-package com.digitalindiapay;
+package com.ssvcms;
 
 import okhttp3.OkHttpClient;
 import javax.net.ssl.*;

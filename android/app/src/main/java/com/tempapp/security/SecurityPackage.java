@@ -1,4 +1,4 @@
-package com.digitalindiapay.security;
+package com.ssvcms.security;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

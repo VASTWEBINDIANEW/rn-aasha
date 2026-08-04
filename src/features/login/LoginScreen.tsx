@@ -141,7 +141,7 @@ const fetchdata = async () => {
 
     // ✅ condition lagao
     if (res?.data?.CMSUSER === true) {
-      dispatch(setOnlyCmsuser(false));
+      dispatch(setOnlyCmsuser(true));
     } else {
       dispatch(setOnlyCmsuser(false));
       // ya agar kuch nahi bhejna:

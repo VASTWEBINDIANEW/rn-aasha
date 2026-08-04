@@ -1,4 +1,4 @@
-package com.digitalindiapay.location;
+package com.ssvcms.location;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

@@ -4,7 +4,7 @@ import { RootState } from './reduxUtils/store';
 import useAxiosHook from './utils/network/AxiosClient';
 import { APP_URLS } from './utils/network/urls';
 import {
-  reset,
+  setAllPermissionsGranted,
   setColorConfig,
   setDeviceInfo,
   setIsDemoUser,
@@ -48,9 +48,9 @@ import ConnectionLost from './components/ConnectionLost';
 import { translate } from './utils/languageUtils/I18n';
 import BlockedMessageAnimated from './features/dashboard/components/Pkgmiss';
 import firestore from '@react-native-firebase/firestore';
-import CmsScreen from './features/RadiantApp/CmsScreen';
-import { useNavigation } from '@react-navigation/native';
-import NavigationService from './utils/navigation/NavigationService';
+// import PermissionScreen from './components/PermissionScreen';
+import ShowLoader from './components/ShowLoder';
+import NavigationService, { useNavigation } from './utils/navigation/NavigationService';
 
 export const AppContainer = () => {
   const { LocationModule } = NativeModules;
@@ -65,6 +65,7 @@ export const AppContainer = () => {
     loginId,
     isFingerprintEnabled,
     unLocked,
+    allPermissionsGranted,
     isDemoUser: reduxIsDemoUser,
     onlyCmsUser
   } = useSelector((state: RootState) => state.userInfo);
@@ -87,9 +88,46 @@ export const AppContainer = () => {
 
   try { getApp(); } catch (e) { initializeApp(firebaseConfig, 'aircharge'); }
 
+  // 🔥 Permission Check Effect — sirf initial check karta hai, request nahi karta
+useEffect(() => {
+  const checkPermissions = async () => {
+    if (Platform.OS === 'android') {
+      const galleryPermission =
+        Platform.Version >= 33
+          ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+          : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+      const camera = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
+      const location = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      const gallery = await PermissionsAndroid.check(galleryPermission);
+
+      if (camera && location && gallery) {
+        dispatch(setAllPermissionsGranted(true));
+      } else {
+        dispatch(setAllPermissionsGranted(false));
+      }
+    } else {
+      // iOS ya dusre platform ke liye default true maan rahe hain abhi ke liye
+      dispatch(setAllPermissionsGranted(true));
+    }
+  };
+
+  checkPermissions();
+}, []);
+
+  // 🔑 FIX: Ab ye effect sirf tabhi aage badhega jab allPermissionsGranted true ho.
+  // Isse initAppAndLocation() ka location request PermissionScreen ke requestMultiple()
+  // ke saath race/conflict nahi karega.
   useEffect(() => {
     const init = async () => {
       await fetchAppData();
+
+      // Permissions abhi granted nahi hain — PermissionScreen khud sab handle karega,
+      // yahan se koi separate permission request mat chalao
+      if (!allPermissionsGranted) {
+        setIsLoading(false);
+        return;
+      }
 
       if (authToken) {
         if (isDemo) {
@@ -110,7 +148,7 @@ export const AppContainer = () => {
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        if (authToken && !isDemo) {
+        if (authToken && !isDemo && allPermissionsGranted) {
           checkGPSOnResume();
         }
       }
@@ -118,7 +156,7 @@ export const AppContainer = () => {
     });
 
     return () => subscription.remove();
-  }, [authToken]);
+  }, [authToken, allPermissionsGranted]); // 🔑 allPermissionsGranted dependency mein add kiya
 
   const checkGPSOnResume = async () => {
     try {
@@ -131,7 +169,6 @@ export const AppContainer = () => {
         if (status === "ENABLED") {
           fetchDeviceInfo(false);
         } else {
-          // user cancel kare toh 2 sec baad fir check
           setTimeout(() => {
             checkGPSOnResume();
           }, 2000);
@@ -144,7 +181,7 @@ export const AppContainer = () => {
     }
   };
 
-  const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [allowed, setAllowed] = useState(null);
 
   useEffect(() => {
     const subscriber = firestore()
@@ -157,52 +194,50 @@ export const AppContainer = () => {
               const data = documentSnapshot.data();
               const status = data?.isAllowed ?? false;
               setAllowed(status);
-              console.log('User allowed status:', status);
             } else {
               setAllowed(false);
-              console.log('Document does not exist');
             }
           } catch (error) {
-            console.log('Firestore read error:', error);
             setAllowed(false);
           }
         },
-        error => {
-          console.log('Snapshot listener error:', error);
-          setAllowed(false);
-        }
+        error => setAllowed(false)
       );
 
     return () => subscriber();
   }, []);
 
+  // 🔑 FIX: Ab yahan se dobara PermissionsAndroid.request() nahi chalta,
+  // kyunki is function tak tabhi pahunchte hain jab allPermissionsGranted
+  // already true ho chuka hai (PermissionScreen se). Sirf GPS enabled hai
+  // ya nahi wo check karke device info fetch karta hai.
   const initAppAndLocation = async () => {
-    let granted = false;
+    try {
+      const isEnabled = await LocationModule.isLocationEnabled();
 
-    if (Platform.OS === 'android') {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      granted = result === PermissionsAndroid.RESULTS.GRANTED;
-    } else {
-      granted = true;
+      if (!isEnabled) {
+        const status = await LocationModule.requestGPSEnabling();
+
+        if (status !== "ENABLED") {
+          Alert.alert(
+            translate('Location Required'),
+            translate('Please enable GPS to continue.'),
+            [
+              {
+                text: 'Retry',
+                onPress: () => initAppAndLocation(),
+              }
+            ]
+          );
+          return;
+        }
+      }
+
+      fetchDeviceInfo(false);
+    } catch (e) {
+      console.log('GPS Check Error', e);
+      fetchDeviceInfo(false);
     }
-
-    if (!granted) {
-      Alert.alert(
-        translate('Location Required'),
-        translate('Please allow location to continue.'),
-        [
-          {
-            text: 'Retry',
-            onPress: () => initAppAndLocation(),
-          }
-        ]
-      );
-      return;
-    }
-
-    fetchDeviceInfo(false);
   };
 
   const fetchDeviceInfo = async (skipLocation: boolean) => {
@@ -211,9 +246,6 @@ export const AppContainer = () => {
       const ip = await getIpAddress();
       const bundleId = DeviceInfo.getBundleId();
 
-      console.log('====================================');
-      console.log("Bundle ID:", bundleId);
-      console.log('====================================');
       setpkg(bundleId);
 
       let locData = {
@@ -240,7 +272,6 @@ export const AppContainer = () => {
           locData = loc;
           setLocationAllowed(true);
         } catch (e) {
-          console.log("Location Error", e);
           const status = await LocationModule.requestGPSEnabling();
           if (status === "ENABLED") {
             fetchDeviceInfo(false);
@@ -270,8 +301,6 @@ export const AppContainer = () => {
   const fetchAppData = async () => {
     try {
       const res = await get({ url: APP_URLS.getColors });
-
-      console.log('🎨 Color Config:', res);
       if (res) {
         dispatch(setColorConfig({
           primaryColor: res.BACKGROUNDCOLOR1,
@@ -283,9 +312,6 @@ export const AppContainer = () => {
       }
 
       const version = await get({ url: APP_URLS.current_version });
-      console.log('====================================');
-      console.log("Server Version Response:", version);
-      console.log('====================================');
 
       if (version) {
         dispatch(setLogoUrl(version.Logo));
@@ -300,10 +326,6 @@ export const AppContainer = () => {
       if (version?.PackageName) {
         const mismatch = bundleId !== version.PackageName;
         setpkgmiss(mismatch);
-
-        console.log('📦 LOCAL PACKAGE:', bundleId);
-        console.log('🌐 SERVER PACKAGE:', version.PackageName);
-        console.log('❗ PACKAGE MISMATCH:', mismatch);
       }
       registerNotification();
     } catch (e) {
@@ -316,35 +338,24 @@ export const AppContainer = () => {
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const isDisconnected = !state.isConnected;
-
-      setConnectionLost(prev => {
-        if (prev === isDisconnected) return prev;
-        return isDisconnected;
-      });
-
-      if (isDisconnected) {
-        console.log("Internet Disconnected ❌");
-      } else {
-        console.log("Internet Connected ✅");
-      }
+      setConnectionLost(prev => prev === isDisconnected ? prev : isDisconnected);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const navigation = useNavigation();
-  const appState1 = useRef(AppState.currentState);
+  // --- RENDER LOGIC (Priority Based) ---
 
+   const navigation = useNavigation();
+  const appState1 = useRef(AppState.currentState);
   const fetchdata = async () => {
     try {
       const url = APP_URLS.getUserInfo;
       console.log('🌐 API URL:', url);
-
       const res = await get({ url });
       console.log('✅ RESPONSE:', res);
-
       if (res?.data?.CMSUSER === true) {
-        dispatch(setOnlyCmsuser(false));
+        dispatch(setOnlyCmsuser(true));
       } else {
         dispatch(setOnlyCmsuser(false));
       }
@@ -352,14 +363,12 @@ export const AppContainer = () => {
       console.log('❌ ERROR:', error);
     }
   };
-
   useEffect(() => {
     // 1. Screen Focus Listener
     const unsubscribeFocus = navigation.addListener('focus', () => {
       console.log('📲 Screen Focus → API Call');
       fetchdata();
     });
-
     // 2. Background → Foreground Listener
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (
@@ -369,17 +378,13 @@ export const AppContainer = () => {
         console.log('🔄 App foreground me aayi → API Call');
         fetchdata();
       }
-
       appState1.current = nextAppState;
     });
-
     return () => {
       unsubscribeFocus();
       subscription.remove();
     };
   }, [navigation]);
-
-
   useEffect(() => {
     if (authToken) {
       if (onlyCmsUser) {
@@ -398,6 +403,16 @@ export const AppContainer = () => {
       return <Updatebox isVer={undefined} loading={undefined} isplay={false} />;
     }
 
+    if (allPermissionsGranted === false) {
+      return (
+        <PermissionScreen
+          onSuccess={(status: boolean) =>
+            dispatch(setAllPermissionsGranted(status))
+          }
+        />
+      );
+    }
+
     if (!authToken) {
       return <AuthNavigator />;
     }
@@ -405,7 +420,7 @@ export const AppContainer = () => {
     if (isFingerprintEnabled && !unLocked) {
       return <BiometricAuth />;
     }
-    // if(!onlyCmsUser) return <CmsScreen/>
+
     return IsDealer ? <DealerNavigator /> : <AppNavigator />;
   };
 
@@ -415,3 +430,5 @@ export const AppContainer = () => {
     </SafeWrapper>
   );
 };
+
+export default AppContainer;

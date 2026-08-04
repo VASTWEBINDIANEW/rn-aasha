@@ -1,4 +1,4 @@
-package com.digitalindiapay.ContactPicker;
+package com.ssvcms.ContactPicker;
 
 import android.app.Activity;
 import android.content.Intent;

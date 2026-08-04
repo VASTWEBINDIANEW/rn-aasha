@@ -1,4 +1,4 @@
-package com.digitalindiapay   // ✅ was com.worldpayone
+package com.ssvcms   // ✅ was com.worldpayone
 
 import android.Manifest
 import android.app.Activity
