@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#F3F3F3"
+    android:id="@+id/main"
+    tools:context=".UpiFailureScreen"
+    android:orientation="vertical">
+
+    <!-- Header -->
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="70dp"-->
+<!--        android:background="#D9043D"-->
+<!--        android:gravity="center_vertical"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:paddingStart="18dp"-->
+<!--        android:paddingEnd="18dp">-->
+
+<!--        <TextView-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="Fingpay"-->
+<!--            android:textColor="#FFFFFF"-->
+<!--            android:textSize="22sp"-->
+<!--            android:textStyle="bold" />-->
+
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="UPI Cash Withdrawal"-->
+<!--            android:textColor="#FFFFFF"-->
+<!--            android:textSize="16sp"-->
+<!--            android:textStyle="bold" />-->
+
+<!--    </LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@drawable/bg_header_gradient"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:src="@drawable/your_logo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="UPI Cash Withdrawal"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- Main Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Failure Icon -->
+        <LinearLayout
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/bg_failed_circle"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_failed"/>
+
+        </LinearLayout>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Transaction Failed"
+            android:textColor="#001B44"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/failure_reason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Customer cancelled the transaction."
+            android:textColor="#E30613"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+<!--        &lt;!&ndash; Error Types Card &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="30dp"-->
+<!--            android:background="@drawable/bg_error_card"-->
+<!--            android:orientation="vertical"-->
+<!--            android:padding="16dp">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:text="Error Type Variants:"-->
+<!--                android:textColor="#1F2937"-->
+<!--                android:textSize="17sp"-->
+<!--                android:textStyle="bold" />-->
+
+<!--            &lt;!&ndash; Row 1 &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="16dp"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Timeout"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Auth Failed"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--            </LinearLayout>-->
+
+<!--            &lt;!&ndash; Row 2 &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Invalid Account"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Declined"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--            </LinearLayout>-->
+
+<!--            &lt;!&ndash; Row 3 &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Insufficient Balance"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Limit Exceeded"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--            </LinearLayout>-->
+
+<!--            &lt;!&ndash; Row 4 &ndash;&gt;-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Duplicate Expired"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_error_button"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Bank Issue"-->
+<!--                    android:textColor="#1F2937"-->
+<!--                    android:textSize="15sp" />-->
+
+<!--            </LinearLayout>-->
+
+<!--            &lt;!&ndash; Selected &ndash;&gt;-->
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="45dp"-->
+<!--                android:layout_marginTop="12dp"-->
+<!--                android:background="@drawable/bg_red_button"-->
+<!--                android:gravity="center"-->
+<!--                android:text="User Cancelled"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="16sp"-->
+<!--                android:textStyle="bold" />-->
+
+<!--        </LinearLayout>-->
+
+        <!-- Generate QR -->
+        <Button
+            android:id="@+id/generate_new_qr"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/bg_button_gradient"
+            android:text="Generate New QR"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Home Button -->
+        <Button
+            android:id="@+id/return_of_home"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_outline_button"
+            android:text="Return to Home"
+            android:textAllCaps="false"
+            android:textColor="#374151"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

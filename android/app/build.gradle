@@ -13,24 +13,38 @@ react {
 }
 
 android {
-    namespace "com.worldpayone"
+    namespace "com.pemudra"
     compileSdk 35
     ndkVersion "27.2.12479018"
 
     defaultConfig {
-        applicationId "com.worldpayone"
+        applicationId "com.pemudra"
         minSdk 24
         targetSdk 35
         versionCode 1
         versionName "0.0.1"
         multiDexEnabled true
 
-        externalNativeBuild {
-            cmake {
-                arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-                cppFlags "-Wl,-z,max-page-size=16384"
-            }
-        }
+        // externalNativeBuild {
+        //     cmake {
+        //         arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+        //         cppFlags "-Wl,-z,max-page-size=16384"
+        //     }
+        // }
+// externalNativeBuild {
+//     cmake {
+//         arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+//     }
+// }
+
+externalNativeBuild {
+    cmake {
+        arguments "-DANDROID_STL=c++_shared", 
+                  "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                  "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384"
+        // cppFlags "-j2"
+    }
+}
 
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -97,12 +111,15 @@ dependencies {
     implementation("com.facebook.react:hermes-android")
     implementation "androidx.multidex:multidex:2.0.1"
     implementation("androidx.activity:activity-ktx:1.9.0")
-
+implementation 'com.google.zxing:core:3.5.2'
+implementation 'commons-io:commons-io:2.15.1'
 implementation project(':react-native-ml-kit_face-detection')  // ← yeh add karo
 implementation 'com.google.mlkit:face-detection:16.1.5'
     // CredoPay & Local AARs
     implementation files('libs/pspwDmt.aar')
     implementation files('libs/pw_ekyc.aar')
+        implementation files('libs/app-release.aar')
+
     implementation('in.credopay.payment.sdk:vm30-payment-sdk:3.0.20') {
         exclude group: 'com.squareup.retrofit2', module: 'retrofit'
     }

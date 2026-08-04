@@ -311,6 +311,7 @@ useEffect(() => {
       const version = await get({ url: APP_URLS.current_version });
 
       if (version) {
+        console.log(version,"PPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
         dispatch(setLogoUrl(version.Logo));
         dispatch(setVersionData(version));
 

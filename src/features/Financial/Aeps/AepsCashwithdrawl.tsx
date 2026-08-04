@@ -202,7 +202,7 @@ const provider =
     async function getUserNamefunction(MoNumber) {
         setIsLoading(true)
         try {
-            const response = await get({ url: activeAepsLine ? `${APP_URLS.aepsNameinfoNifi}${MoNumber}` : `${APP_URLS.aepsNameinfo}${MoNumber}` })
+            const response = await get({ url: activeAepsLine.line !=='yellow' ? `${APP_URLS.aepsNameinfoNifi}${MoNumber}` : `${APP_URLS.aepsNameinfo}${MoNumber}` })
             setAutofcs(true);
             setConsumerName(response.RESULT);
             setIsLoading(false)
@@ -626,6 +626,8 @@ const saveFaceResponse = async (data) => {
             console.error("Error sending OTP:", error);
         }
     };
+
+    console.log(activeAepsLine,'activeAepsLine','***')
     const OnPressEnq = async (fingerprintDataString, pidDataXml) => {
         try {
 
@@ -1304,7 +1306,7 @@ setIsLoading(false);
                             <DynamicButton
                                 onPress={() => {
              //   OnPressEnq2(faceData);
-
+console.log(bankName,bankid,mobileNumber,consumerName,aadharNumber);
                                     setisFacialTan(false);
                                     if (bankName !== 'Select Bank' &&
                                         mobileNumber.length === 10 &&

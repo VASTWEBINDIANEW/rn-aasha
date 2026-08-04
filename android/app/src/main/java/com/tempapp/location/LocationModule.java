@@ -1,4 +1,4 @@
-package com.worldpayone.location;
+package com.pemudra.location;
 
 import android.Manifest;
 import android.app.Activity;

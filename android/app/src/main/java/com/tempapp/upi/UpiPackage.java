@@ -1,4 +1,4 @@
-package com.worldpayone.upi;
+package com.pemudra.upi;
 
 import androidx.annotation.NonNull;
 

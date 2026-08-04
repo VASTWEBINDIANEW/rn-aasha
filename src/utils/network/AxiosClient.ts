@@ -32,7 +32,8 @@ useEffect(()=>{
   const axiosInstance = useMemo(
     () =>
       axios.create({
-        baseURL: 'http://native.uniquerechargesrs.in/',
+        //http://native.vastwebindia.com/
+        baseURL: 'http://native.vastwebindia.com///',
         timeout: DEFAULT_TIMEOUT,
       }),
     [],

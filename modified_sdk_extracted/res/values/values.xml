@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbTAeFw0wODA0MTUyMzM2NTZaFw0zNTA5MDEyMzM2NTZaMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbTCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgCggEBANbOLggKv+IxTdGNs8/TGFy0PTP6DHThvbbR24kT9ixcOd9W+EaBPWW+wPPKQmsHxajtWjmQwWfna8mZuSeJS48LIgAZlKkpFeVyxW0qMBujb8X8ETrWy550NaFtI6t9+u7hZeTfHwqNvacKhp1RbE6dBRGWynwMVX8XW8N1+UjFaq6GCJukT4qmpN2afb8sCjUigq0GuMwYXrFVee74bQgLHWGJwPmvmLHC69EH6kWr22ijx4OKXlSIx2xT1AsSHee70w5iDBiK4aph27yH3TxkXy9V89TDdexAcKk/cVHYNnDBapcavl7y0RiQ4biu8ymM8Ga/nmzhRKya6G0cGw8CAQOjgfwwgfkwHQYDVR0OBBYEFI0cxb6VTEM8YYY6FbBMvAPyT+CyMIHJBgNVHSMEgcEwgb6AFI0cxb6VTEM8YYY6FbBMvAPyT+CyoYGapIGXMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbYIJANWFuGx90071MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADggEBABnTDPEF+3iSP0wNfdIjIz1AlnrPzgAIHVvXxunW7SBrDhEglQZBbKJEk5kT0mtKoOD1JMrSu1xuTKEBahWRbqHsXclaXjoBADb0kkjVEJu/Lh5hgYZnOjvlba8Ld7HCKePCVePoTJBdI4fvugnL8TsgK05aIskyY0hKI9L8KfqfGTl1lzOv2KoWD0KWwtAWPoGChZxmQ+nBli+gwYMzM1vAkP+aayLe0a1EQimlOalO762r0GXO0ks+UeXde2Z4e+8S/pf7pITEI/tP+MxJTALw9QUWEv9lKTk+jkbqxbsh8nfBUapfKqYn0eidpwq2AzVp3juYl7//fKnaPhJD9gs=
+        </item>
+    </string-array>
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEQzCCAyugAwIBAgIJAMLgh0ZkSjCNMA0GCSqGSIb3DQEBBAUAMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDAeFw0wODA4MjEyMzEzMzRaFw0zNjAxMDcyMzEzMzRaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgCggEBAKtWLgDYO6IIrgqWbxJOKdoR8qtW0I9Y4sypEwPpt1TTcvZApxsdyxMJZ2JORland2qSGT2y5b+3JKkedxiLDmpHpDsz2WCbdxgxRczfey5YZnTJ4VZbH0xqWVW/8lGmPav5xVwnIiJS6HXk+BVKZF+JcWjAsb/GEuq/eFdpuzSqeYTcfi6idkyugwfYwXFU1+5fZKUaRKYCwkkFQVfcAs1fXA5V+++FGfvjJ/CxURaSxaBvGdGDhfXE28LWuT9ozCl5xw4Yq5OGazvV24mZVSoOO0yZ31j7kYvtwYK6NeADwbSxDdJEqO4k//0zOHKrUiGYXtqw/A0LFFtqoZKFjnkCAQOjgdkwgdYwHQYDVR0OBBYEFMd9jMIhF1Ylmn/Tgt9r45jk14alMIGmBgNVHSMEgZ4wgZuAFMd9jMIhF1Ylmn/Tgt9r45jk14aloXikdjB0MQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEUMBIGA1UEChMLR29vZ2xlIEluYy4xEDAOBgNVBAsTB0FuZHJvaWQxEDAOBgNVBAMTB0FuZHJvaWSCCQDC4IdGZEowjTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBAUAA4IBAQBt0lLO74UwLDYKqs6Tm8/yzKkEu116FmH4rkaymUIE0P9KaMftGlMexFlaYjzmB2OxZyl6euNXEsQH8gjwyxCUKRJNexBiGcCEyj6z+a1fuHHvkiaai+KL8W1EyNmgjmyy8AW7P+LLlkR+ho5zEHatRbM/YAnqGcFh5iZBqpknHf1SKMXFh4dd239FJ1jWYfbMDMy3NS5CTMQ2XFI1MvcyUTdZPErjQfTbQe3aDQsQcafEQPD+nqActifKZ0Np0IS9L9kR/wbNvyz6ENwPiTrjV2KRkEjH78ZMcUQXg0L3BYHJ3lc69Vs5Ddf9uUGGMYldX3WfMBEmh/9iFBDAaTCK
+        </item>
+    </string-array>
+    <color name="app_bg">#EDEDED</color>
+    <color name="black">#FF000000</color>
+    <color name="btn_pressed">#002E55</color>
+    <color name="grey">#616161</color>
+    <color name="header_color">#004886</color>
+    <color name="red">#E5093A</color>
+    <color name="white">#FFFFFFFF</color>
+    <string name="fingpay_cash_withdrawal_Rs">\u20B9</string>
+    <string name="fingpay_cash_withdrawal_aadhaar_number">Aadhaar Number</string>
+    <string name="fingpay_cash_withdrawal_aeps">AEPS</string>
+    <string name="fingpay_cash_withdrawal_alert_dialog_title">Alert</string>
+    <string name="fingpay_cash_withdrawal_amount">Amount</string>
+    <string name="fingpay_cash_withdrawal_app_name">Cash Withdrawal Sdk</string>
+    <string name="fingpay_cash_withdrawal_back">BACK</string>
+    <string name="fingpay_cash_withdrawal_bad_req">Bad Request</string>
+    <string name="fingpay_cash_withdrawal_cancel_btn">Cancel</string>
+    <string name="fingpay_cash_withdrawal_confirmation">Confirmation</string>
+    <string name="fingpay_cash_withdrawal_default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="fingpay_cash_withdrawal_device_connectivity">Please check data network on your device.</string>
+    <string name="fingpay_cash_withdrawal_device_permission">This app needs permission to get Device Information</string>
+    <string name="fingpay_cash_withdrawal_getting_location">Getting Location, Please Wait...</string>
+    <string name="fingpay_cash_withdrawal_goto_permissions">Go to Permissions to Grant</string>
+    <string name="fingpay_cash_withdrawal_grant">Grant</string>
+    <string name="fingpay_cash_withdrawal_history">TRANSACTION HISTORY</string>
+    <string name="fingpay_cash_withdrawal_internal_error">Internal Server Error</string>
+    <string name="fingpay_cash_withdrawal_is_null">Input stream is null</string>
+    <string name="fingpay_cash_withdrawal_launch">LAUNCH FINGPAY</string>
+    <string name="fingpay_cash_withdrawal_loading">Loading...</string>
+    <string name="fingpay_cash_withdrawal_merch_id">Merchant Id</string>
+    <string name="fingpay_cash_withdrawal_merch_pin">Password</string>
+    <string name="fingpay_cash_withdrawal_merchant_master_data_null">MerchantMasterData is null</string>
+    <string name="fingpay_cash_withdrawal_mobile_number">Mobile Number</string>
+    <string name="fingpay_cash_withdrawal_name">Name</string>
+    <string name="fingpay_cash_withdrawal_need_permissions">Need some Permissions</string>
+    <string name="fingpay_cash_withdrawal_network_error">Server Unavailable while sending data</string>
+    <string name="fingpay_cash_withdrawal_no">NO</string>
+    <string name="fingpay_cash_withdrawal_no_banks">No Banks</string>
+    <string name="fingpay_cash_withdrawal_no_payment_types">No Payment Types</string>
+    <string name="fingpay_cash_withdrawal_ok_btn">OK</string>
+    <string name="fingpay_cash_withdrawal_organization_code">Organization Code</string>
+    <string name="fingpay_cash_withdrawal_out_of_range">Amount is not within transaction limit.</string>
+    <string name="fingpay_cash_withdrawal_parse_detailed_msg">Data may not be valid or server has issues</string>
+    <string name="fingpay_cash_withdrawal_parse_display_msg">Error Parsing Data</string>
+    <string name="fingpay_cash_withdrawal_paswword">Password</string>
+    <string name="fingpay_cash_withdrawal_problem_with_network">Some Problems in Network Or Web-Services,try again...</string>
+    <string name="fingpay_cash_withdrawal_progress_dialog_msg">Getting data...</string>
+    <string name="fingpay_cash_withdrawal_progress_dialog_title">Please wait...</string>
+    <string name="fingpay_cash_withdrawal_remarks">Remarks</string>
+    <string name="fingpay_cash_withdrawal_response_null">Response is null</string>
+    <string name="fingpay_cash_withdrawal_secret_key">Secret Key</string>
+    <string name="fingpay_cash_withdrawal_server_error">Problem with server</string>
+    <string name="fingpay_cash_withdrawal_server_issue">Server encountered some issue, please try again later</string>
+    <string name="fingpay_cash_withdrawal_server_not_reachable">Server is not reachable</string>
+    <string name="fingpay_cash_withdrawal_share_text">You can download the app from\n</string>
+    <string name="fingpay_cash_withdrawal_thank_you">Thank You</string>
+    <string name="fingpay_cash_withdrawal_timeout">Transaction has timed out. Please check the status after sometime.</string>
+    <string name="fingpay_cash_withdrawal_trade_bal">Trade Bal : </string>
+    <string name="fingpay_cash_withdrawal_unable_toget_permission">Unable to get Permission</string>
+    <string name="fingpay_cash_withdrawal_unique_id">Unique ID</string>
+    <string name="fingpay_cash_withdrawal_valid_amount">Please enter valid amount</string>
+    <string name="fingpay_cash_withdrawal_valid_cust_name">Please enter valid Member name</string>
+    <string name="fingpay_cash_withdrawal_valid_mobile">Please enter 10 digit mobile number</string>
+    <string name="fingpay_cash_withdrawal_yes">YES</string>
+    <style name="Base.Theme.FingpayUpiCashWithdrawalApp" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        
+
+        
+        <item name="android:statusBarColor">#D9043D</item>
+        
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="CustomAlertDialog" parent="@android:style/Theme.Panel">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+    <style name="CustomAlertDialogStyle">
+        <item name="android:bottomBright">@android:color/transparent</item>
+        <item name="android:bottomDark">@android:color/transparent</item>
+        <item name="android:bottomMedium">@android:color/transparent</item>
+        <item name="android:centerBright">@android:color/transparent</item>
+        <item name="android:centerDark">@android:color/transparent</item>
+        <item name="android:centerMedium">@android:color/transparent</item>
+        <item name="android:fullBright">@drawable/dialog</item>
+        <item name="android:fullDark">@drawable/dialog</item>
+        <item name="android:topBright">@android:color/transparent</item>
+        <item name="android:topDark">@android:color/transparent</item>
+    </style>
+    <style name="StyledDialog" parent="@android:style/Theme.Panel">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:alertDialogStyle">@style/CustomAlertDialogStyle</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+    <style name="Theme.FingpayUpiCashWithdrawalApp" parent="Base.Theme.FingpayUpiCashWithdrawalApp"/>
+    <style name="button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:background">@drawable/btn_bg</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">@font/open_sans</item>
+    </style>
+    <style name="text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:shadowColor">@color/white</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">18sp</item>
+        <item name="background">@color/white</item>
+        <item name="android:fontFamily">@font/arial</item>
+    </style>
+</resources>

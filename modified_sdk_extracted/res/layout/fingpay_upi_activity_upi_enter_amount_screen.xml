@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    android:id="@+id/main"
+    android:orientation="vertical">
+
+    <!-- Header -->
+    <!-- Header -->
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="@drawable/bg_header_gradient"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UPI Cash Withdrawal"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.02"
+            android:maxLines="1"
+            android:includeFontPadding="false" />
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:text="Entered Amount"
+            android:textColor="#001B44"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Subtitle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Proceed to generate UPI QR for cash withdrawal"
+            android:textColor="#4A5568"
+            android:textSize="16sp" />
+
+        <!-- Buttons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="4dp"
+                android:background="#F1F1F1">
+
+                <TextView
+                    android:id="@+id/txtReadOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:text="Read-Only"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/bg_header_gradient"
+                    android:textColor="@drawable/text_selector"/>
+
+                <TextView
+                    android:id="@+id/txtEditable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:layout_marginStart="15dp"
+                    android:paddingHorizontal="16dp"
+                    android:text="Editable"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/bg_header_gradient"
+                    android:textColor="@drawable/text_selector"/>
+
+                <TextView
+                    android:id="@+id/txtEmpty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:text="Empty"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:layout_marginStart="15dp"
+                    android:focusable="true"
+                    android:background="@drawable/bg_header_gradient"
+                    android:textColor="@drawable/text_selector"/>
+
+            </LinearLayout>
+
+
+
+<!--            <RadioGroup-->
+<!--                android:id="@+id/modes"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="5dp"-->
+<!--                android:background="@android:color/transparent"-->
+<!--                android:checkedButton="@+id/rb_today"-->
+<!--                android:orientation="horizontal">-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/read_only_tv"-->
+<!--                    android:layout_width="120dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:gravity="center"-->
+<!--                    android:text="Read-Only"-->
+<!--                    android:textColor="#FFFFFF"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:background="@drawable/bg_red_button"-->
+<!--                    android:button="@null"-->
+<!--                    android:fontFamily="@font/open_sans"-->
+<!--                    android:minHeight="42dp"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:textAppearance="?android:attr/textAppearanceSmall" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/editable_tv"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:layout_width="100dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:background="@drawable/bg_red_button"-->
+<!--                    android:button="@null"-->
+<!--                    android:fontFamily="@font/open_sans"-->
+<!--                    android:gravity="center"-->
+<!--                    android:minHeight="42dp"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:text="Editable"-->
+<!--                    android:textColor="#2D3A56"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:textAppearance="?android:attr/textAppearanceSmall" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/empty_tv"-->
+<!--                    android:layout_width="80dp"-->
+<!--                    android:layout_height="45dp"-->
+<!--                    android:layout_marginStart="10dp"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/bg_red_button"-->
+<!--                    android:button="@null"-->
+<!--                    android:fontFamily="@font/open_sans"-->
+<!--                    android:gravity="center"-->
+<!--                    android:minHeight="42dp"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:text="Empty"-->
+<!--                    android:textColor="#2D3A56"-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:textAppearance="?android:attr/textAppearanceSmall" />-->
+<!--            </RadioGroup>-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/read_only_tv"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="45dp"-->
+<!--                android:background="@drawable/bg_red_button"-->
+<!--                android:gravity="center"-->
+<!--                android:text="Read-Only"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textStyle="bold" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/editable_tv"-->
+<!--                android:layout_width="100dp"-->
+<!--                android:layout_height="45dp"-->
+<!--                android:layout_marginStart="10dp"-->
+<!--                android:background="@drawable/bg_gray_button"-->
+<!--                android:gravity="center"-->
+<!--                android:text="Editable"-->
+<!--                android:textColor="#2D3A56"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textStyle="bold" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/empty_tv"-->
+<!--                android:layout_width="80dp"-->
+<!--                android:layout_height="45dp"-->
+<!--                android:layout_marginStart="10dp"-->
+<!--                android:background="@drawable/bg_gray_button"-->
+<!--                android:gravity="center"-->
+<!--                android:text="Empty"-->
+<!--                android:textColor="#2D3A56"-->
+<!--                android:textSize="18sp"-->
+<!--                android:textStyle="bold" />-->
+
+        </LinearLayout>
+
+        <!-- Amount Box -->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="110dp"-->
+<!--        android:layout_marginStart="18dp"-->
+<!--            android:layout_marginTop="40dp"-->
+<!--            android:background="@drawable/bg_amount_box"-->
+<!--            android:gravity="center_vertical"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:paddingStart="22dp"-->
+<!--            android:paddingEnd="22dp">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="₹"-->
+<!--                android:textColor="#64748B"-->
+<!--                android:textSize="34sp"-->
+<!--                android:textStyle="bold" />-->
+
+            <EditText
+                android:id="@+id/edtAmount"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/bg_amount_box"
+                android:paddingStart="22dp"
+                android:paddingEnd="22dp"
+                android:maxLength="8"
+                android:inputType="number"
+                android:text="500"
+                android:textColor="#64748B"
+                android:textSize="34sp"
+                android:textStyle="bold" />
+
+<!--        </LinearLayout>-->
+
+        <!-- Generate Button -->
+        <!-- Note Box -->
+        <Button
+            android:id="@+id/btnGenerate"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="35dp"
+            android:background="@drawable/bg_button_gradient"
+            android:backgroundTint="@null"
+            android:text="Generate QR Code"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_note"
+            android:padding="18dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Note: The QR code will be valid for 10 minutes. Ensure the customer scans within this time."
+                android:textColor="#153DBB"
+                android:textSize="17sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    </ScrollView>
+
+
+
+</LinearLayout>

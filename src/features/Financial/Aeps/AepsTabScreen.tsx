@@ -73,8 +73,8 @@ const AepsTabScreen = () => {
 
   const { colorConfig, activeAepsLine } = useSelector((s: RootState) => s.userInfo);
   const color1 = colorConfig.primaryColor;
-  const themeColor = activeAepsLine ? '#1FAA59' : '#F4C430';
-  const themeBg = activeAepsLine ? '#E8F5E9' : '#FFFDE7';
+  const themeColor = activeAepsLine.line !=='yellow' ? '#1FAA59' : '#F4C430';
+  const themeBg = activeAepsLine.line !=='yellow' ? '#E8F5E9' : '#FFFDE7';
 
   const [activeService, setActiveService] = useState<string | null>(null);
   const [UserStatus, setUserStatus] = useState('');
@@ -127,7 +127,7 @@ const AepsTabScreen = () => {
 
     try {
 
-      const url = activeAepsLine
+      const url = activeAepsLine.line !=='yellow'
         ? 'AEPS/api/Nifi/data/AepsStatusCheck'
         : 'AEPS/api/data/AepsStatusCheck';
       const response = await get({ url });

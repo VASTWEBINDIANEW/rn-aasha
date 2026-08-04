@@ -36,9 +36,9 @@ const Aepsekyc = () => {
   const { getMobileDeviceId } = useDeviceInfoHook();
   
   // Dynamic Theme Colors
-  const themeColor = activeAepsLine ? '#1FAA59' : '#F4C430'; // Green vs Yellow
-  const themeBg = activeAepsLine ? '#E8F5E9' : '#FFFDE7';    // Light Green vs Light Yellow
-  const textColor = activeAepsLine ? '#1B5E20' : '#856404'; // Deep Green vs Deep Brown
+  const themeColor = activeAepsLine.line !=='yellow' ? '#1FAA59' : '#F4C430'; // Green vs Yellow
+  const themeBg = activeAepsLine.line !=='yellow' ? '#E8F5E9' : '#FFFDE7';    // Light Green vs Light Yellow
+  const textColor = activeAepsLine.line !=='yellow' ? '#1B5E20' : '#856404'; // Deep Green vs Deep Brown
 
   const Model = getMobileDeviceId();
 
@@ -56,8 +56,9 @@ const Aepsekyc = () => {
 
   const kycotpsend = useCallback(async (deviceid: string) => {
     setIsLoading(true);
+    console.log(activeAepsLine.line !=='yellow' ,'=== KYC OTP SEND INITIATED ===', { latitude, longitude, deviceid, formattedDate });
     try {
-      const url = activeAepsLine ? APP_URLS.sendekycotpNifi : APP_URLS.sendekycotp;
+      const url = activeAepsLine.line !=='yellow'? APP_URLS.sendekycotpNifi : APP_URLS.sendekycotp;
       
       const requestData = {
         latitude: latitude || "0.0",
@@ -75,6 +76,7 @@ const Aepsekyc = () => {
         data: JSON.stringify(requestData),
         config: { headers },
       });
+      console.log(headers,requestData)
 console.log('OTP Send Response:', response);
       if (response?.Status) {
         setprimarykeyid(response.primaryKeyId);
@@ -112,7 +114,7 @@ console.log('OTP Send Response:', response);
       };
 
       const response = await post({
-        url: activeAepsLine ? 'AEPS/api/Nifi/data/EkycVerifyOtp' : 'AEPS/api/data/EkycVerifyOtp',
+        url: activeAepsLine.line !=='yellow' ? 'AEPS/api/Nifi/data/EkycVerifyOtp' : 'AEPS/api/data/EkycVerifyOtp',
         data: JSON.stringify(requestBody),
       });
 
@@ -140,7 +142,7 @@ console.log('OTP Send Response:', response);
       {/* Dynamic Status Bar */}
       <View style={[styles.statusIndicator, { backgroundColor: themeColor }]}>
         <Text style={styles.statusText}>
-          {activeAepsLine ? '✅ LINE 1 (NIFI) ACTIVE' : '⚡ LINE 2 (STANDARD) ACTIVE'}
+          {activeAepsLine.line !=='yellow' ? '✅ LINE 1 (NIFI) ACTIVE' : '⚡ LINE 2 (STANDARD) ACTIVE'}
         </Text>
       </View>
 

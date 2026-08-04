@@ -190,6 +190,7 @@ import CommissionReport from '../../features/Acount/maxuspay';
 import RadiantStep from '../../features/RadiantApp/Radiantregister/RadiantStep';
 import ApprovalStatusScreen from '../../features/RadiantApp/Radiantregister/ApprovalStatusScreen';
 import CameraScreen from '../../components/CameraScreen';
+import CashWithdrawalScreen from '../../features/Financial/Aeps/CashWithdrawalScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -1082,6 +1083,12 @@ const AppNavigator = () => {
             <Stack.Screen
         name="UPIScreen"
         component={UPIScreen}
+        options={{ headerShown: false }}
+      />   
+
+            <Stack.Screen
+        name="CashWithdrawalScreen"
+        component={CashWithdrawalScreen}
         options={{ headerShown: false }}
       />   
     </Stack.Navigator>

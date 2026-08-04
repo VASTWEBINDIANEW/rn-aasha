@@ -314,6 +314,10 @@ const IconButtons = ({
             }
 
             switch (item.ScreenName) {
+              case "UPI-ATMScreen1":
+              navigation.navigate('CashWithdrawalScreen');
+
+              break 
               case "HideMoreScreen":
                 setViewMoreStatus((p: any) => !p);
                 break;

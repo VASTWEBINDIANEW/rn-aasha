@@ -1,5 +1,5 @@
 {
-  "name": "worldpayone",
+  "name": "pemudra",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -109,7 +109,7 @@
     "react-native-sound-player": "^0.14.5",
     "react-native-status-bar-height": "^2.6.0",
     "react-native-step-indicator": "^1.0.3",
-    "react-native-svg": "^15.11.1",
+    "react-native-svg": "15.12.0",
     "react-native-switch": "^1.5.1",
     "react-native-tab-view": "^4.2.2",
     "react-native-toast-notifications": "^3.4.0",
@@ -152,5 +152,6 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "packageManager": "yarn@4.18.0"
 }

@@ -24,6 +24,8 @@ const BankBottomSite = ({ isbank, setisbank, setBankName, bankdata, setBankId, o
     );
 
     const handleSelect = (item) => {
+
+         console.log(item,'@@@@')
         onPress1(item['iINNo']);
         setBankId(item['iINNo']);
         setisFacialTan(item['isFacialTan']);

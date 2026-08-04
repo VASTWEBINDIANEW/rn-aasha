@@ -80,11 +80,11 @@ const LoginScreen = () => {
 // (Agar Vite use kar rahe hain toh: const isDev = import.meta.env.DEV;)
 
 const [userEmail, setUserEmail] = useState(
-  signUpId || (isDev ? 'ajayhit@hotmail.com' : 'ajayhit@hotmail.com')
+  signUpId || (isDev ? 'ankitpilaniya199@gmail.com' : '')
 );
 
 const [userPassword, setUserPassword] = useState(
-  signUpPassword || (isDev ? '46445078' : '46445078')
+  signUpPassword || (isDev ? '64838307' : '')
 );
   const [uniqueId, setUniqueId] = useState('');
   const [modelNumber, setModelNumber] = useState('');
@@ -1222,7 +1222,6 @@ const onPressLoginHardcoded = useCallback(async (otp) => {
 
   // ─── Version Update Screen ───────────────────────────────────────────────────
 
-console.log(logoUrl)
   // ─── Loading / Splash ────────────────────────────────────────────────────────
   if (loading) {
     return (
