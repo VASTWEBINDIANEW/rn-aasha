@@ -12,5 +12,12 @@
     "baseapiurl": "http://native.smartpay1.in/",
     "baseWebUrl": "stdigipe.in/",
     "appPackage": "com.rechargedrishti"
+  },
+  {
+    "name": "easytelrecharge",
+    "AppName":"Easy Tel Recharge",
+    "baseapiurl":"http://native.easytelrecharge.com//",
+    "baseWebUrl":"easytelrecharge.com/",
+    "appPackage":"com.easytelrecharge"
   }
 ]
