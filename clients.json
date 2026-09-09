@@ -1,0 +1,16 @@
+[
+  {
+    "name": "universalrecharge",
+    "AppName": "Universal Recharge",
+    "baseapiurl": "http://native.universalrecharge.in/",
+    "baseWebUrl": "universalrecharge.in/",
+    "appPackage": "com.universalrecharge"
+  },
+  {
+    "name": "smartpay1",
+    "AppName": "Smart Pay1",
+    "baseapiurl": "http://native.smartpay1.in/",
+    "baseWebUrl": "stdigipe.in/",
+    "appPackage": "com.rechargedrishti"
+  }
+]

@@ -1,0 +1,37 @@
+import React from 'react';
+import Svg, {Path, Rect, G} from 'react-native-svg';
+
+const MastercardLogo = ({width = 60, height = 30}) => {
+  return (
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 -54.25 482.51 482.51"
+      fill="none"
+    >
+      <G>
+        <Rect
+          x="169.81"
+          y="31.89"
+          width="143.72"
+          height="234.42"
+          fill="#FF5F00"
+        />
+
+        <Path
+          d="M317.05 197.6A149.5 149.5 0 0 1 373.79 80.39a149.1 149.1 0 1 0 0 234.42A149.5 149.5 0 0 1 317.05 197.6Z"
+          transform="translate(-132.74 -48.5)"
+          fill="#EB001B"
+        />
+
+        <Path
+          d="M615.26 197.6a148.95 148.95 0 0 1-241 117.21 149.43 149.43 0 0 0 0-234.42 148.95 148.95 0 0 1 241 117.21Z"
+          transform="translate(-132.74 -48.5)"
+          fill="#F79E1B"
+        />
+      </G>
+    </Svg>
+  );
+};
+
+export default MastercardLogo;
