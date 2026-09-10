@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'yarn'
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -28,11 +27,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Clean yarn cache
-        run: yarn cache clean
-
       - name: Install dependencies
-        run: yarn install --no-frozen-lockfile
+        run: yarn install --network-timeout 600000
 
       - name: Generate client config
         run: node scripts/generate-config.js ${{ github.event.inputs.client }}
